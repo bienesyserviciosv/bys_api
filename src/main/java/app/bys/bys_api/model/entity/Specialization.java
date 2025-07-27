@@ -1,6 +1,5 @@
 package app.bys.bys_api.model.entity;
 
-import app.bys.bys_api.model.enums.SpecializationType;
 import jakarta.persistence.*;
 import lombok.*;
 

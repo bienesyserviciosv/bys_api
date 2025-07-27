@@ -29,9 +29,9 @@ public class ServiceRequestController {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable), HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<ServiceRequestDto> create(@Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
-        return new ResponseEntity<>(serviceRequestService.create(serviceRequestDto), HttpStatus.CREATED);
+    @PostMapping("/user/{id}")
+    public ResponseEntity<ServiceRequestDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
+        return new ResponseEntity<>(serviceRequestService.create(id, serviceRequestDto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
