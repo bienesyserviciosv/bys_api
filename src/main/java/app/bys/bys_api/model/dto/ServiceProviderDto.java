@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @NoArgsConstructor
@@ -22,6 +23,7 @@ public class ServiceProviderDto {
     private Long id;
 
     @NotBlank(groups = OnCreate.class)
+    @Size(min = 3, max = 20, groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("name")
     private String name;
 
@@ -50,5 +52,9 @@ public class ServiceProviderDto {
 
     @JsonProperty("longitude")
     private String longitude;
+
+    @JsonProperty("qualification")
+    private double qualification;
+
 
 }

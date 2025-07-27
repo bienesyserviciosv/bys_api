@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.sql.Time;
 import java.util.Date;
 
 @NoArgsConstructor
@@ -38,6 +39,9 @@ public class ServiceRequestDto {
     @JsonProperty("date")
     private Date date;
 
+    @JsonProperty("time")
+    private Time time;
+
     @JsonProperty("status")
     @Enumerated(EnumType.STRING)
     private Status status = Status.IN_PROGRESS;
@@ -46,8 +50,9 @@ public class ServiceRequestDto {
     @NotNull(groups = OnCreate.class)
     private SpecializationDto specialization;
 
-//    private FinalUserDto finalUser;
-//
+    @JsonProperty("finalUser")
+    private FinalUserDto finalUser;
+
 //    private ServiceProviderDto serviceProvider;
 
 

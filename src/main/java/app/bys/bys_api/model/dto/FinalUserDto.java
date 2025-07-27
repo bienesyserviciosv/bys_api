@@ -3,9 +3,7 @@ package app.bys.bys_api.model.dto;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @NoArgsConstructor
@@ -19,6 +17,7 @@ public class FinalUserDto {
     private Long id;
 
     @NotBlank(groups = OnCreate.class)
+    @Size(min = 3, max = 20, groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("name")
     private String name;
 
