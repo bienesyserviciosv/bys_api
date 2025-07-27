@@ -6,6 +6,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.repository.ServiceProviderRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,8 @@ public class ServiceProviderService {
     private final ServiceProviderMapper mapper;
 
     public ServiceProviderDto get(Long id) {
-        return mapper.entityToDto(serviceProviderRepository.findById(id).orElseThrow());
+        return mapper.entityToDto(serviceProviderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found")));
     }
 
     public PageDto<ServiceProviderDto> getAll(Pageable pageable) {
@@ -30,12 +32,17 @@ public class ServiceProviderService {
     }
 
     public ServiceProviderDto update(Long id, ServiceProviderDto serviceProviderDto) {
-        ServiceProvider serviceProviderFound = serviceProviderRepository.findById(id).orElseThrow();
+        ServiceProvider serviceProviderFound = serviceProviderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found"));
+
         mapper.updateServiceProviderFromDto(serviceProviderDto, serviceProviderFound);
         return mapper.entityToDto(serviceProviderRepository.save(serviceProviderFound));
     }
 
     public void delete(Long id) {
+        if (!serviceProviderRepository.existsById(id)) {
+            throw new EntityNotFoundException("Service provider with id " + id + " not found");
+        }
         serviceProviderRepository.deleteById(id);
     }
 }
