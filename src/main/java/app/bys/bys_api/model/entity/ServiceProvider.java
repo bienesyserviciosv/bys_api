@@ -12,6 +12,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "service_provider")
 public class ServiceProvider {
 
     @Id
@@ -41,6 +42,9 @@ public class ServiceProvider {
 
     @Column(name = "longitude")
     private String longitude;
+
+    @Column(name = "qualification")
+    private double qualification;
 
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)
     private Set<Specialization> specializations;

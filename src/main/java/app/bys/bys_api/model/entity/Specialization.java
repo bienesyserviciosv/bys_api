@@ -12,6 +12,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "specialization")
 public class Specialization {
 
     @Id
@@ -19,7 +20,7 @@ public class Specialization {
     private Long id;
 
     @Column(name = "specialization_type", nullable = false, unique = true)
-    private SpecializationType specializationType;
+    private String specializationType;
 
     @ManyToOne
     @JoinColumn(name = "service_provider_id")

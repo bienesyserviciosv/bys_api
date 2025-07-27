@@ -4,6 +4,7 @@ import app.bys.bys_api.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Time;
 import java.util.Date;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "service_request")
 public class ServiceRequest {
 
     @Id
@@ -31,8 +33,11 @@ public class ServiceRequest {
     @Column(name = "address")
     private String address;
 
-    @Column(name = "date_time")
-    private Date dateTime;
+    @Column(name = "date")
+    private Date date;
+
+    @Column(name = "time")
+    private Time time;
 
     @Column(name = "status")
     private Status status;
