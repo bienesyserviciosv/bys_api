@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class ServiceRequestController {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping("/user/{id}")
     public ResponseEntity<ServiceRequestDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
         return new ResponseEntity<>(serviceRequestService.create(id, serviceRequestDto), HttpStatus.CREATED);
