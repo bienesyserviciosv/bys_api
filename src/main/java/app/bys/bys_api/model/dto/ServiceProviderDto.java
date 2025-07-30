@@ -22,21 +22,21 @@ public class ServiceProviderDto {
     @JsonProperty("id")
     private Long id;
 
-    @NotBlank(groups = OnCreate.class)
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 3, max = 20, groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("name")
     private String name;
 
-    @Email(groups = {OnCreate.class, OnUpdate.class})
-    @NotNull(groups = OnCreate.class)
+    @Email(message = ErrorMessage.EM_WRONG_EMAIL, groups = {OnCreate.class, OnUpdate.class})
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @JsonProperty("email")
     private String email;
 
-    @NotBlank(groups = OnCreate.class)
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @JsonProperty("phoneNumber")
     private String phoneNumber;
 
-    @NotBlank(groups = OnCreate.class)
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @JsonProperty("experience")
     private String experience;
 

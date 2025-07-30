@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.dto;
 
+import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.model.enums.Status;
 import app.bys.bys_api.validation.OnCreate;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +24,7 @@ public class ServiceRequestDto {
     private Long id;
 
     @JsonProperty("description")
-    @NotBlank
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
     private String description;
 
     @JsonProperty("latitude")
@@ -33,7 +34,7 @@ public class ServiceRequestDto {
     private String longitude;
 
     @JsonProperty("address")
-    @NotBlank
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
     private String address;
 
     @JsonProperty("date")
@@ -47,7 +48,7 @@ public class ServiceRequestDto {
     private Status status = Status.IN_PROGRESS;
 
     @JsonProperty("specialization")
-    @NotNull(groups = OnCreate.class)
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private SpecializationDto specialization;
 
     @JsonProperty("finalUser")

@@ -16,17 +16,18 @@ public class FinalUserDto {
     @JsonProperty("id")
     private Long id;
 
-    @NotBlank(groups = OnCreate.class)
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 3, max = 20, groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("name")
     private String name;
 
-    @NotNull(groups = OnCreate.class)
-    @Email(groups = {OnCreate.class, OnUpdate.class})
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @Email(message = ErrorMessage.EM_WRONG_EMAIL, groups = {OnCreate.class, OnUpdate.class})
+    @Size(max = 50, groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("email")
     private String email;
 
     @JsonProperty("phoneNumber")
-    @NotBlank(groups = OnCreate.class)
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String phoneNumber;
 }
