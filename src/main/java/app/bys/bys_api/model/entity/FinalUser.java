@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.entity;
 
+import app.bys.bys_api.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,16 @@ public class FinalUser {
     @Column(name = "password")
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private UserStatus status;
+
     @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY)
     private Set<ServiceRequest> serviceRequest;
+
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "final_users_roles",
+            joinColumns = @JoinColumn(name = "final_user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
 }

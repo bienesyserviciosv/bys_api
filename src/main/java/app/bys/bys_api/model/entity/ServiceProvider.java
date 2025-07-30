@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.entity;
 
 import app.bys.bys_api.model.enums.Level;
+import app.bys.bys_api.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,8 +44,15 @@ public class ServiceProvider {
     @Column(name = "longitude")
     private String longitude;
 
+    @Column(name = "password")
+    private String password;
+
     @Column(name = "qualification")
     private double qualification;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private UserStatus status;
 
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)
     private Set<Specialization> specializations;
@@ -54,6 +62,12 @@ public class ServiceProvider {
 
     @OneToMany(mappedBy = "serviceProvider")
     private Set<Picture> pictureSet;
+
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "service_provider_roles",
+            joinColumns = @JoinColumn(name = "service_provider_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
 
 }
 
