@@ -25,7 +25,7 @@ public class ServiceRequestService {
 
     public ServiceRequestDto get(Long id) {
         return requestMapper.entityToDto(serviceRequestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + "not found")));
+                .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found")));
     }
 
     public PageDto<ServiceRequestDto> getAll(Pageable pageable) {
@@ -34,7 +34,7 @@ public class ServiceRequestService {
 
     public ServiceRequestDto create(Long id, ServiceRequestDto serviceRequestDto) {
         FinalUser finalUser = finalUserRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + "not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found"));
 
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
         finalUserRepository.save(finalUser);
