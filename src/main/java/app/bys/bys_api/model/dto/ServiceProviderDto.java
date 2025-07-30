@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.dto;
 
+import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.model.enums.Level;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
@@ -52,6 +53,9 @@ public class ServiceProviderDto {
 
     @JsonProperty("longitude")
     private String longitude;
+
+    @JsonProperty("password")
+    private String password;
 
     @JsonProperty("qualification")
     private double qualification;

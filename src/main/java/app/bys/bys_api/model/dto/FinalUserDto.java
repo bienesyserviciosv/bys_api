@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.dto;
 
+import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,4 +31,9 @@ public class FinalUserDto {
     @JsonProperty("phoneNumber")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String phoneNumber;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @Size(min = 8)
+    private String password;
 }
