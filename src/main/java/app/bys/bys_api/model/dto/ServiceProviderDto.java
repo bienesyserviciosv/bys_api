@@ -13,6 +13,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -55,6 +57,9 @@ public class ServiceProviderDto {
     private String longitude;
 
     @JsonProperty("password")
+    @JsonProperty("registration_date")
+    private LocalDateTime registrationDate;
+
     private String password;
 
     @JsonProperty("qualification")

@@ -1,7 +1,6 @@
 package app.bys.bys_api.repository;
 
 import app.bys.bys_api.model.entity.FinalUser;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

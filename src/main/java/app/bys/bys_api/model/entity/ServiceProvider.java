@@ -5,6 +5,7 @@ import app.bys.bys_api.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -56,6 +57,8 @@ public class ServiceProvider {
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;
+    @Column(name = "registration_time")
+    private LocalDateTime registrationDate;
 
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)
     private Set<Specialization> specializations;
