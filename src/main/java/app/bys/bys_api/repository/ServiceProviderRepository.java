@@ -9,4 +9,8 @@ import java.util.Optional;
 @Repository
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long> {
      Optional<ServiceProvider> findByEmail(String email);
+
+     boolean existsByEmail(String email);
+
+     boolean existsByPhoneNumber(String phoneNumber);
 }

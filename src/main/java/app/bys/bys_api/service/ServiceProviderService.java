@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.model.dto.PageDto;
@@ -28,6 +29,9 @@ public class ServiceProviderService {
     }
 
     public ServiceProviderDto create(ServiceProviderDto serviceProviderDto) {
+        if (serviceProviderRepository.existsByEmail(serviceProviderDto.getEmail())) {
+            throw new DuplicateEmailException("The email is already registered");
+        }
         return mapper.entityToDto(serviceProviderRepository.save(mapper.dtoToEntity(serviceProviderDto)));
     }
 

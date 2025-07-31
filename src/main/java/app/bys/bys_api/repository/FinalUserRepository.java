@@ -1,6 +1,7 @@
 package app.bys.bys_api.repository;
 
 import app.bys.bys_api.model.entity.FinalUser;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,6 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
     Optional<FinalUser> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    boolean existsByPhoneNumber(String phoneNumber);
 }

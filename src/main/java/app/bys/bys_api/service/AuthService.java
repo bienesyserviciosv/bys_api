@@ -56,7 +56,14 @@ public class AuthService {
 
     public FinalUserDto registerFinalUser(FinalUserDto dto) {
         Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Rol ROLE_USER not found"));
+                .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
+        if (finalUserRepo.existsByEmail(dto.getEmail())) {
+            throw new DuplicateEmailException("The email is already registered");
+        }
+        /*if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())){
+            throw new DuplicatePhoneException("The phone number is already registered");
+        }*/
+
         FinalUser user = FinalUser.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
@@ -76,7 +83,11 @@ public class AuthService {
 
     public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto) {
         Role providerRole = roleRepository.findByName("ROLE_PROVIDER")
-                .orElseThrow(() -> new RuntimeException("Rol ROLE_PROVIDER not found"));
+                .orElseThrow(() -> new RuntimeException("ROLE_PROVIDER not found"));
+        if (serviceProviderRepo.existsByEmail(dto.getEmail())) {
+            throw new DuplicateEmailException("The email is already registered");
+        }
+
         ServiceProvider provider = ServiceProvider.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
