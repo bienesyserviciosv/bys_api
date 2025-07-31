@@ -37,6 +37,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final FinalUserMapper finalUserMapper;
     private final ServiceProviderMapper serviceProviderMapper;
+    private final OtpService otpService;
 
     @PostConstruct  // Se ejecutará al iniciar la aplicación
     public void initRoles() {
@@ -55,38 +56,69 @@ public class AuthService {
 
     public FinalUserDto registerFinalUser(FinalUserDto dto) {
         Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Rol ROLE_USER no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Rol ROLE_USER not found"));
         FinalUser user = FinalUser.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())
                 .password(passwordEncoder.encode(dto.getPassword()))
+                .emailVerified(false)
                 .status(UserStatus.ACTIVE)
                 .roles(Set.of(userRole))
-                //.roles(Set.of(Role.builder().name("ROLE_USER").build()))
-                //.roles(List.of(roleRepository.findByName("ROLE_USER")))
                 .build();
+
+        String otp = otpService.generateOTP();
+        otpService.sendOTP(dto.getEmail(), otp);
+        otpService.storeOTP(dto.getEmail(), otp);
 
         return finalUserMapper.entityToDto(finalUserRepo.save(user));
     }
 
     public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto) {
         Role providerRole = roleRepository.findByName("ROLE_PROVIDER")
-                .orElseThrow(() -> new RuntimeException("Rol ROLE_PROVIDER no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Rol ROLE_PROVIDER not found"));
         ServiceProvider provider = ServiceProvider.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())
+                .password(passwordEncoder.encode(dto.getPassword()))
                 .status(UserStatus.ACTIVE)
                 .experience(dto.getExperience())
+                .emailVerified(false)
                 .level(Level.NOT_VERIFIED)
                 .verified(false)
                 .roles(Set.of(providerRole))
-                .password(passwordEncoder.encode(dto.getPassword()))
                 .build();
 
+        String otp = otpService.generateOTP();
+        otpService.sendOTP(dto.getEmail(), otp);
+        otpService.storeOTP(dto.getEmail(), otp);
 
         return serviceProviderMapper.entityToDto(serviceProviderRepo.save(provider));
+    }
+
+    public void verifyEmail(String email, String otp) {
+        if (!otpService.validateOTP(email, otp)) {
+            throw new RuntimeException("OTP not valid");
+        }
+        boolean userFound = finalUserRepo.findByEmail(email)
+                .map(user -> {
+                    user.setEmailVerified(true);
+                    finalUserRepo.save(user);
+                    return true;
+                }).orElse(false);
+
+        boolean providerFound = serviceProviderRepo.findByEmail(email)
+                .map(provider -> {
+                    provider.setEmailVerified(true);
+                    serviceProviderRepo.save(provider);
+                    return true;
+                }).orElse(false);
+
+        // 3. Si no existe en ningún repositorio
+        if (!userFound && !providerFound) {
+            throw new RuntimeException("El email proporcionado no está registrado en nuestro sistema");
+        }
     }
 
     public ResponseEntity<AuthResponse> login(AuthRequest authRequest) {
