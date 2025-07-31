@@ -54,6 +54,9 @@ public class ServiceProvider {
     @Column(name = "status")
     private UserStatus status;
 
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
+
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)
     private Set<Specialization> specializations;
 

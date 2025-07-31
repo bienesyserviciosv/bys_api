@@ -32,9 +32,10 @@ public class SecurityConfig {
         return httpSecurity
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/auth/final_user/**").permitAll()
-                                .requestMatchers("/auth/service_provider/**").permitAll()
-                                .requestMatchers("/auth/login").permitAll()
+                                .requestMatchers("/auth/**").permitAll()
+//                                .requestMatchers("/auth/final_user/**").permitAll()
+//                                .requestMatchers("/auth/service_provider/**").permitAll()
+//                                .requestMatchers("/auth/login").permitAll()
                                 .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
                                 .anyRequest().authenticated()
                 )

@@ -31,6 +31,9 @@ public class FinalUser {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private UserStatus status;
