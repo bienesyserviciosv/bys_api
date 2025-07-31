@@ -54,7 +54,7 @@ public class ServiceProviderDto {
     @JsonProperty("longitude")
     private String longitude;
 
-    @JsonProperty("password")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @JsonProperty("qualification")
