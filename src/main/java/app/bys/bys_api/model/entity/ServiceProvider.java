@@ -57,6 +57,10 @@ public class ServiceProvider {
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;
+
+    @Column(name = "completed_services")
+    private int completedServices = 0;
+
     @Column(name = "registration_time")
     private LocalDateTime registrationDate;
 
