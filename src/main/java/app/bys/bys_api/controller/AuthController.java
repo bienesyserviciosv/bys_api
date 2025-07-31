@@ -38,7 +38,7 @@ public class AuthController {
       ServiceProviderDto providerRegistered = authService.registerServiceProvider(serviceProviderDto);
       Map<String, Object> response = new HashMap<>();
       response.put("message", "Service Provider register successfully");
-      response.put("user", providerRegistered);
+      response.put("service provider", providerRegistered);
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
   @PostMapping("/login")
