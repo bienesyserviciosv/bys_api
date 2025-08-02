@@ -58,6 +58,9 @@ public class ServiceProvider {
     @Column(name = "email_verified")
     private boolean emailVerified = false;
 
+    @Column(name = "phone_verified")
+    private boolean phoneVerified = false;
+
     @Column(name = "completed_services")
     private int completedServices = 0;
 

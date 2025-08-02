@@ -26,7 +26,7 @@ public class FinalUser {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @Column(name = "password")
@@ -34,6 +34,9 @@ public class FinalUser {
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;
+
+    @Column(name = "phone_verified")
+    private boolean phoneVerified = false;
 
     @Column(name = "registration_time")
     private LocalDateTime registrationDate;

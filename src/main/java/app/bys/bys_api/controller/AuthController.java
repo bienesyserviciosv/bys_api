@@ -1,7 +1,7 @@
 package app.bys.bys_api.controller;
 
-import app.bys.bys_api.model.dto.AuthRequest;
-import app.bys.bys_api.model.dto.AuthResponse;
+import app.bys.bys_api.model.dto.AuthRequestDto;
+import app.bys.bys_api.model.dto.AuthResponseDto;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.service.AuthService;
@@ -47,8 +47,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
-        return authService.login(authRequest);
+    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequestDto) {
+        return authService.login(authRequestDto);
     }
 
     @PostMapping("/verify-email")

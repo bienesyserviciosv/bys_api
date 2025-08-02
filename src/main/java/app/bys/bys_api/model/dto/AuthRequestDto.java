@@ -1,7 +1,6 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -10,11 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthRequest {
+public class AuthRequestDto {
 
-    @Email(message = ErrorMessage.EM_WRONG_EMAIL)
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
-    private String email;
+    private String identifier;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
     private String password;

@@ -1,11 +1,11 @@
 package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.DuplicateEmailException;
+import app.bys.bys_api.mapper.FinalUserMapper;
+import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
-import app.bys.bys_api.mapper.FinalUserMapper;
-import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.repository.FinalUserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

@@ -13,4 +13,6 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
      boolean existsByEmail(String email);
 
      boolean existsByPhoneNumber(String phoneNumber);
+
+     Optional<ServiceProvider> findByPhoneNumber(String phone);
 }

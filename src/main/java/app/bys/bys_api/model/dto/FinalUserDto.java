@@ -34,6 +34,7 @@ public class FinalUserDto {
     private String email;
 
     @JsonProperty("phoneNumber")
+    @Size(min = 8, message = "The length must be greater than 8 char", groups = {OnCreate.class, OnUpdate.class})
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String phoneNumber;
 

@@ -1,10 +1,11 @@
 package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.DuplicateEmailException;
+import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
-import app.bys.bys_api.model.dto.AuthRequest;
-import app.bys.bys_api.model.dto.AuthResponse;
+import app.bys.bys_api.model.dto.AuthRequestDto;
+import app.bys.bys_api.model.dto.AuthResponseDto;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.entity.FinalUser;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -59,27 +61,32 @@ public class AuthService {
     public FinalUserDto registerFinalUser(FinalUserDto dto) {
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
-        if (finalUserRepo.existsByEmail(dto.getEmail())) {
-            throw new DuplicateEmailException("The email is already registered");
+
+        if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
+            if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
+                throw new DuplicatePhoneException("The phone number is already registered");
+            }
+            handlePhoneOtp(dto.getPhoneNumber());
         }
-        /*if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())){
-            throw new DuplicatePhoneException("The phone number is already registered");
-        }*/
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            if (finalUserRepo.existsByEmail(dto.getEmail())) {
+                throw new DuplicateEmailException("The email is already registered");
+            }
+            handleEmailOtp(dto.getEmail());
+        }
 
         FinalUser user = FinalUser.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())
                 .password(passwordEncoder.encode(dto.getPassword()))
+                .phoneVerified(false)
                 .emailVerified(false)
                 .status(UserStatus.ACTIVE)
                 .roles(Set.of(userRole))
                 .registrationDate(LocalDateTime.now())
                 .build();
-
-        String otp = otpService.generateOTP();
-        otpService.sendOTP(dto.getEmail(), otp);
-        otpService.storeOTP(dto.getEmail(), otp);
 
         return finalUserMapper.entityToDto(finalUserRepo.save(user));
     }
@@ -87,8 +94,19 @@ public class AuthService {
     public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto) {
         Role providerRole = roleRepository.findByName("ROLE_PROVIDER")
                 .orElseThrow(() -> new RuntimeException("ROLE_PROVIDER not found"));
-        if (serviceProviderRepo.existsByEmail(dto.getEmail())) {
-            throw new DuplicateEmailException("The email is already registered");
+
+        if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
+            if (serviceProviderRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
+                throw new DuplicatePhoneException("The phone number is already registered");
+            }
+            handlePhoneOtp(dto.getPhoneNumber());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            if (serviceProviderRepo.existsByEmail(dto.getEmail())) {
+                throw new DuplicateEmailException("The email is already registered");
+            }
+            handleEmailOtp(dto.getEmail());
         }
 
         ServiceProvider provider = ServiceProvider.builder()
@@ -99,18 +117,24 @@ public class AuthService {
                 .status(UserStatus.ACTIVE)
                 .experience(dto.getExperience())
                 .emailVerified(false)
+                .phoneVerified(false)
                 .level(Level.NOT_VERIFIED)
                 .verified(false)
                 .roles(Set.of(providerRole))
                 .registrationDate(LocalDateTime.now())
                 .build();
 
-        String otp = otpService.generateOTP();
-        otpService.sendOTP(dto.getEmail(), otp);
-        otpService.storeOTP(dto.getEmail(), otp);
-
         return serviceProviderMapper.entityToDto(serviceProviderRepo.save(provider));
     }
+
+    private void handleEmailOtp(String email) {
+        String otp = otpService.generateOTP();
+        otpService.sendOTP(email, otp);
+        otpService.storeOTP(email, otp);
+    }
+
+    //TODO Complete method
+    private void handlePhoneOtp(String phone) {}
 
     public void verifyEmail(String email, String otp) {
         if (!otpService.validateOTP(email, otp)) {
@@ -130,25 +154,43 @@ public class AuthService {
                     return true;
                 }).orElse(false);
 
-        // 3. Si no existe en ningún repositorio
         if (!userFound && !providerFound) {
             throw new RuntimeException("The email provided is not registered in our system.");
         }
     }
 
-    public ResponseEntity<AuthResponse> login(AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequest.getEmail(), authRequest.getPassword()
-                )
-        );
+    public ResponseEntity<AuthResponseDto> login(AuthRequestDto authRequestDto) {
+        String identifier = authRequestDto.getIdentifier();
 
-        String jwt = jwtUtil.generateToken(authentication);
-        AuthResponse response = AuthResponse.builder()
-                .token(jwt)
-                .username(authRequest.getEmail())
-                .build();
+        if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
+            FinalUser user = getUser(identifier);
+            return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword());
+        }
 
-        return ResponseEntity.ok(response);
+        if (serviceProviderRepo.existsByEmail(identifier) || serviceProviderRepo.existsByPhoneNumber(identifier)) {
+            ServiceProvider provider = getProvider(identifier);
+            return authenticateAndRespond(provider.getEmail(), authRequestDto.getPassword());
+        }
+
+        throw new UsernameNotFoundException("User not found");
+    }
+
+    private FinalUser getUser(String identifier) {
+        return identifier.contains("@")
+                  ? finalUserRepo.findByEmail(identifier).orElseThrow(() -> new UsernameNotFoundException("Email not found"))
+                  : finalUserRepo.findByPhoneNumber(identifier).orElseThrow(() -> new UsernameNotFoundException("Phone number not found"));
+    }
+
+    private ServiceProvider getProvider(String identifier) {
+        return identifier.contains("@")
+                ? serviceProviderRepo.findByEmail(identifier).orElseThrow(() -> new UsernameNotFoundException("Email not found"))
+                : serviceProviderRepo.findByPhoneNumber(identifier).orElseThrow(() -> new UsernameNotFoundException("Phone number not found"));
+    }
+
+    private ResponseEntity<AuthResponseDto> authenticateAndRespond(String username, String password) {
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password));
+        String jwt = jwtUtil.generateToken(auth);
+        return ResponseEntity.ok(new AuthResponseDto(username, jwt));
     }
 }

@@ -36,6 +36,7 @@ public class ServiceProviderDto {
     private String email;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @Size(min = 8, groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("phoneNumber")
     private String phoneNumber;
 
