@@ -1,5 +1,7 @@
 package app.bys.bys_api.config;
 
+import app.bys.bys_api.error.DuplicateEmailException;
+import app.bys.bys_api.error.DuplicatePhoneException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,5 +31,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({DuplicateEmailException.class, DuplicatePhoneException.class})
+    public ResponseEntity<Map<String, Object>> handleDuplicateFields(RuntimeException ex) {
+        String field = ex instanceof DuplicateEmailException ? "email" : "teléfono";
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "message", ex.getMessage(),
+                        "error", "DUPLICATE_ENTRY",
+                        "field", field,
+                        "timestamp", LocalDateTime.now()
+                ));
     }
 }

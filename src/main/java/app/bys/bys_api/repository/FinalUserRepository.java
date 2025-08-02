@@ -13,4 +13,6 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
     Optional<FinalUser> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    boolean existsByPhoneNumber(String phoneNumber);
 }

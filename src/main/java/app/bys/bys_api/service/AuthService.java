@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.model.dto.AuthRequest;
@@ -24,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -56,7 +58,14 @@ public class AuthService {
 
     public FinalUserDto registerFinalUser(FinalUserDto dto) {
         Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Rol ROLE_USER not found"));
+                .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
+        if (finalUserRepo.existsByEmail(dto.getEmail())) {
+            throw new DuplicateEmailException("The email is already registered");
+        }
+        /*if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())){
+            throw new DuplicatePhoneException("The phone number is already registered");
+        }*/
+
         FinalUser user = FinalUser.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
@@ -65,6 +74,7 @@ public class AuthService {
                 .emailVerified(false)
                 .status(UserStatus.ACTIVE)
                 .roles(Set.of(userRole))
+                .registrationDate(LocalDateTime.now())
                 .build();
 
         String otp = otpService.generateOTP();
@@ -76,7 +86,11 @@ public class AuthService {
 
     public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto) {
         Role providerRole = roleRepository.findByName("ROLE_PROVIDER")
-                .orElseThrow(() -> new RuntimeException("Rol ROLE_PROVIDER not found"));
+                .orElseThrow(() -> new RuntimeException("ROLE_PROVIDER not found"));
+        if (serviceProviderRepo.existsByEmail(dto.getEmail())) {
+            throw new DuplicateEmailException("The email is already registered");
+        }
+
         ServiceProvider provider = ServiceProvider.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
@@ -88,6 +102,7 @@ public class AuthService {
                 .level(Level.NOT_VERIFIED)
                 .verified(false)
                 .roles(Set.of(providerRole))
+                .registrationDate(LocalDateTime.now())
                 .build();
 
         String otp = otpService.generateOTP();
@@ -117,7 +132,7 @@ public class AuthService {
 
         // 3. Si no existe en ningún repositorio
         if (!userFound && !providerFound) {
-            throw new RuntimeException("El email proporcionado no está registrado en nuestro sistema");
+            throw new RuntimeException("The email provided is not registered in our system.");
         }
     }
 

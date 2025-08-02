@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
@@ -28,6 +29,9 @@ public class FinalUserService {
     }
 
     public FinalUserDto create(FinalUserDto finalUserDto) {
+        if (finalUserRepository.existsByEmail(finalUserDto.getEmail())) {
+            throw new DuplicateEmailException("The email is already registered");
+        }
         return mapper.entityToDto(finalUserRepository.save(mapper.dtoToEntity(finalUserDto)));
     }
 
