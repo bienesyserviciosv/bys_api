@@ -38,29 +38,12 @@ public class AuthService {
     private final FinalUserRepository finalUserRepo;
     private final ServiceProviderRepository serviceProviderRepo;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
     private final FinalUserMapper finalUserMapper;
     private final ServiceProviderMapper serviceProviderMapper;
     private final OtpService otpService;
 
-    @PostConstruct  // Se ejecutará al iniciar la aplicación
-    public void initRoles() {
-        createRoleIfNotFound("ROLE_USER");
-        createRoleIfNotFound("ROLE_PROVIDER");
-        createRoleIfNotFound("ROLE_ADMIN");
-    }
-
-    private void createRoleIfNotFound(String roleName) {
-        if (!roleRepository.existsByName(roleName)) {
-            Role role = new Role();
-            role.setName(roleName);
-            roleRepository.save(role);
-        }
-    }
-
-    public FinalUserDto registerFinalUser(FinalUserDto dto) {
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
+      public FinalUserDto registerFinalUser(FinalUserDto dto) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
@@ -84,7 +67,7 @@ public class AuthService {
                 .phoneVerified(false)
                 .emailVerified(false)
                 .status(UserStatus.ACTIVE)
-                .roles(Set.of(userRole))
+                .roles(Set.of(roleService.getRoleOrThrow("ROLE_USER")))
                 .registrationDate(LocalDateTime.now())
                 .build();
 
@@ -92,8 +75,6 @@ public class AuthService {
     }
 
     public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto) {
-        Role providerRole = roleRepository.findByName("ROLE_PROVIDER")
-                .orElseThrow(() -> new RuntimeException("ROLE_PROVIDER not found"));
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (serviceProviderRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
@@ -120,7 +101,7 @@ public class AuthService {
                 .phoneVerified(false)
                 .level(Level.NOT_VERIFIED)
                 .verified(false)
-                .roles(Set.of(providerRole))
+                .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
                 .registrationDate(LocalDateTime.now())
                 .build();
 
