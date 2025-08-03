@@ -37,7 +37,6 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found"));
 
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
-        finalUserRepository.save(finalUser);
         return requestMapper.entityToDto(serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto)));
     }
 

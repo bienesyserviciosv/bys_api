@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +39,23 @@ public class JwtUtil {
                 .signWith(getSignatureKey(), Jwts.SIG.HS256)
                 .compact();
 
+    }
+
+    public String generateToken(String subject, Collection<? extends GrantedAuthority> authorities) {
+        String scope = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(auth -> auth.startsWith("ROLE"))
+                .collect(Collectors.joining(" "));
+
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .issuer("self")
+                .issuedAt(Date.from(now))
+                .subject(subject)
+                .expiration(Date.from(now.plus(24, ChronoUnit.HOURS)))
+                .claim("authorities", scope)
+                .signWith(getSignatureKey(), Jwts.SIG.HS256)
+                .compact();
     }
 
     public SecretKey getSignatureKey(){

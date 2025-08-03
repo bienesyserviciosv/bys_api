@@ -7,6 +7,7 @@ import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.service.AuthService;
 import app.bys.bys_api.service.OtpService;
 import app.bys.bys_api.validation.OnCreate;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,6 +84,17 @@ public class AuthController {
             ));
         }
     }
+
+    @GetMapping("/login-user")
+    public void redirectToGoogleUser(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/api/oauth2/authorization/google-user");
+    }
+
+    @GetMapping("/login-provider")
+    public void redirectToGoogleProvider(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/api/oauth2/authorization/google-provider");
+    }
+
 
 //    @PostMapping("/password/recovery/request")
 //    public ResponseEntity<Void> passwordRecoveryRequest(@RequestBody EmailDto emailDto) {
