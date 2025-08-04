@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +31,18 @@ public class ServiceRequestController {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable), HttpStatus.OK);
     }
 
+    //Crear solicitud con el id
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping("/user/{id}")
     public ResponseEntity<ServiceRequestDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
-        return new ResponseEntity<>(serviceRequestService.create(id, serviceRequestDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(serviceRequestService.createWithId(id, serviceRequestDto), HttpStatus.CREATED);
+    }
+
+    //Crear con authentication
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    @PostMapping
+    public ResponseEntity<ServiceRequestDto> create(Authentication auth, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
+        return new ResponseEntity<>(serviceRequestService.create(auth.getName(), serviceRequestDto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")

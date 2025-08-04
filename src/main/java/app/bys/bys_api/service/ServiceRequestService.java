@@ -32,9 +32,18 @@ public class ServiceRequestService {
         return PageMapper.pageToDto(serviceRequestRepository.findAll(pageable).map(requestMapper::entityToDto));
     }
 
-    public ServiceRequestDto create(Long id, ServiceRequestDto serviceRequestDto) {
+    public ServiceRequestDto createWithId(Long id, ServiceRequestDto serviceRequestDto) {
         FinalUser finalUser = finalUserRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found"));
+
+        serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
+        return requestMapper.entityToDto(serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto)));
+    }
+
+
+    public ServiceRequestDto create(String email, ServiceRequestDto serviceRequestDto) {
+        FinalUser finalUser = finalUserRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
         return requestMapper.entityToDto(serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto)));
