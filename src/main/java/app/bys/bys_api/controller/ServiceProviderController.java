@@ -27,8 +27,12 @@ public class ServiceProviderController {
     }
 
     @GetMapping
-    public ResponseEntity<PageDto<ServiceProviderDto>> getAll(Pageable pageable) {
-        return new ResponseEntity<>(serviceProviderService.getAll(pageable), HttpStatus.OK);
+    public ResponseEntity<PageDto<ServiceProviderDto>> getAll(Pageable pageable,
+                                                              @RequestParam(name = "search", required = false) String search,
+                                                              @RequestParam(name = "specializations", required = false) List<Long> specializationList,
+                                                              @RequestParam(name = "address", required = false) String address
+    ) {
+        return new ResponseEntity<>(serviceProviderService.getAll(pageable, search, specializationList, address), HttpStatus.OK);
     }
 
     @PostMapping

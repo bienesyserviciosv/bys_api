@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.enums;
 
-public enum Status {
+public enum RequestStatus {
+    PENDING,
     IN_PROGRESS,
     COMPLETED
 }

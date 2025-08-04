@@ -1,7 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
-import app.bys.bys_api.model.enums.Status;
+import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.validation.OnCreate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
@@ -43,9 +43,10 @@ public class ServiceRequestDto {
     @JsonProperty("time")
     private Time time;
 
+    @Builder.Default
     @JsonProperty("status")
     @Enumerated(EnumType.STRING)
-    private Status status = Status.IN_PROGRESS;
+    private RequestStatus requestStatus = RequestStatus.IN_PROGRESS;
 
     @JsonProperty("specialization")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)

@@ -7,12 +7,16 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.repository.ServiceProviderRepository;
+import app.bys.bys_api.service.specification.ServiceProviderSpecification;
+import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +31,43 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found")));
     }
 
-    public PageDto<ServiceProviderDto> getAll(Pageable pageable) {
-        return PageMapper.pageToDto(serviceProviderRepository.findAll(pageable).map(mapper::entityToDto));
+    public PageDto<ServiceProviderDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address) {
+
+        Specification<ServiceProvider> specializationSpec =
+                specializationList != null ? ServiceProviderSpecification.hasSpecialization(specializationList)
+                        : null;
+
+        ServiceProviderSpecification searchSpec =
+                search != null ? new ServiceProviderSpecification(
+                        new SearchCriteria(
+                                "name",
+                                "s",
+                                search
+                        )
+                )
+                        : null;
+
+        ServiceProviderSpecification addressSpec =
+                address != null ? new ServiceProviderSpecification(
+                        new SearchCriteria(
+                                "address",
+                                ":",
+                                address
+                        )
+                )
+                        : null;
+
+        List<Specification<ServiceProvider>> specList = new ArrayList<>(Arrays.asList(
+                specializationSpec,
+                searchSpec,
+                addressSpec
+        ));
+
+        return PageMapper.pageToDto(serviceProviderRepository.findAll(
+                Specification.allOf(specList.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList())),
+                pageable).map(mapper::entityToDto));
     }
 
     public ServiceProviderDto create(ServiceProviderDto serviceProviderDto) {

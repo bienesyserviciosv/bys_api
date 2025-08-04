@@ -1,6 +1,6 @@
 package app.bys.bys_api.model.entity;
 
-import app.bys.bys_api.model.enums.Status;
+import app.bys.bys_api.model.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,8 +39,8 @@ public class ServiceRequest {
     @Column(name = "time")
     private Time time;
 
-    @Column(name = "status")
-    private Status status;
+    @Column(name = "request_status")
+    private RequestStatus requestStatus;
 
     @ManyToOne
     @JoinColumn(name = "specialization_id")
