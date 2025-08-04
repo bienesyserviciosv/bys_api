@@ -14,6 +14,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,13 +41,21 @@ public class ServiceProviderDto {
     @JsonProperty("phoneNumber")
     private String phoneNumber;
 
+    @JsonProperty("address")
+    private String address;
+
+    @JsonProperty("specializations")
+    private Set<SpecializationDto> specializations;
+
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @JsonProperty("experience")
     private String experience;
 
+    @Builder.Default
     @JsonProperty("verified")
     private Boolean verified = false;
 
+    @Builder.Default
     @JsonProperty("level")
     @Enumerated(EnumType.STRING)
     private Level level = Level.NOT_VERIFIED;
@@ -60,6 +69,7 @@ public class ServiceProviderDto {
     @JsonProperty("registration_date")
     private LocalDateTime registrationDate;
 
+    @Builder.Default
     @JsonProperty("completed_services")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private int completedServices = 0;

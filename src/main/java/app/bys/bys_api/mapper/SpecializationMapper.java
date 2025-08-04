@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.Set;
+
 @Mapper(componentModel = "spring")
 public interface SpecializationMapper {
 
@@ -16,4 +18,6 @@ public interface SpecializationMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateSpecializationFromDto(SpecializationDto specializationDto, @MappingTarget Specialization specialization);
+
+    Set<Specialization> setDtoToEntitySet(Set<SpecializationDto> specializationDtos);
 }

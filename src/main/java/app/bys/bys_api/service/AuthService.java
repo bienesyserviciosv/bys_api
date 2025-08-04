@@ -4,6 +4,7 @@ import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
+import app.bys.bys_api.mapper.SpecializationMapper;
 import app.bys.bys_api.model.dto.AuthRequestDto;
 import app.bys.bys_api.model.dto.AuthResponseDto;
 import app.bys.bys_api.model.dto.FinalUserDto;
@@ -36,11 +37,12 @@ public class AuthService {
     private final ServiceProviderRepository serviceProviderRepo;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
-    private final FinalUserMapper finalUserMapper;
+    private final FinalUserMapper userMapper;
+    private final SpecializationMapper specializationMapper;
     private final ServiceProviderMapper serviceProviderMapper;
     private final OtpService otpService;
 
-      public FinalUserDto registerFinalUser(FinalUserDto dto) {
+    public FinalUserDto registerFinalUser(FinalUserDto dto) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
@@ -68,7 +70,7 @@ public class AuthService {
                 .registrationDate(LocalDateTime.now())
                 .build();
 
-        return finalUserMapper.entityToDto(finalUserRepo.save(user));
+        return userMapper.entityToDto(finalUserRepo.save(user));
     }
 
     public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto) {
@@ -94,6 +96,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .status(UserStatus.ACTIVE)
                 .experience(dto.getExperience())
+                .specializations(specializationMapper.setDtoToEntitySet(dto.getSpecializations()))
                 .emailVerified(false)
                 .phoneVerified(false)
                 .level(Level.NOT_VERIFIED)
@@ -155,8 +158,8 @@ public class AuthService {
 
     private FinalUser getUser(String identifier) {
         return identifier.contains("@")
-                  ? finalUserRepo.findByEmail(identifier).orElseThrow(() -> new UsernameNotFoundException("Email not found"))
-                  : finalUserRepo.findByPhoneNumber(identifier).orElseThrow(() -> new UsernameNotFoundException("Phone number not found"));
+                ? finalUserRepo.findByEmail(identifier).orElseThrow(() -> new UsernameNotFoundException("Email not found"))
+                : finalUserRepo.findByPhoneNumber(identifier).orElseThrow(() -> new UsernameNotFoundException("Phone number not found"));
     }
 
     private ServiceProvider getProvider(String identifier) {

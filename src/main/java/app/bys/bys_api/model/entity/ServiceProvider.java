@@ -55,19 +55,28 @@ public class ServiceProvider {
     @Column(name = "status")
     private UserStatus status;
 
+    @Builder.Default
     @Column(name = "email_verified")
     private boolean emailVerified = false;
 
+    @Builder.Default
     @Column(name = "phone_verified")
     private boolean phoneVerified = false;
 
+    @Column(name = "address")
+    private String address;
+
+    @Builder.Default
     @Column(name = "completed_services")
     private int completedServices = 0;
 
     @Column(name = "registration_time")
     private LocalDateTime registrationDate;
 
-    @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "provider_specialization",
+            joinColumns = {@JoinColumn(name = "provider_id")},
+            inverseJoinColumns = {@JoinColumn(name = "specialization_id")})
     private Set<Specialization> specializations;
 
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)

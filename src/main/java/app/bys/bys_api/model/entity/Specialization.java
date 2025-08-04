@@ -21,9 +21,8 @@ public class Specialization {
     @Column(name = "specialization_type", nullable = false, unique = true)
     private String specializationType;
 
-    @ManyToOne
-    @JoinColumn(name = "service_provider_id")
-    private ServiceProvider serviceProvider;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "specializations")
+    private Set<ServiceProvider> serviceProviderSet;
 
     @OneToMany(mappedBy = "specialization", fetch = FetchType.LAZY)
     private Set<ServiceRequest> serviceRequestSet;
