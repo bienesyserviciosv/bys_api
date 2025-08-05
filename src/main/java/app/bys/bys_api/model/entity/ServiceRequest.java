@@ -56,4 +56,7 @@ public class ServiceRequest {
     @ManyToOne
     @JoinColumn(name = "service_provider")
     private ServiceProvider serviceProvider;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest")
+    private Set<Offer> offerSet;
 }

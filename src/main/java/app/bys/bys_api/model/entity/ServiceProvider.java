@@ -91,6 +91,9 @@ public class ServiceProvider {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "provider")
+    private Set<Offer> offerSet;
+
 }
 
 

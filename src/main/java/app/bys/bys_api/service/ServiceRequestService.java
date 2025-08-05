@@ -9,10 +9,19 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
+import app.bys.bys_api.service.specification.ServiceRequestSpecification;
+import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +37,47 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found")));
     }
 
-    public PageDto<ServiceRequestDto> getAll(Pageable pageable) {
-        return PageMapper.pageToDto(serviceRequestRepository.findAll(pageable).map(requestMapper::entityToDto));
+    public PageDto<ServiceRequestDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList) {
+        Specification<ServiceRequest> specializationSpec =
+                specializationList != null ? ServiceRequestSpecification.hasSpecialization(specializationList)
+                        : null;
+
+        ServiceRequestSpecification searchSpec =
+                search != null ? new ServiceRequestSpecification(
+                        new SearchCriteria(
+                                "name",
+                                "s",
+                                search
+                        )
+                )
+                        : null;
+
+        ServiceRequestSpecification addressSpec =
+                address != null ? new ServiceRequestSpecification(
+                        new SearchCriteria(
+                                "address",
+                                ":",
+                                address
+                        )
+                )
+                        : null;
+
+        Specification<ServiceRequest> userSpec =
+                userList != null ? ServiceRequestSpecification.hasUser(userList)
+                        : null;
+
+        List<Specification<ServiceRequest>> specList = new ArrayList<>(Arrays.asList(
+                specializationSpec,
+                searchSpec,
+                addressSpec,
+                userSpec
+        ));
+
+        return PageMapper.pageToDto(serviceRequestRepository.findAll(
+                Specification.allOf(specList.stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())),
+                pageable).map(requestMapper::entityToDto));
     }
 
     public ServiceRequestDto createWithId(Long id, ServiceRequestDto serviceRequestDto) {
