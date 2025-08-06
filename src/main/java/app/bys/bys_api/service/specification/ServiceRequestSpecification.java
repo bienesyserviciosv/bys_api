@@ -22,7 +22,7 @@ public class ServiceRequestSpecification extends ASpecification<ServiceRequest> 
                 builder.like(
                         builder.lower(
                                 root.get(
-                                        "name"
+                                        "description"
                                 )
                         ), "%" + ((String) criteria.getValue()).toLowerCase() + "%");
     }
@@ -32,7 +32,7 @@ public class ServiceRequestSpecification extends ASpecification<ServiceRequest> 
             if (query != null) {
                 query.distinct(true);
             }
-            Join<ServiceRequest, Specialization> courses = root.join("specializations");
+            Join<ServiceRequest, Specialization> courses = root.join("specialization");
             return criteriaBuilder.in(courses.get("id")).value(specializationIdList);
         };
     }
@@ -42,7 +42,7 @@ public class ServiceRequestSpecification extends ASpecification<ServiceRequest> 
             if (query != null) {
                 query.distinct(true);
             }
-            Join<ServiceRequest, FinalUser> courses = root.join("specializations");
+            Join<ServiceRequest, FinalUser> courses = root.join("finalUser");
             return criteriaBuilder.in(courses.get("id")).value(userIdList);
         };
     }

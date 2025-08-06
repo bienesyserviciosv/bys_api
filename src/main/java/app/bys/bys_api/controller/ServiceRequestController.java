@@ -31,7 +31,7 @@ public class ServiceRequestController {
     @GetMapping
     public ResponseEntity<PageDto<ServiceRequestDto>> getAll(Pageable pageable,
                                                              @RequestParam(name = "search", required = false) String search,
-                                                             @RequestParam(name = "specializations", required = false) List<Long> specializationList,
+                                                             @RequestParam(name = "specialization", required = false) List<Long> specializationList,
                                                              @RequestParam(name = "address", required = false) String address,
                                                              @RequestParam(name = "user", required = false) List<Long> userIdList
     ) {

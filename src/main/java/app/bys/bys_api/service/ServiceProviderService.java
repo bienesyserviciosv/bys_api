@@ -32,7 +32,6 @@ public class ServiceProviderService {
     }
 
     public PageDto<ServiceProviderDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address) {
-
         Specification<ServiceProvider> specializationSpec =
                 specializationList != null ? ServiceProviderSpecification.hasSpecialization(specializationList)
                         : null;

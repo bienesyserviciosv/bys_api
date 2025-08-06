@@ -54,9 +54,9 @@ public class ServiceRequest {
     private FinalUser finalUser;
 
     @ManyToOne
-    @JoinColumn(name = "service_provider")
+    @JoinColumn(name = "service_provider_id")
     private ServiceProvider serviceProvider;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest")
+    @OneToMany(fetch = FetchType.LAZY)
     private Set<Offer> offerSet;
 }

@@ -32,7 +32,7 @@ public class JwtUtil {
         Instant now = Instant.now();
         return Jwts.builder()
                 .issuer("self")
-                .issuedAt(new Date())
+                .issuedAt(Date.from(now))
                 .subject(authentication.getName())
                 .expiration(Date.from(now.plus(24, ChronoUnit.HOURS)))
                 .claim("authorities", scope)
