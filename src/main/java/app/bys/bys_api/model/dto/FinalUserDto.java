@@ -33,16 +33,16 @@ public class FinalUserDto {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("phoneNumber")
     @Size(min = 8, message = "The length must be greater than 8 char", groups = {OnCreate.class, OnUpdate.class})
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @JsonProperty("phoneNumber")
     private String phoneNumber;
 
     @JsonProperty("registration_date")
     private LocalDateTime registrationDate;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 8)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 }
