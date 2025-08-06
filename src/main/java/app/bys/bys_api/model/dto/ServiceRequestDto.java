@@ -46,7 +46,7 @@ public class ServiceRequestDto {
     @Builder.Default
     @JsonProperty("status")
     @Enumerated(EnumType.STRING)
-    private RequestStatus requestStatus = RequestStatus.IN_PROGRESS;
+    private RequestStatus requestStatus = RequestStatus.PENDING;
 
     @JsonProperty("specialization")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)

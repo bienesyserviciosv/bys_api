@@ -1,6 +1,6 @@
 package app.bys.bys_api.model.entity;
 
-import app.bys.bys_api.model.enums.Level;
+import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,7 +37,7 @@ public class ServiceProvider {
     private Boolean verified;
 
     @Column(name = "level")
-    private Level level;
+    private MembershipType membershipType;
 
     @Column(name = "latitude")
     private String latitude;

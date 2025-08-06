@@ -1,7 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
-import app.bys.bys_api.model.enums.Level;
+import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -58,7 +58,7 @@ public class ServiceProviderDto {
     @Builder.Default
     @JsonProperty("level")
     @Enumerated(EnumType.STRING)
-    private Level level = Level.NOT_VERIFIED;
+    private MembershipType membershipType = MembershipType.NOT_VERIFIED;
 
     @JsonProperty("latitude")
     private String latitude;

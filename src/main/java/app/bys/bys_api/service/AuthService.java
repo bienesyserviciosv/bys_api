@@ -11,7 +11,7 @@ import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.ServiceProvider;
-import app.bys.bys_api.model.enums.Level;
+import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
@@ -99,7 +99,7 @@ public class AuthService {
                 .specializations(specializationMapper.setDtoToEntitySet(dto.getSpecializations()))
                 .emailVerified(false)
                 .phoneVerified(false)
-                .level(Level.NOT_VERIFIED)
+                .membershipType(MembershipType.NOT_VERIFIED)
                 .verified(false)
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
                 .registrationDate(LocalDateTime.now())
