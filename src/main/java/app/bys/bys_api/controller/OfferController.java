@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +44,15 @@ public class OfferController {
         return new ResponseEntity<>(offerService.update(id, offerDto), HttpStatus.OK);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         offerService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    @PatchMapping("/accept/{id}")
+    public ResponseEntity<OfferDto> acceptOffer(Authentication auth, @PathVariable Long id) {
+        return new ResponseEntity<>(offerService.acceptOffer(auth.getName(), id), HttpStatus.OK);
+    }
 }

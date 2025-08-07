@@ -29,4 +29,12 @@ public class Offer {
     @Column(name = "service_request_id", nullable = false)
     private Long serviceRequestId;
 
+    @ManyToOne
+    @JoinColumn(name = "final_user_id")
+    private FinalUser finalUser;
+
+    @Builder.Default
+    @Column(name = "accepted")
+    private Boolean accepted = false;
+
 }

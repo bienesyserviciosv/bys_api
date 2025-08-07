@@ -4,10 +4,12 @@ import app.bys.bys_api.mapper.OfferMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.OfferDto;
 import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.RequestStatus;
+import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.OfferRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
@@ -33,6 +35,7 @@ public class OfferService {
     private final OfferMapper offerMapper;
     private final ServiceProviderRepository serviceProviderRepo;
     private final ServiceRequestRepository serviceRequestRepo;
+    private final FinalUserRepository finalUserRepo;
 
     public OfferDto get(Long id) {
         return offerMapper.entityToDto(offerRepo.findById(id)
@@ -95,5 +98,17 @@ public class OfferService {
             throw new EntityNotFoundException("Offer with id: " + id + "not found");
         }
         offerRepo.deleteById(id);
+    }
+
+    public OfferDto acceptOffer(String email, Long id) {
+        FinalUser finalUser = finalUserRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
+
+        Offer offer = offerRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found"));
+
+        offer.setFinalUser(finalUser);
+        offer.setAccepted(true);
+        return offerMapper.entityToDto(offerRepo.save(offer));
     }
 }

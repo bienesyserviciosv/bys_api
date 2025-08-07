@@ -23,7 +23,7 @@ public class OfferDto {
     @NotNull(groups = OnCreate.class)
     @Positive(groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("price")
-    private double price;
+    private Double price;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 3, max = 30, groups = {OnCreate.class, OnUpdate.class})
@@ -34,5 +34,8 @@ public class OfferDto {
     @Positive(groups = OnCreate.class)
     @JsonProperty("service_request_id")
     private Long serviceRequestId;
+
+    @JsonProperty("accepted")
+    private Boolean accepted = false;
 
 }

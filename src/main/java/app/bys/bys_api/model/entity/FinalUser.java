@@ -55,4 +55,7 @@ public class FinalUser {
             joinColumns = @JoinColumn(name = "final_user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "finalUser")
+    private Set<Offer> offerSet;
 }
