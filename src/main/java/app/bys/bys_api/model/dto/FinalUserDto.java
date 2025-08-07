@@ -42,7 +42,7 @@ public class FinalUserDto {
     private LocalDateTime registrationDate;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    @Size(min = 8)
+    @Size(min = 8, message = "The length must be greater than 8 char", groups = OnCreate.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 }

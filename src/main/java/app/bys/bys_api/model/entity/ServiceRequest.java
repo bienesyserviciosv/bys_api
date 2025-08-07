@@ -4,8 +4,8 @@ import app.bys.bys_api.model.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 
 @Entity
@@ -34,10 +34,10 @@ public class ServiceRequest {
     private String address;
 
     @Column(name = "date")
-    private Date date;
+    private LocalDate date;
 
     @Column(name = "time")
-    private Time time;
+    private LocalTime time;
 
     @Column(name = "request_status")
     private RequestStatus requestStatus;
