@@ -27,12 +27,6 @@ public class ServiceRequestDto {
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
     private String description;
 
-    @JsonProperty("latitude")
-    private String latitude;
-
-    @JsonProperty("longitude")
-    private String longitude;
-
     @JsonProperty("address")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
     private String address;

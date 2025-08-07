@@ -60,12 +60,6 @@ public class ServiceProviderDto {
     @Enumerated(EnumType.STRING)
     private MembershipType membershipType = MembershipType.NOT_VERIFIED;
 
-    @JsonProperty("latitude")
-    private String latitude;
-
-    @JsonProperty("longitude")
-    private String longitude;
-
     @JsonProperty("registration_date")
     private LocalDateTime registrationDate;
 
