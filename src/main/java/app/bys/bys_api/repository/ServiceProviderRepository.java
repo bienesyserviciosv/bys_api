@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
      boolean existsByPhoneNumber(String phoneNumber);
 
      Optional<ServiceProvider> findByPhoneNumber(String phone);
+
+     List<ServiceProvider> findByAddressAndSpecializations_Id(String address, Long specializationId);
+
 }
