@@ -48,14 +48,14 @@ public class AuthService {
             if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
                 throw new DuplicatePhoneException("The phone number is already registered");
             }
-            handlePhoneOtp(dto.getPhoneNumber());
+            //handlePhoneOtp(dto.getPhoneNumber());
         }
 
         if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
             if (finalUserRepo.existsByEmail(dto.getEmail())) {
                 throw new DuplicateEmailException("The email is already registered");
             }
-            handleEmailOtp(dto.getEmail());
+            //handleEmailOtp(dto.getEmail());
         }
 
         FinalUser user = FinalUser.builder()
@@ -79,14 +79,14 @@ public class AuthService {
             if (serviceProviderRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
                 throw new DuplicatePhoneException("The phone number is already registered");
             }
-            handlePhoneOtp(dto.getPhoneNumber());
+            //handlePhoneOtp(dto.getPhoneNumber());
         }
 
         if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
             if (serviceProviderRepo.existsByEmail(dto.getEmail())) {
                 throw new DuplicateEmailException("The email is already registered");
             }
-            handleEmailOtp(dto.getEmail());
+            //handleEmailOtp(dto.getEmail());
         }
 
         ServiceProvider provider = ServiceProvider.builder()
