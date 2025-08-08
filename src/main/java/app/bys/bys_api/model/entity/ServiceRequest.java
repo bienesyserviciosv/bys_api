@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -59,4 +60,7 @@ public class ServiceRequest {
 
     @OneToMany(fetch = FetchType.LAZY)
     private Set<Offer> offerSet;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest")
+    private List<Notification> notificationList;
 }

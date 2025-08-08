@@ -38,7 +38,6 @@ public class ServiceRequestDto {
     private LocalDate date;
 
     @JsonProperty("time")
-    @Future(groups = {OnCreate.class, OnUpdate.class})
     private LocalTime time;
 
     @Builder.Default

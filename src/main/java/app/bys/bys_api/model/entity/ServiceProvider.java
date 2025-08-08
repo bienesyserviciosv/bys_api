@@ -94,6 +94,9 @@ public class ServiceProvider {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "provider")
     private Set<Offer> offerSet;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "recipient")
+    private Set<Notification> notificationSet;
+
 }
 
 
