@@ -101,6 +101,7 @@ public class AuthService {
                 .phoneVerified(false)
                 .membershipType(MembershipType.NOT_VERIFIED)
                 .verified(false)
+                .address(dto.getAddress())
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
                 .registrationDate(LocalDateTime.now())
                 .build();
