@@ -32,6 +32,6 @@ public class Notification {
     private ServiceProvider recipient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_request_id", unique = false)
+    @JoinColumn(name = "service_request_id")
     private ServiceRequest serviceRequest;
 }
