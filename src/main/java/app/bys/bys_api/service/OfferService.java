@@ -7,8 +7,6 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
-import app.bys.bys_api.model.entity.ServiceRequest;
-import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.OfferRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;

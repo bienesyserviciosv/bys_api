@@ -22,6 +22,9 @@ public class Offer {
     @Column(name = "duration", nullable = false)
     private String duration;
 
+    @Column(name = "description")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "provider_id", nullable = false)
     private ServiceProvider provider;

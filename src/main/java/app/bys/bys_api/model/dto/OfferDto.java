@@ -30,7 +30,7 @@ public class OfferDto {
     @JsonProperty("duration")
     private String duration;
 
-    @Size(min = 3, max = 30, message = "The length must be between 3 and 30", groups = {OnCreate.class, OnUpdate.class})
+    @Size(min = 3, max = 100, message = "The length must be between 3 and 100", groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("description")
     private String description;
 
