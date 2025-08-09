@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -26,11 +27,13 @@ public class ServiceRequestDto {
     private Long id;
 
     @JsonProperty("description")
-    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @Size(min = 5, groups = {OnCreate.class, OnUpdate.class}, message = "The length must be greater than 5 char")
     private String description;
 
     @JsonProperty("address")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
+    @Size(min = 3, groups = {OnCreate.class, OnUpdate.class}, message = "The length must be greater than 3 char")
     private String address;
 
     @Future(groups = {OnCreate.class, OnUpdate.class})

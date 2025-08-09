@@ -20,18 +20,22 @@ public class OfferDto {
     @JsonProperty("id")
     private Long id;
 
-    @NotNull(groups = OnCreate.class)
-    @Positive(groups = {OnCreate.class, OnUpdate.class})
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @Positive(message = "Must be greater than 0", groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("price")
     private Double price;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    @Size(min = 3, max = 30, groups = {OnCreate.class, OnUpdate.class})
+    @Size(min = 3, max = 30, message = "The length must be between 3 and 30", groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("duration")
     private String duration;
 
-    @NotNull(groups = OnCreate.class)
-    @Positive(groups = OnCreate.class)
+    @Size(min = 3, max = 30, message = "The length must be between 3 and 30", groups = {OnCreate.class, OnUpdate.class})
+    @JsonProperty("description")
+    private String description;
+
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @Positive(message = "Must be greater than 0", groups = OnCreate.class)
     @JsonProperty("service_request_id")
     private Long serviceRequestId;
 

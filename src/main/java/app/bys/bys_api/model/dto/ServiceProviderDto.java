@@ -27,7 +27,7 @@ public class ServiceProviderDto {
     private Long id;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    @Size(min = 3, max = 20, groups = {OnCreate.class, OnUpdate.class})
+    @Size(min = 3, max = 20, message = "The length must be between 3 and 20 char", groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("name")
     private String name;
 
@@ -48,6 +48,7 @@ public class ServiceProviderDto {
     private Set<SpecializationDto> specializations;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    @Size(min = 8, max = 1000, groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("experience")
     private String experience;
 
