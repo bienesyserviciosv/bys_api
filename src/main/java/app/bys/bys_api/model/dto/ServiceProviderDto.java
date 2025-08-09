@@ -48,7 +48,7 @@ public class ServiceProviderDto {
     private Set<SpecializationDto> specializations;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    @Size(min = 8, max = 1000, groups = {OnCreate.class, OnUpdate.class})
+    @Size(min = 8, max = 1000, message = "The length must be between 8 and 1000 char", groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("experience")
     private String experience;
 

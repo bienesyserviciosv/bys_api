@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -82,8 +83,12 @@ public class ServiceProvider {
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)
     private Set<ServiceRequest> serviceRequestSet;
 
-    @OneToMany(mappedBy = "serviceProvider")
-    private Set<Picture> pictureSet;
+    @OneToOne
+    @JoinColumn(name = "profile_picture_id")
+    private Picture profilePicture;
+
+    @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Picture> workPictureSet;
 
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.PERSIST)
     @JoinTable(name = "service_provider_roles",
