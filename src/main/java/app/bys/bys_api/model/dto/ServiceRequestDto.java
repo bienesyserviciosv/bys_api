@@ -7,10 +7,7 @@ import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -54,5 +51,14 @@ public class ServiceRequestDto {
 
     @JsonProperty("finalUser")
     private FinalUserDto finalUser;
+
+    @Builder.Default
+    @JsonProperty("offer_quantity")
+    @PositiveOrZero(message = "Must be positive", groups = {OnCreate.class, OnUpdate.class})
+    private Integer offerQuantity = 0;
+
+    @Builder.Default
+    @JsonProperty("new_offer")
+    private Boolean newOffer = false;
 
 }

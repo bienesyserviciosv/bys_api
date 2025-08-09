@@ -43,6 +43,12 @@ public class ServiceRequest {
     @Column(name = "request_status")
     private RequestStatus requestStatus;
 
+    @Column(name = "offer_quantity")
+    private Integer offerQuantity;
+
+    @Column(name = "new_offer")
+    private Boolean newOffer;
+
     @ManyToOne
     @JoinColumn(name = "specialization_id")
     private Specialization specialization;
