@@ -34,7 +34,7 @@ public class OfferController {
         return new ResponseEntity<>(offerService.getAll(pageable, search, providerIdList), HttpStatus.OK);
     }
 
-    //@PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<OfferDto> create(Authentication auth, @Validated(OnCreate.class) @RequestBody OfferDto offerDto) {
         return new ResponseEntity<>(offerService.create(auth.getName(), offerDto), HttpStatus.CREATED);

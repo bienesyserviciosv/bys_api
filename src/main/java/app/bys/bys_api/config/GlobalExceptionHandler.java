@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({DuplicateEmailException.class, DuplicatePhoneException.class})
     public ResponseEntity<Map<String, Object>> handleDuplicateFields(RuntimeException ex) {
-        String field = ex instanceof DuplicateEmailException ? "email" : "teléfono";
+        String field = ex instanceof DuplicateEmailException ? "email" : "phone";
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of(

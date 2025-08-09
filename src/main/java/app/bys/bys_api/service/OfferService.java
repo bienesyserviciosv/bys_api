@@ -77,11 +77,6 @@ public class OfferService {
         Offer offer = offerMapper.dtoToEntity(offerDto);
         offer.setProvider(provider);
 
-        ServiceRequest serviceRequest = serviceRequestRepo.findById(offer.getServiceRequestId())
-                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found"));
-
-        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
-
         return offerMapper.entityToDto(offerRepo.save(offer));
     }
 
@@ -109,6 +104,14 @@ public class OfferService {
 
         offer.setFinalUser(finalUser);
         offer.setAccepted(true);
+
+       /* MOVER ESTA LOGICA A CUANDO SE ACEPTA EL PAGO
+        ServiceRequest serviceRequest = serviceRequestRepo.findById(offer.getServiceRequestId())
+                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found"));
+
+        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
+        serviceRequestRepo.save(serviceRequest);*/
+
         return offerMapper.entityToDto(offerRepo.save(offer));
     }
 }
