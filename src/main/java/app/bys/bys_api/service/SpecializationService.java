@@ -6,6 +6,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.SpecializationDto;
 import app.bys.bys_api.model.entity.Specialization;
 import app.bys.bys_api.repository.SpecializationRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,25 @@ public class SpecializationService {
 
     private final SpecializationRepository specializationRepository;
     private final SpecializationMapper mapper;
+
+    @PostConstruct
+    public void initializeSpecializations() {
+        createSpecializationIfNotFound("ELECTRICITY");
+        createSpecializationIfNotFound("REFRIGERATION");
+        createSpecializationIfNotFound("PLUMBING");
+        createSpecializationIfNotFound("ELECTRONIC");
+        createSpecializationIfNotFound("SMITHY");
+        createSpecializationIfNotFound("CONSTRUCTION");
+
+    }
+
+    private void createSpecializationIfNotFound(String specializationType) {
+        if (!specializationRepository.existsBySpecializationType(specializationType)) {
+            Specialization specialization = new Specialization();
+            specialization.setSpecializationType(specializationType);
+            specializationRepository.save(specialization);
+        }
+    }
 
     public SpecializationDto get(Long id) {
         return mapper.entityToDto(specializationRepository.findById(id)
