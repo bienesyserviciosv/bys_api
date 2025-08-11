@@ -48,11 +48,6 @@ public class UserSuccessHandler implements AuthenticationSuccessHandler {
                 .collect(Collectors.toList());
 
         String jwt = jwtUtil.generateToken(user.getEmail(), authorities);
-
-        response.setContentType("application/json");
-        response.getWriter().write(new ObjectMapper().writeValueAsString(
-                new AuthResponseDto(jwt, user.getEmail()))
-        );
-      //  response.sendRedirect("http://localhost:3000/token?jwt=" + jwt);
+        response.sendRedirect("http://localhost:3000/token?jwt=" + jwt);
     }
 }
