@@ -1,8 +1,10 @@
 package app.bys.bys_api.security.oauth2;
 
+import app.bys.bys_api.model.dto.AuthResponseDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.utils.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -46,11 +48,6 @@ public class UserSuccessHandler implements AuthenticationSuccessHandler {
                 .collect(Collectors.toList());
 
         String jwt = jwtUtil.generateToken(user.getEmail(), authorities);
-
-//        response.setContentType("application/json");
-//        response.getWriter().write(new ObjectMapper().writeValueAsString(
-//                new AuthResponseDto(jwt, user.getEmail()))
-//        );
         response.sendRedirect("http://localhost:3000/token?jwt=" + jwt);
     }
 }

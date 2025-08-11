@@ -42,7 +42,7 @@ public class FinalUserService {
 
     public FinalUserDto update(Long id, FinalUserDto finalUserDto) {
         FinalUser userFound = finalUserRepository.findById(id).
-                orElseThrow(()-> new EntityNotFoundException("Final user with id: " + id + " not found"));
+                orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found"));
         mapper.updateFinalUserFromDto(finalUserDto, userFound);
         return mapper.entityToDto(finalUserRepository.save(userFound));
     }
@@ -56,8 +56,15 @@ public class FinalUserService {
 
     public FinalUser findOrCreateUser(String email, String name) {
         log.info("Recibido email: " + email + ", nombre: " + name);
-        FinalUser existingUser = finalUserRepository.findByEmail(email).orElse(null);
-        if (existingUser != null) {
+        return finalUserRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    FinalUser newUser = new FinalUser();
+                    newUser.setEmail(email);
+                    newUser.setName(name);
+                    newUser.setRoles(Set.of(roleService.getRoleOrThrow("ROLE_USER")));
+                    return finalUserRepository.save(newUser);
+
+        /*if (existingUser != null) {
             return existingUser;
         }
         FinalUser newUser = new FinalUser();
@@ -66,5 +73,7 @@ public class FinalUserService {
         newUser.setRoles(Set.of(roleService.getRoleOrThrow("ROLE_USER")));
 
         return finalUserRepository.save(newUser);
+    */
+                });
     }
 }

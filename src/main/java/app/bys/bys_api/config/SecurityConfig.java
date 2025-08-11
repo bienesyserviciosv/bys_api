@@ -1,6 +1,8 @@
 package app.bys.bys_api.config;
 
 import app.bys.bys_api.security.filter.JwtAuthenticationFilter;
+import app.bys.bys_api.security.oauth2.ProviderSuccessHandler;
+import app.bys.bys_api.security.oauth2.UserSuccessHandler;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +35,8 @@ import java.util.List;
 @Slf4j
 public class SecurityConfig {
 
-    private final AuthenticationSuccessHandler userSuccessHandler;
-    private final AuthenticationSuccessHandler providerSuccessHandler;
+    private final UserSuccessHandler userSuccessHandler;
+    private final ProviderSuccessHandler providerSuccessHandler;
     private final FinalUserService finalUserService;
     private final JwtUtil jwtUtil;
 
@@ -44,13 +46,12 @@ public class SecurityConfig {
         return httpSecurity
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/auth/**", "/oauth2/**").permitAll()
+                                .requestMatchers("/auth/**", "/login/oauth2/**", "/oauth2/**").permitAll()
                                 .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
-                        //.defaultSuccessUrl("http://localhost:3000/token", true)
-                        .successHandler(compositeSuccessHandler())
+                        .successHandler(userSuccessHandler)
                 )
 
                 .csrf(AbstractHttpConfigurer::disable)
@@ -81,22 +82,18 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception { return authenticationConfiguration.getAuthenticationManager(); }
 
-    @Bean
-    public AuthenticationSuccessHandler compositeSuccessHandler() {
-        return (request, response, authentication) -> {
-            String uri = request.getRequestURI();
-            log.info("Redirect URI after OAuth2: " + uri);
-            userSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+//    @Bean
+//    public AuthenticationSuccessHandler compositeSuccessHandler() {
+//        log.info("aaaaaaaAAAAAAAAAAaaaaaaaaAAA");
+//        return  new UserSuccessHandler(finalUserService, jwtUtil);
 //            if (uri.contains("google-user")) {
 //                userSuccessHandler.onAuthenticationSuccess(request, response, authentication);
 //            } else if (uri.contains("google-provider")) {
 //                providerSuccessHandler.onAuthenticationSuccess(request, response, authentication);
 //            } else {
 //                log.warn("No matching URI in handler: " + uri);
-                response.sendRedirect("/login?error");
-          //  }
-        };
+//          }
+//        };
     }
 
 
-}
