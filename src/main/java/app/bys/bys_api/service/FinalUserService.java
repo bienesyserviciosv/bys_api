@@ -6,6 +6,7 @@ import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
+import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.repository.FinalUserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -61,19 +63,11 @@ public class FinalUserService {
                     FinalUser newUser = new FinalUser();
                     newUser.setEmail(email);
                     newUser.setName(name);
-                    newUser.setRoles(Set.of(roleService.getRoleOrThrow("ROLE_USER")));
+                    newUser.setRegistrationDate(LocalDateTime.now());
+                    Role userRole = roleService.getOrCreateRole("ROLE_USER");
+                    newUser.setRoles(Set.of(userRole));
                     return finalUserRepository.save(newUser);
 
-        /*if (existingUser != null) {
-            return existingUser;
-        }
-        FinalUser newUser = new FinalUser();
-        newUser.setEmail(email);
-        newUser.setName(name);
-        newUser.setRoles(Set.of(roleService.getRoleOrThrow("ROLE_USER")));
-
-        return finalUserRepository.save(newUser);
-    */
                 });
     }
 }

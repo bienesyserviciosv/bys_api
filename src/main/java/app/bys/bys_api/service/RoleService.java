@@ -31,4 +31,13 @@ public class RoleService {
         return roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalStateException("Role not found: " + roleName));
     }
+
+    public Role getOrCreateRole(String roleName) {
+        return roleRepository.findByName(roleName)
+                .orElseGet(() -> {
+                    Role newRole = new Role();
+                    newRole.setName(roleName);
+                    return roleRepository.save(newRole);
+                });
+    }
 }
