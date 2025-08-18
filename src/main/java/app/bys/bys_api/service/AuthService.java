@@ -10,6 +10,7 @@ import app.bys.bys_api.model.dto.AuthResponseDto;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.entity.FinalUser;
+import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.UserStatus;
@@ -146,12 +147,12 @@ public class AuthService {
 
         if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
             FinalUser user = getUser(identifier);
-            return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword());
+            return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword(), user.getRoles());
         }
 
         if (serviceProviderRepo.existsByEmail(identifier) || serviceProviderRepo.existsByPhoneNumber(identifier)) {
             ServiceProvider provider = getProvider(identifier);
-            return authenticateAndRespond(provider.getEmail(), authRequestDto.getPassword());
+            return authenticateAndRespond(provider.getEmail(), authRequestDto.getPassword(), provider.getRoles());
         }
 
         throw new UsernameNotFoundException("User not found");
@@ -169,10 +170,10 @@ public class AuthService {
                 : serviceProviderRepo.findByPhoneNumber(identifier).orElseThrow(() -> new UsernameNotFoundException("Phone number not found"));
     }
 
-    private ResponseEntity<AuthResponseDto> authenticateAndRespond(String username, String password) {
+    private ResponseEntity<AuthResponseDto> authenticateAndRespond(String username, String password, Set<Role> roles) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
         String jwt = jwtUtil.generateToken(auth);
-        return ResponseEntity.ok(new AuthResponseDto(username, jwt));
+        return ResponseEntity.ok(new AuthResponseDto(username, jwt, roles));
     }
 }
