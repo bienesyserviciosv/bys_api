@@ -7,6 +7,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.OfferRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
@@ -71,6 +72,18 @@ public class OfferService {
     public OfferDto create(String email, OfferDto offerDto) {
         ServiceProvider provider = serviceProviderRepo.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Provider with email: " + email + " not found"));
+
+        Long requestId = offerDto.getServiceRequestId();
+        ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
+
+        Integer offerQuantity = serviceRequest.getOfferQuantity();
+        offerQuantity++;
+
+        serviceRequest.setOfferQuantity(offerQuantity);
+        serviceRequest.setNewOffer(true);
+
+        serviceRequestRepo.save(serviceRequest);
 
         Offer offer = offerMapper.dtoToEntity(offerDto);
         offer.setProvider(provider);
