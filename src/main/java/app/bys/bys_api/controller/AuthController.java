@@ -1,9 +1,6 @@
 package app.bys.bys_api.controller;
 
-import app.bys.bys_api.model.dto.AuthRequestDto;
-import app.bys.bys_api.model.dto.AuthResponseDto;
-import app.bys.bys_api.model.dto.FinalUserDto;
-import app.bys.bys_api.model.dto.ServiceProviderDto;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.service.AuthService;
 import app.bys.bys_api.service.OtpService;
 import app.bys.bys_api.validation.OnCreate;
@@ -69,12 +66,12 @@ public class AuthController {
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<?> resendOtp(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> resendOtp(@RequestBody @Valid EmailDto emailDto) {
         try {
-            String email = request.get("email");
+            String email = emailDto.getEmail();
             otpService.resendOtp(email);
             return ResponseEntity.ok().body(Map.of(
-                    "message", "Nuevo OTP enviado con éxito",
+                    "message", "New OTP sent successfully",
                     "status", "SUCCESS",
                     "attemptsLeft", MAX_RESEND_ATTEMPTS - otpService.getResendAttempts(email)
             ));
@@ -103,12 +100,12 @@ public class AuthController {
 //        return new ResponseEntity<>(HttpStatus.OK);
 //    }
 //
-//    @PostMapping("/password/recovery/change")
-//    public ResponseEntity<Void> changeRecoveryPassword(Authentication authentication,
-//                                                       @RequestBody ChangePasswordDto changePasswordDto) {
-//        authService.changeRecoveryPassword(authentication, changePasswordDto);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
+
+    @PostMapping("/password/recovery/change")
+    public ResponseEntity<String> resetPassword(@Validated({OnCreate.class}) @RequestBody ResetPasswordRequest resetPasswordRequest) {
+        authService.resetPassword(resetPasswordRequest.getEmail(), resetPasswordRequest.getPassword());
+        return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
+    }
 //
 //    @PostMapping("/password/change")
 //    public ResponseEntity<Void> changePassword(Authentication authentication,
