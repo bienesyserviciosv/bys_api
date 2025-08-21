@@ -2,6 +2,8 @@ package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.error.DuplicatePhoneException;
+import app.bys.bys_api.error.EmailNotVerifiedException;
+import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.mapper.SpecializationMapper;
@@ -17,6 +19,7 @@ import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -52,10 +56,10 @@ public class AuthService {
         }
 
         if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-            if (finalUserRepo.existsByEmail(dto.getEmail())) {
+            if (finalUserRepo.existsByEmail(dto.getEmail()) || serviceProviderRepo.existsByEmail(dto.getEmail())) {
                 throw new DuplicateEmailException("The email is already registered");
             }
-            //handleEmailOtp(dto.getEmail());
+            handleEmailOtp(dto.getEmail());
         }
 
         FinalUser user = FinalUser.builder()
@@ -83,10 +87,10 @@ public class AuthService {
         }
 
         if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-            if (serviceProviderRepo.existsByEmail(dto.getEmail())) {
+            if (serviceProviderRepo.existsByEmail(dto.getEmail()) || finalUserRepo.existsByEmail(dto.getEmail())) {
                 throw new DuplicateEmailException("The email is already registered");
             }
-            //handleEmailOtp(dto.getEmail());
+            handleEmailOtp(dto.getEmail());
         }
 
         ServiceProvider provider = ServiceProvider.builder()
@@ -146,6 +150,7 @@ public class AuthService {
 
         if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
             FinalUser user = getUser(identifier);
+            if (!user.isEmailVerified()) throw new EmailNotVerifiedException("The email is not verified");
             return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword());
         }
 

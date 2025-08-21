@@ -2,6 +2,7 @@ package app.bys.bys_api.config;
 
 import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.error.DuplicatePhoneException;
+import app.bys.bys_api.error.EmailNotVerifiedException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,16 @@ public class GlobalExceptionHandler {
                         "message", ex.getMessage(),
                         "error", "DUPLICATE_ENTRY",
                         "field", field,
+                        "timestamp", LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailNotVerified(EmailNotVerifiedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of(
+                        "message", ex.getMessage(),
+                        "error", "EMAIL_NOT_VERIFIED",
                         "timestamp", LocalDateTime.now()
                 ));
     }
