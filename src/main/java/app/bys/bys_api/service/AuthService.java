@@ -7,10 +7,7 @@ import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.mapper.SpecializationMapper;
-import app.bys.bys_api.model.dto.AuthRequestDto;
-import app.bys.bys_api.model.dto.AuthResponseDto;
-import app.bys.bys_api.model.dto.FinalUserDto;
-import app.bys.bys_api.model.dto.ServiceProviderDto;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.enums.MembershipType;
@@ -24,12 +21,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -45,6 +45,7 @@ public class AuthService {
     private final SpecializationMapper specializationMapper;
     private final ServiceProviderMapper serviceProviderMapper;
     private final OtpService otpService;
+    private final UserDetailsService userDetailsService;
 
     public FinalUserDto registerFinalUser(FinalUserDto dto) {
 

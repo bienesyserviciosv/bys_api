@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -101,19 +102,37 @@ public class AuthController {
 //    }
 //
 
+    @PostMapping("/password/recovery/verify")
+    public ResponseEntity<?> verifyOtpForPasswordReset(@RequestParam String email, @RequestParam String otp) {
+        try {
+            authService.verifyOtpForPasswordReset(email, otp);
+            return ResponseEntity.ok("OTP verified for recover password successfully");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", ex.getMessage(), "timestamp", LocalDateTime.now()));
+        }
+    }
+
     @PostMapping("/password/recovery/change")
     public ResponseEntity<String> resetPassword(@Validated({OnCreate.class}) @RequestBody ResetPasswordRequest resetPasswordRequest) {
         authService.resetPassword(resetPasswordRequest.getEmail(), resetPasswordRequest.getPassword());
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
     }
-//
-//    @PostMapping("/password/change")
-//    public ResponseEntity<Void> changePassword(Authentication authentication,
-//                                               @RequestBody ChangePasswordDto changePasswordDto) {
-//        authService.changePassword(authentication, changePasswordDto);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
 
+    @PostMapping("/password/change")
+    public ResponseEntity<?> changePassword(Authentication auth, @Valid @RequestBody ChangePasswordDto changePasswordDto) {
+
+        try {
+            authService.changePassword(auth.getName(), changePasswordDto);
+            return ResponseEntity.ok("Password changed successfully");
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
 
 }
 
