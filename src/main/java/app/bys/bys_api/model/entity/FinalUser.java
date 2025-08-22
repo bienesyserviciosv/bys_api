@@ -26,7 +26,7 @@ public class FinalUser {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone_number", nullable = false, unique = true)
+    @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
     @Column(name = "password")
@@ -50,7 +50,7 @@ public class FinalUser {
     @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY)
     private Set<ServiceRequest> serviceRequest;
 
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(name = "final_users_roles",
             joinColumns = @JoinColumn(name = "final_user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
