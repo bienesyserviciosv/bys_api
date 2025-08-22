@@ -1,6 +1,8 @@
 package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.*;
+import app.bys.bys_api.repository.FinalUserRepository;
+import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.AuthService;
 import app.bys.bys_api.service.OtpService;
 import app.bys.bys_api.validation.OnCreate;
@@ -27,6 +29,9 @@ public class AuthController {
 
     private final AuthService authService;
     private final OtpService otpService;
+    private final FinalUserRepository finalUserRepo;
+    private final ServiceProviderRepository serviceProviderRepo;
+
 
     @PostMapping("/final_user/register")
     public ResponseEntity<Map<String, Object>> registerFinalUser(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
@@ -69,6 +74,10 @@ public class AuthController {
     @PostMapping("/resend-otp")
     public ResponseEntity<?> resendOtp(@RequestBody @Valid EmailDto emailDto) {
         try {
+            boolean exists = finalUserRepo.existsByEmail(emailDto.getEmail()) || serviceProviderRepo.existsByEmail(emailDto.getEmail());
+            if (!exists) {
+                throw new RuntimeException("The OTP can not be resent");
+            }
             String email = emailDto.getEmail();
             otpService.resendOtp(email);
             return ResponseEntity.ok().body(Map.of(
@@ -93,14 +102,6 @@ public class AuthController {
     public void redirectToGoogleProvider(HttpServletResponse response) throws IOException {
         response.sendRedirect("/api/oauth2/authorization/google-provider");
     }
-
-
-//    @PostMapping("/password/recovery/request")
-//    public ResponseEntity<Void> passwordRecoveryRequest(@RequestBody EmailDto emailDto) {
-//        authService.passwordRecoveryRequest(emailDto);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-//
 
     @PostMapping("/password/recovery/verify")
     public ResponseEntity<?> verifyOtpForPasswordReset(@RequestParam String email, @RequestParam String otp) {
