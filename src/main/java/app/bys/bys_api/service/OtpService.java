@@ -75,13 +75,13 @@ public class OtpService {
 
         // Validar límite de reenvíos
         if (attempts >= MAX_RESEND_ATTEMPTS) {
-            throw new RuntimeException("Has excedido el número máximo de reenvíos");
+            throw new RuntimeException("You have exceeded the maximum number of OTP resends");
         }
 
         // Validar tiempo mínimo entre reenvíos
         if (lastResent != null &&
                 Duration.between(lastResent, LocalDateTime.now()).toMinutes() < RESEND_COOLDOWN_MINUTES) {
-            throw new RuntimeException("Debes esperar antes de solicitar otro OTP");
+            throw new RuntimeException("You must wait before requesting another OTP");
         }
 
         // Generar nuevo OTP (opcional: puedes usar el mismo)
@@ -97,6 +97,24 @@ public class OtpService {
     }
 
     public int getResendAttempts(String email) {
-        return MAX_RESEND_ATTEMPTS - resendAttempts.getOrDefault(email, 0);
+        return resendAttempts.getOrDefault(email, 0);
+    }
+
+    public void restartResendAttempts(String email) {
+         resendAttempts.put(email, 0);
+    }
+
+    private final Map<String, Boolean> otpVerifiedMap = new ConcurrentHashMap<>();
+
+    public void markOtpVerified(String email) {
+        otpVerifiedMap.put(email, true);
+    }
+
+    public boolean isOtpVerified(String email) {
+        return otpVerifiedMap.getOrDefault(email, false);
+    }
+
+    public void clearOtpVerification(String email) {
+        otpVerifiedMap.remove(email);
     }
 }

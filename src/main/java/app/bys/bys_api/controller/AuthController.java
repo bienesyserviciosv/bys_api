@@ -55,7 +55,7 @@ public class AuthController {
     public ResponseEntity<?> verifyEmail(@RequestParam String email, @RequestParam String otp) {
         try {
             authService.verifyEmail(email, otp);
-            return ResponseEntity.ok("Email verificado exitosamente");
+            return ResponseEntity.ok("Email verified successfully");
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of(

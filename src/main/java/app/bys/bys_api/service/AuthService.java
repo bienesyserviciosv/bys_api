@@ -162,6 +162,74 @@ public class AuthService {
         throw new UsernameNotFoundException("User not found");
     }
 
+    public void passwordRecovery(String email) {
+        if (!finalUserRepo.existsByEmail(email) && !serviceProviderRepo.existsByEmail(email)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessage.EM_ENTITY_NOT_FOUND);
+        }
+        handleEmailOtp(email);
+    }
+
+    public void resetPassword(String email, String password) {
+        if (!otpService.isOtpVerified(email)) {
+            throw new RuntimeException("OTP not verified");
+        }
+
+        otpService.clearOtpVerification(email);
+        otpService.restartResendAttempts(email);
+
+        if (finalUserRepo.existsByEmail(email)) {
+            FinalUser user = getUser(email);
+            user.setPassword(passwordEncoder.encode(password));
+            finalUserRepo.save(user);
+        } else if (serviceProviderRepo.existsByEmail(email)) {
+            ServiceProvider provider = getProvider(email);
+            provider.setPassword(passwordEncoder.encode(password));
+            serviceProviderRepo.save(provider);
+        }
+    }
+
+    public void changePassword(String email, ChangePasswordDto changePasswordDto) {
+
+        String currentPassword = changePasswordDto.getCurrentPassword();
+        String newPassword = changePasswordDto.getNewPassword();
+        String newPasswordRepeated = changePasswordDto.getNewPasswordRepeated();
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        if (!passwordEncoder.matches(currentPassword, userDetails.getPassword())) {
+            throw new IllegalArgumentException("The current password is not correct");
+        }
+
+        if (!Objects.equals(newPassword, newPasswordRepeated)) {
+            throw new IllegalArgumentException("The new passwords dont match");
+        }
+
+        if (finalUserRepo.existsByEmail(email)) {
+            FinalUser user = getUser(email);
+            user.setPassword(passwordEncoder.encode(newPassword));
+            finalUserRepo.save(user);
+        } else if (serviceProviderRepo.existsByEmail(email)) {
+            ServiceProvider provider = getProvider(email);
+            provider.setPassword(passwordEncoder.encode(newPassword));
+            serviceProviderRepo.save(provider);
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
+    public void verifyOtpForPasswordReset(String email, String otp) {
+        if (!otpService.validateOTP(email, otp)) {
+            throw new RuntimeException("OTP not valid");
+        }
+
+        if (!finalUserRepo.existsByEmail(email) && !serviceProviderRepo.existsByEmail(email)) {
+            throw new RuntimeException("Email not registered");
+        }
+
+        otpService.markOtpVerified(email);
+    }
+
+
     private FinalUser getUser(String identifier) {
         return identifier.contains("@")
                 ? finalUserRepo.findByEmail(identifier).orElseThrow(() -> new UsernameNotFoundException("Email not found"))
