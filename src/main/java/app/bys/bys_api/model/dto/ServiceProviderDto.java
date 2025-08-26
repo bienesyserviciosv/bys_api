@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
+import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
@@ -38,7 +39,7 @@ public class ServiceProviderDto {
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 8, groups = {OnCreate.class, OnUpdate.class})
-    @JsonProperty("phoneNumber")
+    @JsonProperty("phone_number")
     private String phoneNumber;
 
     @JsonProperty("address")
@@ -57,7 +58,7 @@ public class ServiceProviderDto {
     private Boolean verified = false;
 
     @Builder.Default
-    @JsonProperty("level")
+    @JsonProperty("membership_type")
     @Enumerated(EnumType.STRING)
     private MembershipType membershipType = MembershipType.NOT_VERIFIED;
 
@@ -77,5 +78,7 @@ public class ServiceProviderDto {
     @JsonProperty("qualification")
     private double qualification;
 
+    @JsonProperty(value = "roles", access = JsonProperty.Access.READ_ONLY)
+    private Set<Role> roles;
 
 }

@@ -49,7 +49,7 @@ public class ServiceRequestDto {
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private SpecializationDto specialization;
 
-    @JsonProperty("finalUser")
+    @JsonProperty("final_user")
     private FinalUserDto finalUser;
 
     @Builder.Default

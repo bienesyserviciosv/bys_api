@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
+import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +37,7 @@ public class FinalUserDto {
 
     @Size(min = 8, message = "The length must be greater than 8 char", groups = {OnCreate.class, OnUpdate.class})
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    @JsonProperty("phoneNumber")
+    @JsonProperty("phone_number")
     private String phoneNumber;
 
     @JsonProperty("registration_date")
@@ -45,4 +47,7 @@ public class FinalUserDto {
     @Size(min = 8, message = "The length must be greater than 8 char", groups = OnCreate.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    @JsonProperty(value = "roles", access = JsonProperty.Access.READ_ONLY)
+    private Set<Role> roles;
 }

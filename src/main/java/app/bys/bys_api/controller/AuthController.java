@@ -52,22 +52,15 @@ public class AuthController {
     private String googleClientId;
 
     @PostMapping("/final_user/register")
-    public ResponseEntity<Map<String, Object>> registerFinalUser(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
+    public ResponseEntity<FinalUserDto> registerFinalUser(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
         FinalUserDto userRegistered = authService.registerFinalUser(finalUserDto);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Final User register successfully");
-        response.put("user", userRegistered);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userRegistered);
     }
 
     @PostMapping("/service_provider/register")
-    public ResponseEntity<Map<String, Object>> registerServiceProvider(@Validated({OnCreate.class}) @RequestBody ServiceProviderDto serviceProviderDto) {
+    public ResponseEntity<ServiceProviderDto> registerServiceProvider(@Validated({OnCreate.class}) @RequestBody ServiceProviderDto serviceProviderDto) {
         ServiceProviderDto providerRegistered = authService.registerServiceProvider(serviceProviderDto);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Service Provider register successfully");
-        response.put("user", providerRegistered);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(providerRegistered);
     }
 
     @PostMapping("/admin/register")

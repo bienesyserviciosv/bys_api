@@ -17,7 +17,7 @@ public class SpecializationDto {
     @JsonProperty("id")
     private Long id;
 
-    @JsonProperty("specializationType")
+    @JsonProperty("specialization_type")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = {OnCreate.class, OnUpdate.class})
     private String specializationType;
 
