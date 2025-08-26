@@ -14,7 +14,7 @@ public class Offer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "price", nullable = false)
     private double price;
