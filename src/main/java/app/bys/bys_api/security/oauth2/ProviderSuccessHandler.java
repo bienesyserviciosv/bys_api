@@ -1,10 +1,8 @@
 package app.bys.bys_api.security.oauth2;
 
-import app.bys.bys_api.model.dto.AuthResponseDto;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.service.ServiceProviderService;
 import app.bys.bys_api.utils.JwtUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,9 +42,9 @@ public class ProviderSuccessHandler implements AuthenticationSuccessHandler {
         String jwt = jwtUtil.generateToken(provider.getEmail(), authorities);
 
         response.setContentType("application/json");
-        response.getWriter().write(new ObjectMapper().writeValueAsString(
-                new AuthResponseDto(jwt, provider.getEmail(), provider.getRoles()))
-        );
+//        response.getWriter().write(new ObjectMapper().writeValueAsString(
+//                new AuthResponseDto(jwt, provider.getEmail(), provider.getRoles()))
+//        );
     }
 
 }

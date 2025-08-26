@@ -280,7 +280,34 @@ public class AuthService {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
         String jwt = jwtUtil.generateToken(auth);
-        return ResponseEntity.ok(new AuthResponseDto(username, jwt, roles));
+        AuthResponseDto authResponseDto = new AuthResponseDto();
+        if (roles.stream().anyMatch(role -> role.getName().equals("ROLE_USER"))) {
+            FinalUser user = getUser(username);
+            authResponseDto = AuthResponseDto.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .token(jwt)
+                    .roles(user.getRoles())
+                    .name(user.getName())
+                    .phoneNumber(user.getPhoneNumber())
+                    .registrationDate(user.getRegistrationDate())
+                    .build();
+        }
+
+        if (roles.stream().anyMatch(role -> role.getName().equals("ROLE_PROVIDER"))) {
+            ServiceProvider user = getProvider(username);
+            authResponseDto = AuthResponseDto.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .token(jwt)
+                    .roles(user.getRoles())
+                    .name(user.getName())
+                    .phoneNumber(user.getPhoneNumber())
+                    .registrationDate(user.getRegistrationDate())
+                    .build();
+        }
+
+        return ResponseEntity.ok(authResponseDto);
     }
 
 
