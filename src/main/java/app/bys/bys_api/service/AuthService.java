@@ -185,7 +185,7 @@ public class AuthService {
         if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
             FinalUser user = getUser(identifier);
             if (!user.isEmailVerified()) throw new EmailNotVerifiedException("The email is not verified");
-            return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword());
+
             return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword(), user.getRoles());
         }
 
@@ -264,7 +264,6 @@ public class AuthService {
         otpService.markOtpVerified(email);
     }
 
-
     private FinalUser getUser(String identifier) {
         return identifier.contains("@")
                 ? finalUserRepo.findByEmail(identifier).orElseThrow(() -> new UsernameNotFoundException("Email not found"))
@@ -283,4 +282,6 @@ public class AuthService {
         String jwt = jwtUtil.generateToken(auth);
         return ResponseEntity.ok(new AuthResponseDto(username, jwt, roles));
     }
+
+
 }

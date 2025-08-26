@@ -8,6 +8,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.repository.FinalUserRepository;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -66,8 +68,35 @@ public class FinalUserService {
                     newUser.setRegistrationDate(LocalDateTime.now());
                     Role userRole = roleService.getOrCreateRole("ROLE_USER");
                     newUser.setRoles(Set.of(userRole));
+                    newUser.setRegistrationDate(LocalDateTime.now());
                     return finalUserRepository.save(newUser);
 
                 });
+    }
+
+    public FinalUser findOrCreateUserFromGoogle(GoogleIdToken.Payload payload){
+        String email = payload.getEmail();
+        Optional<FinalUser> existingUser = finalUserRepository.findByEmail(email);
+
+        if (existingUser.isPresent()) {
+            return existingUser.get();
+        }
+
+        FinalUser newUser = new FinalUser();
+        newUser.setEmail(email);
+
+        String name = (String) payload.get("name");
+        if (name == null || name.isBlank()) {
+            name = email.split("@")[0]; // o "Usuario sin nombre"
+        }
+        newUser.setName(name);
+
+        Role userRole = roleService.getOrCreateRole("ROLE_USER");
+        newUser.setRoles(Set.of(userRole));
+        newUser.setPassword("oauth2_dummy");
+        newUser.setRegistrationDate(LocalDateTime.now());
+//        newUser.setPictureUrl((String) payload.get("picture"));
+//        newUser.setProvider(AuthProvider.GOOGLE);
+        return finalUserRepository.save(newUser);
     }
 }

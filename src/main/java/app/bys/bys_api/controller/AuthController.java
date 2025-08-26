@@ -3,22 +3,35 @@ package app.bys.bys_api.controller;
 import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
+import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.service.AuthService;
+import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.service.OtpService;
+import app.bys.bys_api.utils.JwtUtil;
 import app.bys.bys_api.validation.OnCreate;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static app.bys.bys_api.service.OtpService.MAX_RESEND_ATTEMPTS;
 
@@ -29,9 +42,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final OtpService otpService;
+    private final FinalUserService finalUserService;
     private final FinalUserRepository finalUserRepo;
     private final ServiceProviderRepository serviceProviderRepo;
+    private final JwtUtil jwtUtil;
 
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
 
     @PostMapping("/final_user/register")
     public ResponseEntity<Map<String, Object>> registerFinalUser(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
@@ -145,4 +163,38 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<?> authenticateWithGoogle(@RequestBody GoogleAuthRequest request) {
+        try {
+            GoogleIdToken.Payload payload = verifyGoogleToken(request.getIdToken());
+
+            FinalUser user = finalUserService.findOrCreateUserFromGoogle(payload);
+
+            List<GrantedAuthority> authorities = user.getRoles().stream()
+                    .map(role -> new SimpleGrantedAuthority(role.getName()))
+                    .collect(Collectors.toList());
+
+            String jwt = jwtUtil.generateToken(user.getEmail(), authorities);
+
+            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    private GoogleIdToken.Payload verifyGoogleToken(String idTokenString) throws Exception {
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(),
+                new GsonFactory())
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+
+        GoogleIdToken idToken = verifier.verify(idTokenString);
+        if (idToken == null) {
+            throw new RuntimeException("Token inválido");
+        }
+
+        return idToken.getPayload();
+    }
 }

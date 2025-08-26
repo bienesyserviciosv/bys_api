@@ -45,7 +45,7 @@ public class ProviderSuccessHandler implements AuthenticationSuccessHandler {
 
         response.setContentType("application/json");
         response.getWriter().write(new ObjectMapper().writeValueAsString(
-                new AuthResponseDto(jwt, provider.getEmail()))
+                new AuthResponseDto(jwt, provider.getEmail(), provider.getRoles()))
         );
     }
 
