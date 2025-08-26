@@ -50,38 +50,26 @@ public class ServiceRequestController {
     //Crear solicitud con el id
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping("/user/{id}")
-    public ResponseEntity<Map<String, Object>> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
+    public ResponseEntity<ServiceRequestDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
 
         ServiceRequest serviceRequest = serviceRequestService.createWithId(id, serviceRequestDto);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
-        String message = notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
+        notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
 
-        ServiceRequestDto responseDto = serviceRequestMapper.entityToDto(serviceRequest);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("Service request created", responseDto);
-        response.put("message", message);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return new ResponseEntity<>(serviceRequestMapper.entityToDto(serviceRequest), HttpStatus.CREATED);
     }
 
     //Crear con authentication
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<Map<String, Object>> create(Authentication auth, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
+    public ResponseEntity<ServiceRequestDto> create(Authentication auth, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
         ServiceRequest serviceRequest = serviceRequestService.create(auth.getName(), serviceRequestDto);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
-        String message = notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
+        notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
 
-        ServiceRequestDto responseDto = serviceRequestMapper.entityToDto(serviceRequest);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("Service request created", responseDto);
-        response.put("message", message);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return new ResponseEntity<>(serviceRequestMapper.entityToDto(serviceRequest), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")

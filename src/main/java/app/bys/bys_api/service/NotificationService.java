@@ -12,6 +12,7 @@ import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -25,30 +26,33 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final ServiceProviderRepository serviceProviderRepository;
     private final NotificationMapper notificationMapper;
 
-    public String notifyProviders(Long specializationId, String address, ServiceRequest serviceRequest) {
+    public void notifyProviders(Long specializationId, String address, ServiceRequest serviceRequest) {
 
         List<ServiceProvider> providers = serviceProviderRepository.findByAddressAndSpecializations_Id(address, specializationId);
 
-        if (providers.isEmpty()) {
-            return "There are no providers with this conditions";
+        if (providers != null && !providers.isEmpty()) {
+            List<Notification> notifications = providers.stream()
+                    .map(provider -> Notification.builder()
+                            .recipient(provider)
+                            .message("Nueva solicitud disponible en tu zona")
+                            .read(false)
+                            .timestamp(LocalDateTime.now())
+                            .serviceRequest(serviceRequest)
+                            .build())
+                    .collect(Collectors.toList());
+
+            notificationRepository.saveAll(notifications);
+            log.info("{} notification created", notifications.size());
+        } else {
+            log.warn("No providers found with this conditions");
         }
-        for (ServiceProvider provider : providers) {
-            Notification notification = Notification.builder()
-                    .recipient(provider)
-                    .message("Nueva solicitud disponible en tu zona")
-                    .read(false)
-                    .timestamp(LocalDateTime.now())
-                    .serviceRequest(serviceRequest)
-                    .build();
-            notificationRepository.save(notification);
-        }
-            return "Notifications were sent";
     }
 
     public PageDto<NotificationDto> getNotifications(Pageable pageable, String search, List<Long> providerIdList) {
