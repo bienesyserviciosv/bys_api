@@ -1,0 +1,41 @@
+name: Deploy Bys API
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-develop:
+    name: Deploy develop
+    runs-on: ubuntu-latest
+    steps:
+#      - name: Notify start
+#        run: |
+#          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_DEVOPS_BOT_TOKEN }}/sendMessage \
+#          -d chat_id=${{ secrets.TELEGRAM_DEVOPS_CHAT_ID }} \
+#          -d message_thread_id=${{ secrets.TELEGRAM_DEVOPS_TOPIC_ID }} \
+#          -d text=$'🚀 Deploy en dev iniciado'
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: SSH to VPS and run commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/bys_api
+            git checkout develop
+            git pull
+            sudo docker-compose down
+            sudo docker-compose up -d --build
+
+#      - name: Notify start
+#        run: |
+#          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_DEVOPS_BOT_TOKEN }}/sendMessage \
+#          -d chat_id=${{ secrets.TELEGRAM_DEVOPS_CHAT_ID }} \
+#          -d message_thread_id=${{ secrets.TELEGRAM_DEVOPS_TOPIC_ID }} \
+#          -d text=$'✅ Deploy en dev finalizado!!! \n\n *Cambios:* Comming Soon...'

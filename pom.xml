@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>app.bys</groupId>
 	<artifactId>bys_api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>bys_api</name>
 	<description>API REST for ByS project</description>
 	<url/>
@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>23</java.version>
+		<java.version>21</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
