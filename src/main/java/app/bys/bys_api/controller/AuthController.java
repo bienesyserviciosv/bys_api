@@ -64,13 +64,9 @@ public class AuthController {
     }
 
     @PostMapping("/admin/register")
-    public ResponseEntity<Map<String, Object>> registerAdmin(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
+    public ResponseEntity<FinalUserDto> registerAdmin(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
         FinalUserDto userRegistered = authService.registerAdmin(finalUserDto);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Admin register successfully");
-        response.put("admin", userRegistered);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userRegistered);
     }
 
     @PostMapping("/login")
