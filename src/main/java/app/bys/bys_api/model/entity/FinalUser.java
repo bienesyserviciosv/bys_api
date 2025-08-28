@@ -47,7 +47,7 @@ public class FinalUser {
     @Column(name = "status")
     private UserStatus status;
 
-    @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<ServiceRequest> serviceRequest;
 
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = {CascadeType.MERGE, CascadeType.REFRESH})

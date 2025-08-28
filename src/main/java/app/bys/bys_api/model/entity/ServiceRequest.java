@@ -67,6 +67,6 @@ public class ServiceRequest {
     @OneToMany(fetch = FetchType.LAZY)
     private Set<Offer> offerSet;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest", cascade = CascadeType.REMOVE)
     private List<Notification> notificationList;
 }
