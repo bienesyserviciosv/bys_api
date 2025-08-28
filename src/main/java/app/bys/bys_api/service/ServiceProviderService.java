@@ -31,6 +31,11 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found")));
     }
 
+    public ServiceProviderDto getWithEmail(String email) {
+        return mapper.entityToDto(serviceProviderRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with email " + email+ " not found")));
+    }
+
     public PageDto<ServiceProviderDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address) {
         Specification<ServiceProvider> specializationSpec =
                 specializationList != null ? ServiceProviderSpecification.hasSpecialization(specializationList)
@@ -84,11 +89,26 @@ public class ServiceProviderService {
         return mapper.entityToDto(serviceProviderRepository.save(serviceProviderFound));
     }
 
+    public ServiceProviderDto updateByEmail(String email, ServiceProviderDto serviceProviderDto) {
+        ServiceProvider serviceProviderFound = serviceProviderRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with email " + email + " not found"));
+
+        mapper.updateServiceProviderFromDto(serviceProviderDto, serviceProviderFound);
+        return mapper.entityToDto(serviceProviderRepository.save(serviceProviderFound));
+    }
+
     public void delete(Long id) {
         if (!serviceProviderRepository.existsById(id)) {
             throw new EntityNotFoundException("Service provider with id " + id + " not found");
         }
         serviceProviderRepository.deleteById(id);
+    }
+
+    public void deleteByEmail(String email) {
+        if (!serviceProviderRepository.existsByEmail(email)) {
+            throw new EntityNotFoundException("Service provider with email " + email + " not found");
+        }
+        serviceProviderRepository.deleteByEmail(email);
     }
 
     public ServiceProvider findOrCreateProvider(String email, String name) {

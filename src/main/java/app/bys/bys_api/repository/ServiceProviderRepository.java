@@ -20,4 +20,5 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
      List<ServiceProvider> findByAddressAndSpecializations_Id(String address, Long specializationId);
 
+     void deleteByEmail(String email);
 }
