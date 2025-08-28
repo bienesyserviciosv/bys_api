@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/service_provider")
-@PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_ADMIN')")
+@PreAuthorize("hasAnyAuthority('ROLE_PROVIDER')")
 public class ServiceProviderController {
 
     private final ServiceProviderService serviceProviderService;

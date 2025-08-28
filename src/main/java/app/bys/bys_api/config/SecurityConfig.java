@@ -48,6 +48,8 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers("/auth/**", "/login/oauth2/**", "/oauth2/**").permitAll()
                                 .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/v3/api-docs*/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth

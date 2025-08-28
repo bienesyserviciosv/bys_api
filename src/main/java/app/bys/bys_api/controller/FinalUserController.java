@@ -1,13 +1,9 @@
 package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.FinalUserDto;
-import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.service.FinalUserService;
-import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
