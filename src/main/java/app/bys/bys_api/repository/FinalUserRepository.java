@@ -17,4 +17,6 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
     boolean existsByPhoneNumber(String phoneNumber);
 
     Optional<FinalUser> findByPhoneNumber(String phoneNumber);
+
+    void deleteByEmail(String email);
 }

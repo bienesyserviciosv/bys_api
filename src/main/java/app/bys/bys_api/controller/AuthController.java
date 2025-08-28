@@ -1,9 +1,9 @@
 package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.*;
+import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
-import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.service.AuthService;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.service.OtpService;
@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

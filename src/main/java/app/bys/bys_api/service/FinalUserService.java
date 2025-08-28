@@ -33,6 +33,11 @@ public class FinalUserService {
                 orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found")));
     }
 
+    public FinalUserDto getWithEmail(String email) {
+        return mapper.entityToDto(finalUserRepository.findByEmail(email).
+                orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found")));
+    }
+
     public PageDto<FinalUserDto> getAll(Pageable pageable) {
         return PageMapper.pageToDto(finalUserRepository.findAll(pageable).map(mapper::entityToDto));
     }
@@ -51,12 +56,27 @@ public class FinalUserService {
         return mapper.entityToDto(finalUserRepository.save(userFound));
     }
 
+    public FinalUserDto updateByEmail(String email, FinalUserDto finalUserDto) {
+        FinalUser userFound = finalUserRepository.findByEmail(email).
+                orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
+        mapper.updateFinalUserFromDto(finalUserDto, userFound);
+        return mapper.entityToDto(finalUserRepository.save(userFound));
+    }
+
     public void delete(Long id) {
         if (!finalUserRepository.existsById(id)) {
             throw new EntityNotFoundException("Final user with id: " + id + " not found");
         }
         finalUserRepository.deleteById(id);
     }
+
+    public void deleteByEmail(String email) {
+        if (!finalUserRepository.existsByEmail(email)) {
+            throw new EntityNotFoundException("Final user with email: " + email + " not found");
+        }
+        finalUserRepository.deleteByEmail(email);
+    }
+
 
     public FinalUser findOrCreateUser(String email, String name) {
         log.info("Recibido email: " + email + ", nombre: " + name);
