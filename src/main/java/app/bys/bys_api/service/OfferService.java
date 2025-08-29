@@ -32,7 +32,6 @@ public class OfferService {
 
     private final OfferRepository offerRepo;
     private final OfferMapper offerMapper;
-    private final ServiceProviderRepository serviceProviderRepo;
     private final ServiceRequestRepository serviceRequestRepo;
     private final FinalUserRepository finalUserRepo;
 
@@ -69,10 +68,7 @@ public class OfferService {
                 pageable).map(offerMapper::entityToDto));
     }
 
-    public OfferDto create(String email, OfferDto offerDto) {
-        ServiceProvider provider = serviceProviderRepo.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Provider with email: " + email + " not found"));
-
+    public OfferDto create(ServiceProvider provider, OfferDto offerDto) {
         Long requestId = offerDto.getServiceRequestId();
         ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));

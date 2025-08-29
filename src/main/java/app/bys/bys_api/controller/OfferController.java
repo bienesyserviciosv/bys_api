@@ -2,9 +2,12 @@ package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.OfferDto;
 import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.OfferService;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,7 +23,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/offer")
 public class OfferController {
+
     private final OfferService offerService;
+    private final ServiceProviderRepository serviceProviderRepo;
 
     @GetMapping("/{id}")
     public ResponseEntity<OfferDto> get(@PathVariable Long id) {
@@ -34,10 +39,13 @@ public class OfferController {
         return new ResponseEntity<>(offerService.getAll(pageable, search, providerIdList), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER')")
     @PostMapping
     public ResponseEntity<OfferDto> create(Authentication auth, @Validated(OnCreate.class) @RequestBody OfferDto offerDto) {
-        return new ResponseEntity<>(offerService.create(auth.getName(), offerDto), HttpStatus.CREATED);
+        String email = auth.getName();
+        ServiceProvider provider = serviceProviderRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Provider with email: " + email + " not found"));
+        return new ResponseEntity<>(offerService.create(provider, offerDto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
