@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs*/**").permitAll()
+                                .requestMatchers("/specialization").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
