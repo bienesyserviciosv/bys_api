@@ -37,7 +37,7 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found")));
     }
 
-    public PageDto<ServiceRequestDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList) {
+    public PageDto<ServiceRequestDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
         Specification<ServiceRequest> specializationSpec =
                 specializationList != null ? ServiceRequestSpecification.hasSpecialization(specializationList)
                         : null;
@@ -66,11 +66,16 @@ public class ServiceRequestService {
                 userList != null ? ServiceRequestSpecification.hasUser(userList)
                         : null;
 
+        Specification<ServiceRequest> providerSpec =
+                providerList != null ? ServiceRequestSpecification.hasProvider(providerList)
+                        : null;
+
         List<Specification<ServiceRequest>> specList = new ArrayList<>(Arrays.asList(
                 specializationSpec,
                 searchSpec,
                 addressSpec,
-                userSpec
+                userSpec,
+                providerSpec
         ));
 
         return PageMapper.pageToDto(serviceRequestRepository.findAll(

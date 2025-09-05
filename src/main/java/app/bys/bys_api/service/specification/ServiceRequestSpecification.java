@@ -1,6 +1,7 @@
 package app.bys.bys_api.service.specification;
 
 import app.bys.bys_api.model.entity.FinalUser;
+import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.entity.Specialization;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -47,13 +48,13 @@ public class ServiceRequestSpecification extends ASpecification<ServiceRequest> 
         };
     }
 
-    public static Specification<ServiceRequest> isArtist(Long userId) {
+    public static Specification<ServiceRequest> hasProvider(List<Long> providerIdList) {
         return (root, query, criteriaBuilder) -> {
             if (query != null) {
                 query.distinct(true);
             }
-            Join<ServiceRequest, FinalUser> userJoin = root.join("user", JoinType.LEFT);
-            return criteriaBuilder.in(userJoin.get("id")).value(userId);
+            Join<ServiceRequest, ServiceProvider> courses = root.join("serviceProvider");
+            return criteriaBuilder.in(courses.get("id")).value(providerIdList);
         };
     }
 

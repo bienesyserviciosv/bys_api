@@ -18,9 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,7 +27,6 @@ public class ServiceRequestController {
 
     private final ServiceRequestService serviceRequestService;
     private final NotificationService notificationService;
-    private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceRequestMapper serviceRequestMapper;
 
     @GetMapping("/{id}")
@@ -42,9 +39,10 @@ public class ServiceRequestController {
                                                              @RequestParam(name = "search", required = false) String search,
                                                              @RequestParam(name = "specialization", required = false) List<Long> specializationList,
                                                              @RequestParam(name = "address", required = false) String address,
-                                                             @RequestParam(name = "user", required = false) List<Long> userIdList
+                                                             @RequestParam(name = "user", required = false) List<Long> userIdList,
+                                                             @RequestParam(name = "provider", required = false) List<Long> providerIdList
     ) {
-        return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList), HttpStatus.OK);
+        return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
     }
 
     //Crear solicitud con el id
