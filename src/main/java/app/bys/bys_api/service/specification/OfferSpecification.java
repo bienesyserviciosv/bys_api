@@ -21,7 +21,7 @@ public class OfferSpecification extends ASpecification<Offer> {
                 builder.like(
                         builder.lower(
                                 root.get(
-                                        "name"
+                                        "description"
                                 )
                         ), "%" + ((String) criteria.getValue()).toLowerCase() + "%");
     }

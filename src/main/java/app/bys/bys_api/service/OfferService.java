@@ -32,6 +32,7 @@ public class OfferService {
     private final OfferMapper offerMapper;
     private final ServiceRequestRepository serviceRequestRepo;
     private final FinalUserRepository finalUserRepo;
+    private final ServiceProviderRepository serviceProviderRepo;
 
     public OfferDto get(Long id) {
         return offerMapper.entityToDto(offerRepo.findById(id)
@@ -47,7 +48,7 @@ public class OfferService {
         OfferSpecification searchSpec =
                 search != null ? new OfferSpecification(
                         new SearchCriteria(
-                                "name",
+                                "description",
                                 "s",
                                 search
                         )
