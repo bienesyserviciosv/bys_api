@@ -20,10 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,6 +112,15 @@ public class OfferService {
 
         offer.setFinalUser(finalUser);
         offer.setAccepted(true);
+
+        ServiceProvider serviceProvider = offer.getProvider();
+        Set<ServiceRequest> servRequestSet = serviceProvider.getServiceRequestSet();
+        ServiceRequest request = serviceRequestRepo.findById(offer.getServiceRequestId())
+                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found in this offer"));
+        servRequestSet.add(request);
+        request.setServiceProvider(serviceProvider);
+        serviceProviderRepo.save(serviceProvider);
+        serviceRequestRepo.save(request);
 
        /* MOVER ESTA LOGICA A CUANDO SE ACEPTA EL PAGO
         ServiceRequest serviceRequest = serviceRequestRepo.findById(offer.getServiceRequestId())
