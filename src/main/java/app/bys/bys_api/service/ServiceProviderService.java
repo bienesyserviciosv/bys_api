@@ -1,11 +1,14 @@
 package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.DuplicateEmailException;
+import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
+import app.bys.bys_api.mapper.SpecializationMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.specification.ServiceProviderSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +29,7 @@ public class ServiceProviderService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final ServiceProviderMapper mapper;
     private final RoleService roleService;
+    private final SpecializationMapper specializationMapper;
 
     public ServiceProviderDto get(Long id) {
         return mapper.entityToDto(serviceProviderRepository.findById(id)
@@ -78,7 +83,28 @@ public class ServiceProviderService {
         if (serviceProviderRepository.existsByEmail(serviceProviderDto.getEmail())) {
             throw new DuplicateEmailException("The email is already registered");
         }
-        return mapper.entityToDto(serviceProviderRepository.save(mapper.dtoToEntity(serviceProviderDto)));
+
+        if (serviceProviderRepository.existsByPhoneNumber(serviceProviderDto.getPhoneNumber())) {
+            throw new DuplicatePhoneException("The phone is already registered");
+        }
+
+
+        ServiceProvider provider = ServiceProvider.builder()
+                .name(serviceProviderDto.getName())
+                .email(serviceProviderDto.getEmail())
+                .phoneNumber(serviceProviderDto.getPhoneNumber())
+                .experience(serviceProviderDto.getExperience())
+                .specializations(specializationMapper.setDtoToEntitySet(serviceProviderDto.getSpecializations()))
+                .emailVerified(false)
+                .phoneVerified(false)
+                .membershipType(MembershipType.NOT_VERIFIED)
+                .verified(false)
+                .address(serviceProviderDto.getAddress())
+                .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
+                .registrationDate(LocalDateTime.now())
+                .build();
+
+        return mapper.entityToDto(serviceProviderRepository.save(provider));
     }
 
     public ServiceProviderDto update(Long id, ServiceProviderDto serviceProviderDto) {

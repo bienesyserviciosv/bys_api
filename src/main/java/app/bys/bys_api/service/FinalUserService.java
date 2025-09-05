@@ -1,6 +1,7 @@
 package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.DuplicateEmailException;
+import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.FinalUserDto;
@@ -46,7 +47,21 @@ public class FinalUserService {
         if (finalUserRepository.existsByEmail(finalUserDto.getEmail())) {
             throw new DuplicateEmailException("The email is already registered");
         }
-        return mapper.entityToDto(finalUserRepository.save(mapper.dtoToEntity(finalUserDto)));
+        if (finalUserRepository.existsByPhoneNumber(finalUserDto.getPhoneNumber())) {
+            throw new DuplicatePhoneException("The phone number is already registered");
+        }
+
+        FinalUser user = FinalUser.builder()
+                .name(finalUserDto.getName())
+                .email(finalUserDto.getEmail())
+                .phoneNumber(finalUserDto.getPhoneNumber())
+                .phoneVerified(false)
+                .emailVerified(false)
+                .roles(Set.of(roleService.getRoleOrThrow("ROLE_USER")))
+                .registrationDate(LocalDateTime.now())
+                .build();
+
+        return mapper.entityToDto(finalUserRepository.save(user));
     }
 
     public FinalUserDto update(Long id, FinalUserDto finalUserDto) {
