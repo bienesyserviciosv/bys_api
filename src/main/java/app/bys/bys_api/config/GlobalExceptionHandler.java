@@ -3,6 +3,7 @@ package app.bys.bys_api.config;
 import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.error.EmailNotVerifiedException;
+import app.bys.bys_api.error.UserAcceptingWrongOfferException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,4 +57,16 @@ public class GlobalExceptionHandler {
                         "timestamp", LocalDateTime.now()
                 ));
     }
+
+    @ExceptionHandler(UserAcceptingWrongOfferException.class)
+    public ResponseEntity<Map<String, Object>> handleUserAcceptingWrongOffer(UserAcceptingWrongOfferException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of(
+                        "message", ex.getMessage(),
+                        "error", "USER_ACCEPT_WRONG_OFFER",
+                        "timestamp", LocalDateTime.now()
+                ));
+    }
+
+
 }

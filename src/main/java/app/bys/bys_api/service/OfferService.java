@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.UserAcceptingWrongOfferException;
 import app.bys.bys_api.mapper.OfferMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.OfferDto;
@@ -110,6 +111,10 @@ public class OfferService {
         Offer offer = offerRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found"));
 
+        if (!isUserAuthorizedToAcceptThisOffer(finalUser, offer)) {
+            throw new UserAcceptingWrongOfferException("The user can only accept offers from requests they made");
+        }
+
         offer.setFinalUser(finalUser);
         offer.setAccepted(true);
 
@@ -130,5 +135,13 @@ public class OfferService {
         serviceRequestRepo.save(serviceRequest);*/
 
         return offerMapper.entityToDto(offerRepo.save(offer));
+    }
+
+    private boolean isUserAuthorizedToAcceptThisOffer(FinalUser finalUser, Offer offer) {
+        Long requestId = offer.getServiceRequestId();
+
+        return finalUser.getServiceRequest().stream()
+                .map(ServiceRequest::getId)
+                .anyMatch(id -> id.equals(requestId));
     }
 }
