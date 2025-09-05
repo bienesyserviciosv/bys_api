@@ -39,11 +39,16 @@ public class OfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found")));
     }
 
-    public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList) {
+    public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList, Long serviceRequestId) {
 
         Specification<Offer> providerSpec =
                 providerIdList != null ? OfferSpecification.hasProvider(providerIdList)
                         : null;
+
+        Specification<Offer> serviceRequestSpec =
+                serviceRequestId != null ? OfferSpecification.hasServiceRequestId(serviceRequestId)
+                        : null;
+
 
         OfferSpecification searchSpec =
                 search != null ? new OfferSpecification(
@@ -57,6 +62,7 @@ public class OfferService {
 
         List<Specification<Offer>> specList = new ArrayList<>(Arrays.asList(
                 providerSpec,
+                serviceRequestSpec,
                 searchSpec
         ));
 

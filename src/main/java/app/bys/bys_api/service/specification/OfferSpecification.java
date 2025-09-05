@@ -35,4 +35,14 @@ public class OfferSpecification extends ASpecification<Offer> {
             return criteriaBuilder.in(courses.get("id")).value(providerIdList);
         };
     }
+
+    public static Specification<Offer> hasServiceRequestId(Long serviceRequestId) {
+        return (root, query, criteriaBuilder) -> {
+            if (serviceRequestId == null) {
+                return criteriaBuilder.conjunction(); // No filtrar si no hay ID de solicitud
+            }
+            return criteriaBuilder.equal(root.get("serviceRequestId"), serviceRequestId);
+        };
+    }
+
 }

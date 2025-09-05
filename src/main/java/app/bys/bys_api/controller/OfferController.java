@@ -35,8 +35,9 @@ public class OfferController {
     @GetMapping
     public ResponseEntity<PageDto<OfferDto>> getAll(Pageable pageable,
                                                     @RequestParam(name = "search", required = false) String search,
-                                                    @RequestParam(name = "provider", required = false) List<Long> providerIdList) {
-        return new ResponseEntity<>(offerService.getAll(pageable, search, providerIdList), HttpStatus.OK);
+                                                    @RequestParam(name = "provider", required = false) List<Long> providerIdList,
+                                                    @RequestParam(name = "service_request_id", required = false) Long serviceRequestId) {
+        return new ResponseEntity<>(offerService.getAll(pageable, search, providerIdList, serviceRequestId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER')")
