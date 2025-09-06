@@ -18,6 +18,12 @@ public class ServiceProviderController {
 
     private final ServiceProviderService serviceProviderService;
 
+    @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_USER', 'ROLE_ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<ServiceProviderDto> get(@PathVariable Long id) {
+        return ResponseEntity.ok(serviceProviderService.get(id));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<ServiceProviderDto> getOwnProfile(Authentication authentication) {
         return ResponseEntity.ok(serviceProviderService.getWithEmail(authentication.getName()));

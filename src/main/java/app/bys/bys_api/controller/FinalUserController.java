@@ -18,6 +18,12 @@ public class FinalUserController {
 
     private final FinalUserService finalUserService;
 
+    @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_USER', 'ROLE_ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<FinalUserDto> get(@PathVariable Long id) {
+        return ResponseEntity.ok(finalUserService.get(id));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<FinalUserDto> getOwnProfile(Authentication authentication) {
         return ResponseEntity.ok(finalUserService.getWithEmail(authentication.getName()));
