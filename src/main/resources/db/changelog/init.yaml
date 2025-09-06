@@ -1,0 +1,749 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1757195503039-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: final_user_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: notification_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-3
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: offer_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-4
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: picture_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-5
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: role_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-6
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: service_provider_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-7
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: service_request_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-8
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 1
+            sequenceName: specialization_id_seq
+            startValue: 1
+  - changeSet:
+      id: 1757195503039-9
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: final_user_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: email
+                  type: VARCHAR(255)
+              - column:
+                  name: email_verified
+                  type: BOOLEAN
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  name: phone_number
+                  type: VARCHAR(255)
+              - column:
+                  name: phone_verified
+                  type: BOOLEAN
+              - column:
+                  name: registration_time
+                  type: timestamp
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+            tableName: final_user
+  - changeSet:
+      id: 1757195503039-10
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: final_users_roles_pkey
+                  name: final_user_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: final_users_roles_pkey
+                  name: role_id
+                  type: BIGINT
+            tableName: final_users_roles
+  - changeSet:
+      id: 1757195503039-11
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: notification_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: message
+                  type: VARCHAR(255)
+              - column:
+                  name: read
+                  type: BOOLEAN
+              - column:
+                  name: timestamp
+                  type: timestamp
+              - column:
+                  name: service_provider_id
+                  type: BIGINT
+              - column:
+                  name: service_request_id
+                  type: BIGINT
+            tableName: notification
+  - changeSet:
+      id: 1757195503039-12
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: offer_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: accepted
+                  type: BOOLEAN
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: duration
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: price
+                  type: DOUBLE precision
+              - column:
+                  constraints:
+                    nullable: false
+                  name: service_request_id
+                  type: BIGINT
+              - column:
+                  name: final_user_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: provider_id
+                  type: BIGINT
+            tableName: offer
+  - changeSet:
+      id: 1757195503039-13
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: picture_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: path
+                  type: VARCHAR(255)
+              - column:
+                  name: service_provider_id
+                  type: BIGINT
+              - column:
+                  name: service_request_id
+                  type: BIGINT
+            tableName: picture
+  - changeSet:
+      id: 1757195503039-14
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: provider_specialization_pkey
+                  name: provider_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: provider_specialization_pkey
+                  name: specialization_id
+                  type: BIGINT
+            tableName: provider_specialization
+  - changeSet:
+      id: 1757195503039-15
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: role_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+            tableName: role
+  - changeSet:
+      id: 1757195503039-16
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: service_provider_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: address
+                  type: VARCHAR(255)
+              - column:
+                  name: completed_services
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: email
+                  type: VARCHAR(255)
+              - column:
+                  name: email_verified
+                  type: BOOLEAN
+              - column:
+                  name: experience
+                  type: VARCHAR(255)
+              - column:
+                  name: latitude
+                  type: VARCHAR(255)
+              - column:
+                  name: longitude
+                  type: VARCHAR(255)
+              - column:
+                  name: level
+                  type: SMALLINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: phone_number
+                  type: VARCHAR(255)
+              - column:
+                  name: phone_verified
+                  type: BOOLEAN
+              - column:
+                  name: qualification
+                  type: DOUBLE precision
+              - column:
+                  name: registration_time
+                  type: timestamp
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+              - column:
+                  name: verified
+                  type: BOOLEAN
+              - column:
+                  name: profile_picture_id
+                  type: BIGINT
+            tableName: service_provider
+  - changeSet:
+      id: 1757195503039-17
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: service_provider_roles_pkey
+                  name: service_provider_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: service_provider_roles_pkey
+                  name: role_id
+                  type: BIGINT
+            tableName: service_provider_roles
+  - changeSet:
+      id: 1757195503039-18
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: service_request_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: address
+                  type: VARCHAR(255)
+              - column:
+                  name: date
+                  type: date
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: latitude
+                  type: VARCHAR(255)
+              - column:
+                  name: longitude
+                  type: VARCHAR(255)
+              - column:
+                  name: new_offer
+                  type: BOOLEAN
+              - column:
+                  name: offer_quantity
+                  type: INT
+              - column:
+                  name: request_status
+                  type: SMALLINT
+              - column:
+                  name: time
+                  type: time
+              - column:
+                  name: final_user_id
+                  type: BIGINT
+              - column:
+                  name: service_provider_id
+                  type: BIGINT
+              - column:
+                  name: specialization_id
+                  type: BIGINT
+            tableName: service_request
+  - changeSet:
+      id: 1757195503039-19
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: service_request_offer_set_pkey
+                  name: service_request_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: service_request_offer_set_pkey
+                  name: offer_set_id
+                  type: BIGINT
+            tableName: service_request_offer_set
+  - changeSet:
+      id: 1757195503039-20
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: specialization_pkey
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: specialization_type
+                  type: VARCHAR(255)
+            tableName: specialization
+  - changeSet:
+      id: 1757195503039-21
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: offer_set_id
+            constraintName: uk5kaf5r1f8u5dtb5wolgd0uuig
+            tableName: service_request_offer_set
+  - changeSet:
+      id: 1757195503039-22
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: phone_number
+            constraintName: uk8dmk817aa6gpoeby6ujfrj2u1
+            tableName: final_user
+  - changeSet:
+      id: 1757195503039-23
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: profile_picture_id
+            constraintName: uk93bb80rb9ych67nqqj4g3cldf
+            tableName: service_provider
+  - changeSet:
+      id: 1757195503039-24
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: email
+            constraintName: ukb5vlr6244u7sk4euj6yykexk4
+            tableName: service_provider
+  - changeSet:
+      id: 1757195503039-25
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: specialization_type
+            constraintName: ukfdcect78y8s5a3xbfsjh517le
+            tableName: specialization
+  - changeSet:
+      id: 1757195503039-26
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: email
+            constraintName: ukk8fmpx0hg8um3wpjwou034y06
+            tableName: final_user
+  - changeSet:
+      id: 1757195503039-27
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: phone_number
+            constraintName: ukq8kuxod1xtgjeuv4th6o392nj
+            tableName: service_provider
+  - changeSet:
+      id: 1757195503039-28
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: specialization_id
+            baseTableName: service_request
+            constraintName: fk2efy6bxcqdk5m01rrn8se7ivm
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: specialization
+  - changeSet:
+      id: 1757195503039-29
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: profile_picture_id
+            baseTableName: service_provider
+            constraintName: fk5qspapngek4b31feq0cuw16yt
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: picture
+  - changeSet:
+      id: 1757195503039-30
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: final_user_id
+            baseTableName: service_request
+            constraintName: fk7xtc8oqyva9s1olc508y7lrw
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: final_user
+  - changeSet:
+      id: 1757195503039-31
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_request_id
+            baseTableName: service_request_offer_set
+            constraintName: fk8mnfe50xx04ygcbb2e3gteon5
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_request
+  - changeSet:
+      id: 1757195503039-32
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_provider_id
+            baseTableName: picture
+            constraintName: fk9hhe2g7x915l4i5iomj3uydol
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_provider
+  - changeSet:
+      id: 1757195503039-33
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: specialization_id
+            baseTableName: provider_specialization
+            constraintName: fkav936ia39le3bhal1yaiu42oc
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: specialization
+  - changeSet:
+      id: 1757195503039-34
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: provider_id
+            baseTableName: provider_specialization
+            constraintName: fkawy521e30iw6u16njqrdewsl7
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_provider
+  - changeSet:
+      id: 1757195503039-35
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_request_id
+            baseTableName: notification
+            constraintName: fkcyw9tp3b9v3mgt8y1g8ht2384
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_request
+  - changeSet:
+      id: 1757195503039-36
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_provider_id
+            baseTableName: notification
+            constraintName: fkeemmsu5f01d28gdskoj0w2po0
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_provider
+  - changeSet:
+      id: 1757195503039-37
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: final_user_id
+            baseTableName: final_users_roles
+            constraintName: fkfmme3helodly5ct43pv40r7m5
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: final_user
+  - changeSet:
+      id: 1757195503039-38
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_request_id
+            baseTableName: picture
+            constraintName: fkgq3cc85tc0g89nh8fvvc1ux6u
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_request
+  - changeSet:
+      id: 1757195503039-39
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_provider_id
+            baseTableName: service_provider_roles
+            constraintName: fkjt36p5dqueinsq4iqt0oyayav
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_provider
+  - changeSet:
+      id: 1757195503039-40
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: role_id
+            baseTableName: service_provider_roles
+            constraintName: fkmgtsqgdaeqnnkqcj31c1qihh6
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: role
+  - changeSet:
+      id: 1757195503039-41
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: role_id
+            baseTableName: final_users_roles
+            constraintName: fko84cfl7wfd8919wisajxs0prx
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: role
+  - changeSet:
+      id: 1757195503039-42
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: offer_set_id
+            baseTableName: service_request_offer_set
+            constraintName: fkpjc5aowpq58n9kj0wpil1p3gy
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: offer
+  - changeSet:
+      id: 1757195503039-43
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: final_user_id
+            baseTableName: offer
+            constraintName: fkqbpouu7bistrkpw7d0nms8w0x
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: final_user
+  - changeSet:
+      id: 1757195503039-44
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: provider_id
+            baseTableName: offer
+            constraintName: fkqi4c08tdwc0ph0fqmm8rbjfa4
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_provider
+  - changeSet:
+      id: 1757195503039-45
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_provider_id
+            baseTableName: service_request
+            constraintName: fkt5plgwj337sh3amph973eu5j7
+            onDelete: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: service_provider
+
