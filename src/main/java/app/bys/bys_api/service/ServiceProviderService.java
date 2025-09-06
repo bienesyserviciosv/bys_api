@@ -7,29 +7,39 @@ import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.mapper.SpecializationMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
+import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.repository.MediaRepository;
+import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.specification.ServiceProviderSpecification;
+import app.bys.bys_api.utils.MediaConstants;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ServiceProviderService {
 
     private final ServiceProviderRepository serviceProviderRepository;
     private final ServiceProviderMapper mapper;
     private final RoleService roleService;
     private final SpecializationMapper specializationMapper;
+    private final MediaRepository mediaRepository;
+    private final PictureRepository pictureRepository;
 
     public ServiceProviderDto get(Long id) {
         return mapper.entityToDto(serviceProviderRepository.findById(id)
@@ -79,7 +89,7 @@ public class ServiceProviderService {
                 pageable).map(mapper::entityToDto));
     }
 
-    public ServiceProviderDto create(ServiceProviderDto serviceProviderDto) {
+    public ServiceProviderDto create(ServiceProviderDto serviceProviderDto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {
         if (serviceProviderRepository.existsByEmail(serviceProviderDto.getEmail())) {
             throw new DuplicateEmailException("The email is already registered");
         }
@@ -104,7 +114,9 @@ public class ServiceProviderService {
                 .registrationDate(LocalDateTime.now())
                 .build();
 
-        return mapper.entityToDto(serviceProviderRepository.save(provider));
+        ServiceProvider providerSaved = serviceProviderRepository.save(provider);
+        uploadPictureSet(workPictureSet, profilePicture, providerSaved);
+        return mapper.entityToDto(providerSaved);
     }
 
     public ServiceProviderDto update(Long id, ServiceProviderDto serviceProviderDto) {
@@ -149,4 +161,39 @@ public class ServiceProviderService {
 
         return serviceProviderRepository.save(newProvider);
     }
+
+
+    public void uploadPictureSet(MultipartFile[] workPictureList, MultipartFile profilePicture, ServiceProvider serviceProvider) {
+        if (profilePicture != null) {
+            Picture picture = new Picture();
+            picture.setServiceProvider(serviceProvider);
+            String url = uploadImage(profilePicture);
+            picture.setUrl(url);
+            serviceProvider.setProfilePicture(url);
+            pictureRepository.save(picture);
+        }
+        if (workPictureList != null) {
+            Arrays.stream(workPictureList).forEach(file -> {
+                Picture picture = new Picture();
+                picture.setServiceProvider(serviceProvider);
+                picture.setUrl(uploadImage(file));
+                serviceProvider.getWorkPictureSet().add(picture);
+                pictureRepository.save(picture);
+            });
+        }
+    }
+
+    public String uploadImage(MultipartFile image) {
+        if (image != null) {
+            String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
+            try {
+                mediaRepository.saveImage(imageName, image);
+                return imageName;
+            } catch (IOException exception) {
+                throw new RuntimeException("Error happened uploading the images: " + exception.getMessage());
+            }
+        }
+        return null;
+    }
+
 }

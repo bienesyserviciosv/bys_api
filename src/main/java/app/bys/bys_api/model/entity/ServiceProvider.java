@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -83,12 +83,12 @@ public class ServiceProvider {
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.LAZY)
     private Set<ServiceRequest> serviceRequestSet;
 
-    @OneToOne
-    @JoinColumn(name = "profile_picture_id")
-    private Picture profilePicture;
+    @Column(name = "profile_picture")
+    private String profilePicture;
 
+    @Builder.Default
     @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Picture> workPictureSet;
+    private Set<Picture> workPictureSet = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.PERSIST)
     @JoinTable(name = "service_provider_roles",
@@ -96,10 +96,10 @@ public class ServiceProvider {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "provider")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "provider", cascade = CascadeType.REMOVE)
     private Set<Offer> offerSet;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "recipient")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "recipient", cascade = CascadeType.REMOVE)
     private Set<Notification> notificationSet;
 
 }

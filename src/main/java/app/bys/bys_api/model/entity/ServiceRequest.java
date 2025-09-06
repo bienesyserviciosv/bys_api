@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,8 +54,9 @@ public class ServiceRequest {
     @JoinColumn(name = "specialization_id")
     private Specialization specialization;
 
-    @OneToMany(mappedBy = "serviceRequest",fetch = FetchType.LAZY)
-    private Set<Picture> pictureSet;
+    @Builder.Default
+    @OneToMany(mappedBy = "serviceRequest",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Picture> pictureSet =  new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "final_user_id")
@@ -64,8 +66,8 @@ public class ServiceRequest {
     @JoinColumn(name = "service_provider_id")
     private ServiceProvider serviceProvider;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    private Set<Offer> offerSet;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private Set<Offer> offerSet =  new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest", cascade = CascadeType.REMOVE)
     private List<Notification> notificationList;

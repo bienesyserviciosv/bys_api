@@ -24,6 +24,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -57,8 +58,10 @@ public class AuthController {
     }
 
     @PostMapping("/service_provider/register")
-    public ResponseEntity<ServiceProviderDto> registerServiceProvider(@Validated({OnCreate.class}) @RequestBody ServiceProviderDto serviceProviderDto) {
-        ServiceProviderDto providerRegistered = authService.registerServiceProvider(serviceProviderDto);
+    public ResponseEntity<ServiceProviderDto> registerServiceProvider(@Validated({OnCreate.class}) @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
+                                                                      @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
+                                                                      @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet) {
+        ServiceProviderDto providerRegistered = authService.registerServiceProvider(serviceProviderDto, profilePicture, workPictureSet);
         return ResponseEntity.status(HttpStatus.CREATED).body(providerRegistered);
     }
 

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/admin/service_provider")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-public class AdminServiceProvider {
+public class AdminServiceProviderController {
 
     private final ServiceProviderService serviceProviderService;
 
@@ -37,8 +38,12 @@ public class AdminServiceProvider {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceProviderDto> create(@Validated(OnCreate.class) @RequestBody ServiceProviderDto serviceProviderDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(serviceProviderService.create(serviceProviderDto));
+    public ResponseEntity<ServiceProviderDto> create(@Validated(OnCreate.class)
+                                                        @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
+                                                        @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
+                                                        @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet)
+    {
+        return ResponseEntity.status(HttpStatus.CREATED).body(serviceProviderService.create(serviceProviderDto, profilePicture, workPictureSet));
     }
 
     @PatchMapping("/{id}")

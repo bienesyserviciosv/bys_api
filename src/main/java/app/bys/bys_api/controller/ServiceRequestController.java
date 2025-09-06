@@ -4,7 +4,6 @@ import app.bys.bys_api.mapper.ServiceRequestMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceRequestDto;
 import app.bys.bys_api.model.entity.ServiceRequest;
-import app.bys.bys_api.repository.ServiceRequestRepository;
 import app.bys.bys_api.service.NotificationService;
 import app.bys.bys_api.service.ServiceRequestService;
 import app.bys.bys_api.validation.OnCreate;
@@ -12,11 +11,13 @@ import app.bys.bys_api.validation.OnUpdate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class ServiceRequestController {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
     }
 
-    //Crear solicitud con el id
+    //Crear solicitud con el id del usuario
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping("/user/{id}")
     public ResponseEntity<ServiceRequestDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
@@ -60,9 +61,12 @@ public class ServiceRequestController {
 
     //Crear con authentication
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
-    @PostMapping
-    public ResponseEntity<ServiceRequestDto> create(Authentication auth, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
-        ServiceRequest serviceRequest = serviceRequestService.create(auth.getName(), serviceRequestDto);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ServiceRequestDto> create(Authentication auth,
+                                                    @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
+                                                    @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
+
+        ServiceRequest serviceRequest = serviceRequestService.create(auth.getName(), serviceRequestDto, files);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
         notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
@@ -81,20 +85,3 @@ public class ServiceRequestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
-
-/*  public ResponseEntity<ServiceRequestDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
-
-        ServiceRequest serviceRequest = serviceRequestService.createWithId(id, serviceRequestDto);
-
-        Long specializationId = serviceRequestDto.getSpecialization().getId();
-        notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
-
-        ServiceRequestDto responseDto = serviceRequestMapper.entityToDto(serviceRequest);
-
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("Service request", requestDto);
-//        response.put("message", message);
-
-        //return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-    }*/

@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -47,6 +48,7 @@ public class AuthService {
     private final ServiceProviderMapper serviceProviderMapper;
     private final OtpService otpService;
     private final UserDetailsService userDetailsService;
+    private final ServiceProviderService serviceProviderService;
 
     public FinalUserDto registerFinalUser(FinalUserDto dto) {
 
@@ -79,7 +81,7 @@ public class AuthService {
         return userMapper.entityToDto(finalUserRepo.save(user));
     }
 
-    public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto) {
+    public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (serviceProviderRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
@@ -112,7 +114,9 @@ public class AuthService {
                 .registrationDate(LocalDateTime.now())
                 .build();
 
-        return serviceProviderMapper.entityToDto(serviceProviderRepo.save(provider));
+        ServiceProvider savedProvider = serviceProviderRepo.save(provider);
+        serviceProviderService.uploadPictureSet(workPictureSet, profilePicture, savedProvider);
+        return serviceProviderMapper.entityToDto(savedProvider);
     }
 
     //TODO COMPLETE METHOD
@@ -309,6 +313,4 @@ public class AuthService {
 
         return ResponseEntity.ok(authResponseDto);
     }
-
-
 }
