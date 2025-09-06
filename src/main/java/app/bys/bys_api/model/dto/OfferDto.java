@@ -39,6 +39,9 @@ public class OfferDto {
     @JsonProperty("service_request_id")
     private Long serviceRequestId;
 
+    @JsonProperty(value = "provider_id", access = JsonProperty.Access.READ_ONLY)
+    private Long providerId;
+
     @JsonProperty("accepted")
     private Boolean accepted = false;
 
