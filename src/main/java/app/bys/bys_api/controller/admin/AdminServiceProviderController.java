@@ -2,6 +2,7 @@ package app.bys.bys_api.controller.admin;
 
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
+import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.service.ServiceProviderService;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
@@ -25,7 +26,7 @@ public class AdminServiceProviderController {
     private final ServiceProviderService serviceProviderService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceProviderDto> get(@PathVariable Long id) {
+    public ResponseEntity<ServiceProviderWithPictureDto> get(@PathVariable Long id) {
         return ResponseEntity.ok(serviceProviderService.get(id));
     }
 
@@ -38,7 +39,7 @@ public class AdminServiceProviderController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceProviderDto> create(@Validated(OnCreate.class)
+    public ResponseEntity<ServiceProviderWithPictureDto> create(@Validated(OnCreate.class)
                                                         @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
                                                         @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
                                                         @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet)

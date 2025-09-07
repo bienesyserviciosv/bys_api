@@ -39,8 +39,8 @@ public class ServiceRequestService {
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
 
-    public ServiceRequestDto get(Long id) {
-        return requestMapper.entityToDto(serviceRequestRepository.findById(id)
+    public ServiceRequestWithPictureDto get(Long id) {
+        return requestMapper.entityToDtoWithPicture(serviceRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found")));
     }
 

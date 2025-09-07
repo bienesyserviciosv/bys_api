@@ -3,6 +3,7 @@ package app.bys.bys_api.controller;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceRequestDto;
+import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.service.NotificationService;
 import app.bys.bys_api.service.ServiceRequestService;
@@ -31,7 +32,7 @@ public class ServiceRequestController {
     private final ServiceRequestMapper serviceRequestMapper;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceRequestDto> get(@PathVariable Long id) {
+    public ResponseEntity<ServiceRequestWithPictureDto> get(@PathVariable Long id) {
         return new ResponseEntity<>(serviceRequestService.get(id), HttpStatus.OK);
     }
 
@@ -62,7 +63,7 @@ public class ServiceRequestController {
     //Crear con authentication
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ServiceRequestDto> create(Authentication auth,
+    public ResponseEntity<ServiceRequestWithPictureDto> create(Authentication auth,
                                                     @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
                                                     @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
 
@@ -71,7 +72,7 @@ public class ServiceRequestController {
         Long specializationId = serviceRequestDto.getSpecialization().getId();
         notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
 
-        return new ResponseEntity<>(serviceRequestMapper.entityToDto(serviceRequest), HttpStatus.CREATED);
+        return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")

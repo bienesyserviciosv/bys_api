@@ -58,10 +58,10 @@ public class AuthController {
     }
 
     @PostMapping("/service_provider/register")
-    public ResponseEntity<ServiceProviderDto> registerServiceProvider(@Validated({OnCreate.class}) @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
+    public ResponseEntity<ServiceProviderWithPictureDto> registerServiceProvider(@Validated({OnCreate.class}) @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
                                                                       @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
                                                                       @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet) {
-        ServiceProviderDto providerRegistered = authService.registerServiceProvider(serviceProviderDto, profilePicture, workPictureSet);
+        ServiceProviderWithPictureDto providerRegistered = authService.registerServiceProvider(serviceProviderDto, profilePicture, workPictureSet);
         return ResponseEntity.status(HttpStatus.CREATED).body(providerRegistered);
     }
 

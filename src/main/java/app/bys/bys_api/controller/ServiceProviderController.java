@@ -1,6 +1,7 @@
 package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.ServiceProviderDto;
+import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.service.ServiceProviderService;
 import app.bys.bys_api.validation.OnUpdate;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +21,12 @@ public class ServiceProviderController {
 
     @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceProviderDto> get(@PathVariable Long id) {
+    public ResponseEntity<ServiceProviderWithPictureDto> get(@PathVariable Long id) {
         return ResponseEntity.ok(serviceProviderService.get(id));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ServiceProviderDto> getOwnProfile(Authentication authentication) {
+    public ResponseEntity<ServiceProviderWithPictureDto> getOwnProfile(Authentication authentication) {
         return ResponseEntity.ok(serviceProviderService.getWithEmail(authentication.getName()));
     }
 

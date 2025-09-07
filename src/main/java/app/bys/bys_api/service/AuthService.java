@@ -81,7 +81,7 @@ public class AuthService {
         return userMapper.entityToDto(finalUserRepo.save(user));
     }
 
-    public ServiceProviderDto registerServiceProvider(ServiceProviderDto dto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {
+    public ServiceProviderWithPictureDto registerServiceProvider(ServiceProviderDto dto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (serviceProviderRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
@@ -116,7 +116,7 @@ public class AuthService {
 
         ServiceProvider savedProvider = serviceProviderRepo.save(provider);
         serviceProviderService.uploadPictureSet(workPictureSet, profilePicture, savedProvider);
-        return serviceProviderMapper.entityToDto(savedProvider);
+        return serviceProviderMapper.entityToDtoWithPicture(savedProvider);
     }
 
     //TODO COMPLETE METHOD
