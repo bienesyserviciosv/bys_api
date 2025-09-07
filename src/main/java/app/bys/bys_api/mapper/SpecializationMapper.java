@@ -20,4 +20,6 @@ public interface SpecializationMapper {
     void updateSpecializationFromDto(SpecializationDto specializationDto, @MappingTarget Specialization specialization);
 
     Set<Specialization> setDtoToEntitySet(Set<SpecializationDto> specializationDtos);
+
+    Set<SpecializationDto> setEntityToDtoSet(Set<Specialization> specializations);
 }

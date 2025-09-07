@@ -5,6 +5,7 @@ import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceRequestDto;
+import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
@@ -92,11 +93,18 @@ public class ServiceRequestService {
                 pageable).map(requestMapper::entityToDto));
     }
 
-    public ServiceRequest createWithId(Long id, ServiceRequestDto serviceRequestDto) {
+    public ServiceRequest createWithId(Long id, ServiceRequestDto serviceRequestDto, MultipartFile[] files) {
         FinalUser finalUser = finalUserRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found"));
+
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
-        return serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
+        ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
+
+        if (serviceRequest.getPictureSet() == null) {
+            throw new IllegalStateException("pictureSet no fue inicializado");
+        }
+        uploadPictureSet(files, serviceRequest);
+        return serviceRequest;
     }
 
 

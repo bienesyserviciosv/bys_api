@@ -50,14 +50,15 @@ public class ServiceRequestController {
     //Crear solicitud con el id del usuario
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping("/user/{id}")
-    public ResponseEntity<ServiceRequestDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestBody ServiceRequestDto serviceRequestDto) {
+    public ResponseEntity<ServiceRequestWithPictureDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
+                                                    @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
 
-        ServiceRequest serviceRequest = serviceRequestService.createWithId(id, serviceRequestDto);
+        ServiceRequest serviceRequest = serviceRequestService.createWithId(id, serviceRequestDto, files);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
         notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
 
-        return new ResponseEntity<>(serviceRequestMapper.entityToDto(serviceRequest), HttpStatus.CREATED);
+        return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
     }
 
     //Crear con authentication

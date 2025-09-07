@@ -78,6 +78,9 @@ public class ServiceProviderDto {
     @JsonProperty("qualification")
     private double qualification;
 
+    @JsonProperty("profile_picture")
+    private String profilePicture;
+
     @JsonProperty(value = "roles", access = JsonProperty.Access.READ_ONLY)
     private Set<Role> roles;
 
