@@ -27,5 +27,7 @@ public class Picture {
     @JoinColumn(name = "service_provider_id")
     private ServiceProvider serviceProvider;
 
-
+    @OneToOne
+    @JoinColumn(name = "final_user_id")
+    private FinalUser finalUser;
 }

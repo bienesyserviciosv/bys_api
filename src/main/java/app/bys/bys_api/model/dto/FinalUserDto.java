@@ -48,6 +48,9 @@ public class FinalUserDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @JsonProperty("profile_picture")
+    private String profilePicture;
+
     @JsonProperty(value = "roles", access = JsonProperty.Access.READ_ONLY)
     private Set<Role> roles;
 }

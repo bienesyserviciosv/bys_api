@@ -47,6 +47,9 @@ public class FinalUser {
     @Column(name = "status")
     private UserStatus status;
 
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
     @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<ServiceRequest> serviceRequest;
 
