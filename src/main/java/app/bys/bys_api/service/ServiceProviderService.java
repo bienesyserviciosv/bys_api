@@ -52,7 +52,7 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException("Service provider with email " + email + " not found")));
     }
 
-    public PageDto<ServiceProviderDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address) {
+    public PageDto<ServiceProviderWithPictureDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address) {
         Specification<ServiceProvider> specializationSpec =
                 specializationList != null ? ServiceProviderSpecification.hasSpecialization(specializationList)
                         : null;
@@ -87,7 +87,7 @@ public class ServiceProviderService {
                 Specification.allOf(specList.stream()
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList())),
-                pageable).map(mapper::entityToDto));
+                pageable).map(mapper::entityToDtoWithPicture));
     }
 
     public ServiceProviderWithPictureDto create(ServiceProviderDto serviceProviderDto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {

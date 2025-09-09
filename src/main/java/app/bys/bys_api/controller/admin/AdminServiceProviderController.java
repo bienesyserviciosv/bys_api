@@ -31,19 +31,18 @@ public class AdminServiceProviderController {
     }
 
     @GetMapping
-    public ResponseEntity<PageDto<ServiceProviderDto>> getAll(Pageable pageable,
-                                                              @RequestParam(name = "search", required = false) String search,
-                                                              @RequestParam(name = "specializations", required = false) List<Long> specializationList,
-                                                              @RequestParam(name = "address", required = false) String address) {
+    public ResponseEntity<PageDto<ServiceProviderWithPictureDto>> getAll(Pageable pageable,
+                                                                         @RequestParam(name = "search", required = false) String search,
+                                                                         @RequestParam(name = "specializations", required = false) List<Long> specializationList,
+                                                                         @RequestParam(name = "address", required = false) String address) {
         return ResponseEntity.ok(serviceProviderService.getAll(pageable, search, specializationList, address));
     }
 
     @PostMapping
     public ResponseEntity<ServiceProviderWithPictureDto> create(@Validated(OnCreate.class)
-                                                        @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
-                                                        @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
-                                                        @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet)
-    {
+                                                                @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
+                                                                @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
+                                                                @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet) {
         return ResponseEntity.status(HttpStatus.CREATED).body(serviceProviderService.create(serviceProviderDto, profilePicture, workPictureSet));
     }
 
