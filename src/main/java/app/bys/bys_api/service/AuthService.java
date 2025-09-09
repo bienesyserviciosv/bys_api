@@ -49,8 +49,9 @@ public class AuthService {
     private final OtpService otpService;
     private final UserDetailsService userDetailsService;
     private final ServiceProviderService serviceProviderService;
+    private final FinalUserService finalUserService;
 
-    public FinalUserDto registerFinalUser(FinalUserDto dto) {
+    public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
@@ -78,7 +79,10 @@ public class AuthService {
                 .registrationDate(LocalDateTime.now())
                 .build();
 
-        return userMapper.entityToDto(finalUserRepo.save(user));
+
+        FinalUser savedUser = finalUserRepo.save(user);
+        finalUserService.uploadPictureSet(profilePicture, savedUser);
+        return userMapper.entityToDto(savedUser);
     }
 
     public ServiceProviderWithPictureDto registerServiceProvider(ServiceProviderDto dto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {

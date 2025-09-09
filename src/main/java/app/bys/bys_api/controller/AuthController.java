@@ -52,15 +52,17 @@ public class AuthController {
     private String googleClientId;
 
     @PostMapping("/final_user/register")
-    public ResponseEntity<FinalUserDto> registerFinalUser(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
-        FinalUserDto userRegistered = authService.registerFinalUser(finalUserDto);
+    public ResponseEntity<FinalUserDto> registerFinalUser(@Validated({OnCreate.class})
+                                                          @RequestPart(name = "user") FinalUserDto finalUserDto,
+                                                          @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture) {
+        FinalUserDto userRegistered = authService.registerFinalUser(finalUserDto, profilePicture);
         return ResponseEntity.status(HttpStatus.CREATED).body(userRegistered);
     }
 
     @PostMapping("/service_provider/register")
     public ResponseEntity<ServiceProviderWithPictureDto> registerServiceProvider(@Validated({OnCreate.class}) @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
-                                                                      @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
-                                                                      @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet) {
+                                                                                 @RequestPart(name = "profile_picture", required = false) MultipartFile profilePicture,
+                                                                                 @RequestPart(name = "work_picture_set", required = false) MultipartFile[] workPictureSet) {
         ServiceProviderWithPictureDto providerRegistered = authService.registerServiceProvider(serviceProviderDto, profilePicture, workPictureSet);
         return ResponseEntity.status(HttpStatus.CREATED).body(providerRegistered);
     }

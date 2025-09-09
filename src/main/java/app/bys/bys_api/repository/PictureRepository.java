@@ -11,4 +11,5 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
 
     List<Picture> findByServiceRequestId(Long serviceRequestId);
     List<Picture> findByServiceProviderId(Long serviceProviderId);
+    Picture findByFinalUserId(Long finalUserId);
 }
