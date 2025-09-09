@@ -3,22 +3,20 @@ package app.bys.bys_api.mapper;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Value;
 
 @Mapper(componentModel = "spring")
-public interface FinalUserMapper {
-
-    FinalUser dtoToEntity(FinalUserDto finalUserDto);
-
-    FinalUserDto entityToDto(FinalUser finalUser);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateFinalUserFromDto(FinalUserDto finalUserDto, @MappingTarget FinalUser finalUser);
-}
-
-/*
-
-@Mapper(componentModel = "spring", uses = {FinalUserMapper.class},builder = @Builder(disableBuilder = true))
 public abstract class FinalUserMapper {
+
+    @Value("${media.url}")
+    public String mediaUrl;
+
+    @AfterMapping
+    public void addMediaUrlToImage(@MappingTarget FinalUserDto userDto) {
+        if (userDto.getProfilePicture() != null) {
+            userDto.setProfilePicture(mediaUrl + userDto.getProfilePicture());
+        }
+    }
 
     public abstract FinalUser dtoToEntity(FinalUserDto finalUserDto);
 
@@ -26,11 +24,4 @@ public abstract class FinalUserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateFinalUserFromDto(FinalUserDto finalUserDto, @MappingTarget FinalUser finalUser);
-
-    public abstract Page<FinalUserDto> entityListToDtoList(Page<FinalUser> finalUserList);
-
-    public abstract List<FinalUser> dtoListToEntityList(List<FinalUserDto> finalUserDtoList);
-
 }
-
-*/
