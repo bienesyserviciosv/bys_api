@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1757384014581-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: picture
+                columnName: final_user_id
+      changes:
+        - addColumn:
+            tableName: picture
+            columns:
+              - column:
+                  name: final_user_id
+                  type: BIGINT
+
+  - changeSet:
+      id: 1757384014581-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: final_user
+                columnName: profile_picture
+      changes:
+        - addColumn:
+            tableName: final_user
+            columns:
+              - column:
+                  name: profile_picture
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 1757384014581-3
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - uniqueConstraintExists:
+                tableName: picture
+                constraintName: uc_picture_final_user
+      changes:
+        - addUniqueConstraint:
+            tableName: picture
+            columnNames: final_user_id
+            constraintName: uc_picture_final_user
+
+  - changeSet:
+      id: 1757384014581-4
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - foreignKeyConstraintExists:
+                foreignKeyName: FK_PICTURE_ON_FINAL_USER
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: picture
+            baseColumnNames: final_user_id
+            constraintName: FK_PICTURE_ON_FINAL_USER
+            referencedTableName: final_user
+            referencedColumnNames: id
+
