@@ -45,7 +45,7 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found")));
     }
 
-    public PageDto<ServiceRequestDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
+    public PageDto<ServiceRequestWithPictureDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
         Specification<ServiceRequest> specializationSpec =
                 specializationList != null ? ServiceRequestSpecification.hasSpecialization(specializationList)
                         : null;
@@ -90,7 +90,7 @@ public class ServiceRequestService {
                 Specification.allOf(specList.stream()
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList())),
-                pageable).map(requestMapper::entityToDto));
+                pageable).map(requestMapper::entityToDtoWithPicture));
     }
 
     public ServiceRequest createWithId(Long id, ServiceRequestDto serviceRequestDto, MultipartFile[] files) {
