@@ -32,17 +32,17 @@ public class ServiceRequestController {
     private final ServiceRequestMapper serviceRequestMapper;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceRequestWithPictureDto> get(@PathVariable Long id) {
-        return new ResponseEntity<>(serviceRequestService.get(id), HttpStatus.OK);
+    public ResponseEntity<ServiceRequestWithPictureDto> get(@PathVariable Long id, Authentication auth) {
+        return new ResponseEntity<>(serviceRequestService.get(id, auth), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<PageDto<ServiceRequestWithPictureDto>> getAll(Pageable pageable,
-                                                             @RequestParam(name = "search", required = false) String search,
-                                                             @RequestParam(name = "specialization", required = false) List<Long> specializationList,
-                                                             @RequestParam(name = "address", required = false) String address,
-                                                             @RequestParam(name = "user", required = false) List<Long> userIdList,
-                                                             @RequestParam(name = "provider", required = false) List<Long> providerIdList
+                                                                        @RequestParam(name = "search", required = false) String search,
+                                                                        @RequestParam(name = "specialization", required = false) List<Long> specializationList,
+                                                                        @RequestParam(name = "address", required = false) String address,
+                                                                        @RequestParam(name = "user", required = false) List<Long> userIdList,
+                                                                        @RequestParam(name = "provider", required = false) List<Long> providerIdList
     ) {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
     }
@@ -50,10 +50,11 @@ public class ServiceRequestController {
     //Crear solicitud con el id del usuario
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping("/user/{id}")
-    public ResponseEntity<ServiceRequestWithPictureDto> create(@PathVariable Long id, @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
-                                                    @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
+    public ResponseEntity<ServiceRequestWithPictureDto> createAsAdmin(@PathVariable Long id,
+                                                               @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
+                                                               @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
 
-        ServiceRequest serviceRequest = serviceRequestService.createWithId(id, serviceRequestDto, files);
+        ServiceRequest serviceRequest = serviceRequestService.createWithUserId(id, serviceRequestDto, files);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
         notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
@@ -62,11 +63,11 @@ public class ServiceRequestController {
     }
 
     //Crear con authentication
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ServiceRequestWithPictureDto> create(Authentication auth,
-                                                    @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
-                                                    @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
+                                                               @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
+                                                               @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
 
         ServiceRequest serviceRequest = serviceRequestService.create(auth.getName(), serviceRequestDto, files);
 

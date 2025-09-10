@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,9 +41,22 @@ public class ServiceRequestService {
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
 
-    public ServiceRequestWithPictureDto get(Long id) {
-        return requestMapper.entityToDtoWithPicture(serviceRequestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found")));
+    public ServiceRequestWithPictureDto get(Long id, Authentication auth) {
+        ServiceRequest request = serviceRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found"));
+
+        boolean hasUserRole = auth.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"));
+
+        if (hasUserRole) {
+            FinalUser authenticatedUser = finalUserRepository.findByEmail(auth.getName()).orElseThrow();
+            FinalUser userMadeRequest = request.getFinalUser();
+            if (Objects.equals(authenticatedUser.getId(), userMadeRequest.getId())) {
+                request.setNewOffer(false);
+                serviceRequestRepository.save(request);
+            }
+        }
+        return requestMapper.entityToDtoWithPicture(request);
     }
 
     public PageDto<ServiceRequestWithPictureDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
@@ -93,9 +107,9 @@ public class ServiceRequestService {
                 pageable).map(requestMapper::entityToDtoWithPicture));
     }
 
-    public ServiceRequest createWithId(Long id, ServiceRequestDto serviceRequestDto, MultipartFile[] files) {
-        FinalUser finalUser = finalUserRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found"));
+    public ServiceRequest createWithUserId(Long userId, ServiceRequestDto serviceRequestDto, MultipartFile[] files) {
+        FinalUser finalUser = finalUserRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
         ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
@@ -129,7 +143,7 @@ public class ServiceRequestService {
     }
 
     public void delete(Long id) {
-        if(!serviceRequestRepository.existsById(id)) {
+        if (!serviceRequestRepository.existsById(id)) {
             throw new EntityNotFoundException("Service request with id: " + id + "not found");
         }
         serviceRequestRepository.deleteById(id);
