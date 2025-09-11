@@ -91,7 +91,7 @@ public class FinalUserService {
         if (!finalUserRepository.existsById(id)) {
             throw new EntityNotFoundException("Final user with id: " + id + " not found");
         }
-        Picture picture = pictureRepository.findByFinalUserId(id);
+        Picture picture = pictureRepository.findByFinalUserId(id).orElseThrow();
         pictureRepository.delete(picture);
 
         finalUserRepository.deleteById(id);

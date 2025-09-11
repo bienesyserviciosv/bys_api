@@ -5,3 +5,6 @@ databaseChangeLog:
       file: db/changelog/001.yaml
   - include:
       file: db/changelog/002.yaml
+  # Changelog reconstruido por pérdida de 003.yaml
+  - include:
+      file: db/changelog/003-recovered.yaml

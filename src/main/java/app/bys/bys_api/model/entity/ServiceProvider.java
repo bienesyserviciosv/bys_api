@@ -102,6 +102,9 @@ public class ServiceProvider {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "recipient", cascade = CascadeType.REMOVE)
     private Set<Notification> notificationSet;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceProvider")
+    private Set<Payment> paymentSet;
+
 }
 
 

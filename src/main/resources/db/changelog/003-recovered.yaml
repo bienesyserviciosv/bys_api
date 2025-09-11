@@ -1,0 +1,126 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1757470662161-1
+      author: Carlos
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: payment
+      changes:
+        - createTable:
+            tableName: payment
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: bank
+                  type: VARCHAR(255)
+              - column:
+                  name: payment_type
+                  type: VARCHAR(255)
+              - column:
+                  name: reference_number
+                  type: VARCHAR(255)
+              - column:
+                  name: payment_date
+                  type: TIMESTAMP
+              - column:
+                  name: phone_number
+                  type: VARCHAR(255)
+              - column:
+                  name: id_number
+                  type: VARCHAR(255)
+              - column:
+                  name: screenshot
+                  type: VARCHAR(255)
+              - column:
+                  name: final_user_id
+                  type: BIGINT
+              - column:
+                  name: service_provider_id
+                  type: BIGINT
+
+  - changeSet:
+      id: 1757470662161-2
+      author: Carlos
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: picture
+                columnName: payment_id
+      changes:
+        - addColumn:
+            tableName: picture
+            columns:
+              - column:
+                  name: payment_id
+                  type: BIGINT
+
+  - changeSet:
+      id: 1757470662161-3
+      author: Carlos
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - uniqueConstraintExists:
+                tableName: picture
+                constraintName: uc_picture_payment
+      changes:
+        - addUniqueConstraint:
+            tableName: picture
+            columnNames: payment_id
+            constraintName: uc_picture_payment
+
+  - changeSet:
+      id: 1757470662161-4
+      author: Carlos
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - foreignKeyConstraintExists:
+                foreignKeyName: FK_PAYMENT_ON_FINALUSER
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: payment
+            baseColumnNames: final_user_id
+            constraintName: FK_PAYMENT_ON_FINALUSER
+            referencedTableName: final_user
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 1757470662161-5
+      author: Carlos
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - foreignKeyConstraintExists:
+                foreignKeyName: FK_PAYMENT_ON_SERVICEPROVIDER
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: payment
+            baseColumnNames: service_provider_id
+            constraintName: FK_PAYMENT_ON_SERVICEPROVIDER
+            referencedTableName: service_provider
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 1757470662161-6
+      author: Carlos
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - foreignKeyConstraintExists:
+                foreignKeyName: FK_PICTURE_ON_PAYMENT
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: picture
+            baseColumnNames: payment_id
+            constraintName: FK_PICTURE_ON_PAYMENT
+            referencedTableName: payment
+            referencedColumnNames: id

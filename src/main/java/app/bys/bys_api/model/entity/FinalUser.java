@@ -61,4 +61,9 @@ public class FinalUser {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "finalUser")
     private Set<Offer> offerSet;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "finalUser")
+    private Set<Payment> paymentSet;
+
+
 }

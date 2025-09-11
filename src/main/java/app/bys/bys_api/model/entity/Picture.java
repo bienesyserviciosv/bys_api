@@ -30,4 +30,8 @@ public class Picture {
     @OneToOne
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
+
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 }
