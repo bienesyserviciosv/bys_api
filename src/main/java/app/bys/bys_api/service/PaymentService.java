@@ -13,15 +13,21 @@ import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.PaymentRepository;
 import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
+import app.bys.bys_api.service.specification.PaymentSpecification;
+import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +48,38 @@ public class PaymentService {
         };
     }
 
-    public PageDto<Object> getAllPayments(Pageable pageable) {
-        Page<Payment> payments = paymentRepository.findAll(pageable);
+    public PageDto<Object> getAllPayments(Pageable pageable, String search, List<Long> userIdList, List<Long> providerIdList) {
+
+        PaymentSpecification searchSpec =
+                search != null ? new PaymentSpecification(
+                        new SearchCriteria(
+                                "bank",
+                                "s",
+                                search
+                        )
+                )
+                        : null;
+
+        Specification<Payment> userSpec =
+                userIdList != null ? PaymentSpecification.hasUser(userIdList)
+                        : null;
+
+        Specification<Payment> providerSpec =
+                providerIdList != null ? PaymentSpecification.hasProvider(providerIdList)
+                        : null;
+
+
+        List<Specification<Payment>> specList = new ArrayList<>(Arrays.asList(
+                searchSpec,
+                userSpec,
+                providerSpec
+        ));
+
+        Page<Payment> payments = paymentRepository.findAll(
+                Specification.allOf(specList.stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())),
+                pageable);
 
         List<Object> mappedPayments = payments.stream()
                 .map(payment -> {
@@ -67,7 +103,7 @@ public class PaymentService {
         FinalUser finalUser = finalUserRepository.findById(mobilePaymentDto.getFinalUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + mobilePaymentDto.getFinalUserId() + " not found"));
         ServiceProvider serviceProvider = serviceProviderRepository.findById(mobilePaymentDto.getServiceProviderId())
-                .orElseThrow(()-> new EntityNotFoundException("Service Provider with id: " + mobilePaymentDto.getServiceProviderId() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + mobilePaymentDto.getServiceProviderId() + " not found"));
 
         Payment mobilePayment = paymentMapper.mobileDtoToEntity(mobilePaymentDto);
 
@@ -82,19 +118,19 @@ public class PaymentService {
         return paymentMapper.entityToMobileDto(paymentRepository.save(mobilePayment));
     }
 
-     public TransferPaymentDto createTransferPayment(TransferPaymentDto transferPaymentDto) {
-         FinalUser finalUser = finalUserRepository.findById(transferPaymentDto.getFinalUserId())
-                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + transferPaymentDto.getFinalUserId() + " not found"));
-         ServiceProvider serviceProvider = serviceProviderRepository.findById(transferPaymentDto.getServiceProviderId())
-                 .orElseThrow(()-> new EntityNotFoundException("Service Provider with id: " + transferPaymentDto.getServiceProviderId() + " not found"));
+    public TransferPaymentDto createTransferPayment(TransferPaymentDto transferPaymentDto) {
+        FinalUser finalUser = finalUserRepository.findById(transferPaymentDto.getFinalUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + transferPaymentDto.getFinalUserId() + " not found"));
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(transferPaymentDto.getServiceProviderId())
+                .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + transferPaymentDto.getServiceProviderId() + " not found"));
 
-         Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
+        Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
 
-         transferPayment.setFinalUser(finalUser);
-         finalUser.getPaymentSet().add(transferPayment);
+        transferPayment.setFinalUser(finalUser);
+        finalUser.getPaymentSet().add(transferPayment);
 
-         transferPayment.setServiceProvider(serviceProvider);
-         serviceProvider.getPaymentSet().add(transferPayment);
+        transferPayment.setServiceProvider(serviceProvider);
+        serviceProvider.getPaymentSet().add(transferPayment);
 
         transferPayment.setPaymentType(PaymentType.TRANSFER);
         return paymentMapper.entityToTransferDto(paymentRepository.save(transferPayment));

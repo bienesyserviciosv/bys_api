@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/payment")
@@ -25,8 +27,11 @@ public class PaymentController {
     }
 
     @GetMapping
-    public ResponseEntity<PageDto<Object>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(paymentService.getAllPayments(pageable));
+    public ResponseEntity<PageDto<Object>> getAll(Pageable pageable,
+                                                  @RequestParam(name = "search", required = false) String search,
+                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
+                                                  @RequestParam(name = "provider", required = false) List<Long> providerIdList) {
+        return ResponseEntity.ok(paymentService.getAllPayments(pageable, search, userIdList, providerIdList));
     }
 
     @PostMapping("/mobile")
