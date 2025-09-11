@@ -6,6 +6,7 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Payment;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Value;
 
 @Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public abstract class PaymentMapper {
@@ -40,5 +41,24 @@ public abstract class PaymentMapper {
     protected ServiceProvider mapServiceProvider(Long id) {
         return id == null ? null : ServiceProvider.builder().id(id).build();
     }
+
+    @Value("${media.url}")
+    public String mediaUrl;
+
+    @AfterMapping
+    public void addMediaUrlToMobilePaymentImage(@MappingTarget MobilePaymentDto mobilePaymentDto) {
+        if (mobilePaymentDto.getScreenshot() != null) {
+            mobilePaymentDto.setScreenshot(mediaUrl + mobilePaymentDto.getScreenshot());
+        }
+    }
+
+    @AfterMapping
+    public void addMediaUrlToTransferPaymentImage(@MappingTarget TransferPaymentDto transferPaymentDto) {
+        if (transferPaymentDto.getScreenshot() != null) {
+            transferPaymentDto.setScreenshot(mediaUrl + transferPaymentDto.getScreenshot());
+        }
+    }
+
+
 
 }

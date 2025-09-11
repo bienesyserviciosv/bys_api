@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,13 +36,17 @@ public class PaymentController {
     }
 
     @PostMapping("/mobile")
-    public ResponseEntity<MobilePaymentDto> createMobilePayment(@Validated(OnCreate.class) @RequestBody MobilePaymentDto mobilePaymentDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createMobilePayment(mobilePaymentDto));
+    public ResponseEntity<MobilePaymentDto> createMobilePayment(
+            @Validated(OnCreate.class) @RequestPart(name = "payment") MobilePaymentDto mobilePaymentDto,
+            @RequestPart(name = "screenshot") MultipartFile picture) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createMobilePayment(mobilePaymentDto, picture));
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<TransferPaymentDto> createTransferPayment(@Validated(OnCreate.class) @RequestBody TransferPaymentDto transferPaymentDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createTransferPayment(transferPaymentDto));
+    public ResponseEntity<TransferPaymentDto> createTransferPayment(
+            @Validated(OnCreate.class) @RequestPart(name = "payment") TransferPaymentDto transferPaymentDto,
+            @RequestPart(name = "screenshot") MultipartFile picture) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createTransferPayment(transferPaymentDto, picture));
     }
 
     @PatchMapping("/mobile/{id}")

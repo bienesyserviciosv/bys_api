@@ -147,7 +147,7 @@ public class FinalUserService {
         return finalUserRepository.save(newUser);
     }
 
-    public void uploadPictureSet(MultipartFile profilePicture, FinalUser finalUser) {
+    public void attachPictureToUser(MultipartFile profilePicture, FinalUser finalUser) {
         if (profilePicture != null) {
             Picture picture = new Picture();
             picture.setFinalUser(finalUser);

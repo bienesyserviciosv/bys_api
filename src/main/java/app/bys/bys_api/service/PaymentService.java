@@ -7,13 +7,12 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Payment;
+import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.enums.PaymentType;
-import app.bys.bys_api.repository.FinalUserRepository;
-import app.bys.bys_api.repository.PaymentRepository;
-import app.bys.bys_api.repository.PictureRepository;
-import app.bys.bys_api.repository.ServiceProviderRepository;
+import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.PaymentSpecification;
+import app.bys.bys_api.utils.MediaConstants;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +21,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +36,7 @@ public class PaymentService {
     private final PictureRepository pictureRepository;
     private final FinalUserRepository finalUserRepository;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final MediaRepository mediaRepository;
 
     public Object getPayment(Long id) {
         Payment payment = paymentRepository.findById(id)
@@ -99,7 +98,7 @@ public class PaymentService {
     }
 
 
-    public MobilePaymentDto createMobilePayment(MobilePaymentDto mobilePaymentDto) {
+    public MobilePaymentDto createMobilePayment(MobilePaymentDto mobilePaymentDto, MultipartFile picture) {
         FinalUser finalUser = finalUserRepository.findById(mobilePaymentDto.getFinalUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + mobilePaymentDto.getFinalUserId() + " not found"));
         ServiceProvider serviceProvider = serviceProviderRepository.findById(mobilePaymentDto.getServiceProviderId())
@@ -115,10 +114,12 @@ public class PaymentService {
 
         mobilePayment.setPaymentType(PaymentType.MOBILE);
 
-        return paymentMapper.entityToMobileDto(paymentRepository.save(mobilePayment));
+        Payment savedPayment = paymentRepository.save(mobilePayment);
+        attachScreenshotToPayment(picture, savedPayment);
+        return paymentMapper.entityToMobileDto(savedPayment);
     }
 
-    public TransferPaymentDto createTransferPayment(TransferPaymentDto transferPaymentDto) {
+    public TransferPaymentDto createTransferPayment(TransferPaymentDto transferPaymentDto, MultipartFile picture) {
         FinalUser finalUser = finalUserRepository.findById(transferPaymentDto.getFinalUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + transferPaymentDto.getFinalUserId() + " not found"));
         ServiceProvider serviceProvider = serviceProviderRepository.findById(transferPaymentDto.getServiceProviderId())
@@ -133,7 +134,10 @@ public class PaymentService {
         serviceProvider.getPaymentSet().add(transferPayment);
 
         transferPayment.setPaymentType(PaymentType.TRANSFER);
-        return paymentMapper.entityToTransferDto(paymentRepository.save(transferPayment));
+
+        Payment savedPayment = paymentRepository.save(transferPayment);
+        attachScreenshotToPayment(picture, savedPayment);
+        return paymentMapper.entityToTransferDto(savedPayment);
     }
 
     public MobilePaymentDto updateMobilePayment(Long id, MobilePaymentDto mobilePaymentDto) {
@@ -158,5 +162,29 @@ public class PaymentService {
         pictureRepository.findByPaymentId(id).ifPresent(pictureRepository::delete);
 
         paymentRepository.deleteById(id);
+    }
+
+    public void attachScreenshotToPayment(MultipartFile screenshot, Payment payment) {
+        if (screenshot != null) {
+            Picture picture = new Picture();
+            picture.setPayment(payment);
+            String url = uploadImage(screenshot);
+            picture.setUrl(url);
+            payment.setScreenshot(url);
+            pictureRepository.save(picture);
+        }
+    }
+
+    public String uploadImage(MultipartFile image) {
+        if (image != null) {
+            String imageName = MediaConstants.PAYMENT_FOLDER + UUID.randomUUID();
+            try {
+                mediaRepository.saveImage(imageName, image);
+                return imageName;
+            } catch (IOException exception) {
+                throw new RuntimeException("Error happened uploading the images: " + exception.getMessage());
+            }
+        }
+        return null;
     }
 }

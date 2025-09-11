@@ -81,7 +81,7 @@ public class AuthService {
 
 
         FinalUser savedUser = finalUserRepo.save(user);
-        finalUserService.uploadPictureSet(profilePicture, savedUser);
+        finalUserService.attachPictureToUser(profilePicture, savedUser);
         return userMapper.entityToDto(savedUser);
     }
 
