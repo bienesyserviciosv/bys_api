@@ -3,6 +3,7 @@ package app.bys.bys_api.controller;
 import app.bys.bys_api.model.dto.MobilePaymentDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
+import app.bys.bys_api.model.enums.BankName;
 import app.bys.bys_api.service.PaymentService;
 import app.bys.bys_api.validation.OnCreate;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -64,5 +67,14 @@ public class PaymentController {
         paymentService.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/banks")
+    public ResponseEntity<List<String>> getAvailableBanks() {
+        List<String> banks = Arrays.stream(BankName.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(banks);
+    }
+
 
 }
