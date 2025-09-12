@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
+import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
@@ -31,9 +32,8 @@ public class ServiceRequestWithPictureDto {
     private String description;
 
     @JsonProperty("address")
-    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
-    @Size(min = 3, groups = {OnCreate.class, OnUpdate.class}, message = "The length must be greater than 3 char")
-    private String address;
+    @Enumerated(EnumType.STRING)
+    private Province address;
 
     @Future(groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("date")

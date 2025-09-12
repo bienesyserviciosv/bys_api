@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.entity;
 
 import app.bys.bys_api.model.enums.MembershipType;
+import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -64,8 +65,9 @@ public class ServiceProvider {
     @Column(name = "phone_verified")
     private boolean phoneVerified = false;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "address")
-    private String address;
+    private Province address;
 
     @Builder.Default
     @Column(name = "completed_services")

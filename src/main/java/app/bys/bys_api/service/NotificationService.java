@@ -7,6 +7,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.Notification;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.repository.NotificationRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.specification.NotificationSpecification;
@@ -33,7 +34,7 @@ public class NotificationService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final NotificationMapper notificationMapper;
 
-    public void notifyProviders(Long specializationId, String address, ServiceRequest serviceRequest) {
+    public void notifyProviders(Long specializationId, Province address, ServiceRequest serviceRequest) {
 
         List<ServiceProvider> providers = serviceProviderRepository.findByAddressAndSpecializations_Id(address, specializationId);
 

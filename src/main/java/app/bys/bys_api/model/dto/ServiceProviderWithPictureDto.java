@@ -3,6 +3,7 @@ package app.bys.bys_api.model.dto;
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.model.enums.MembershipType;
+import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,8 +44,9 @@ public class ServiceProviderWithPictureDto {
     @JsonProperty("phone_number")
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
     @JsonProperty("address")
-    private String address;
+    private Province address;
 
     @JsonProperty("specializations")
     private Set<SpecializationDto> specializations;

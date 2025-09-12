@@ -1,6 +1,7 @@
 package app.bys.bys_api.repository;
 
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.enums.Province;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
      Optional<ServiceProvider> findByPhoneNumber(String phone);
 
-     List<ServiceProvider> findByAddressAndSpecializations_Id(String address, Long specializationId);
+     List<ServiceProvider> findByAddressAndSpecializations_Id(Province address, Long specializationId);
 
      void deleteByEmail(String email);
 }

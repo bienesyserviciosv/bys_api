@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.entity;
 
+import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,8 +33,9 @@ public class ServiceRequest {
     @Column(name = "longitude")
     private String longitude;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "address")
-    private String address;
+    private Province address;
 
     @Column(name = "date")
     private LocalDate date;
