@@ -5,10 +5,7 @@ import app.bys.bys_api.mapper.PaymentMapper;
 import app.bys.bys_api.model.dto.MobilePaymentDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
-import app.bys.bys_api.model.entity.FinalUser;
-import app.bys.bys_api.model.entity.Payment;
-import app.bys.bys_api.model.entity.Picture;
-import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.entity.*;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.PaymentSpecification;
@@ -36,6 +33,7 @@ public class PaymentService {
     private final PictureRepository pictureRepository;
     private final FinalUserRepository finalUserRepository;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final OfferRepository offerRepository;
     private final MediaRepository mediaRepository;
 
     public Object getPayment(Long id) {
@@ -103,6 +101,8 @@ public class PaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + mobilePaymentDto.getFinalUserId() + " not found"));
         ServiceProvider serviceProvider = serviceProviderRepository.findById(mobilePaymentDto.getServiceProviderId())
                 .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + mobilePaymentDto.getServiceProviderId() + " not found"));
+        Offer offer = offerRepository.findById(mobilePaymentDto.getOfferId())
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + mobilePaymentDto.getOfferId() + " not found"));
 
         Payment mobilePayment = paymentMapper.mobileDtoToEntity(mobilePaymentDto);
 
@@ -111,6 +111,9 @@ public class PaymentService {
 
         mobilePayment.setServiceProvider(serviceProvider);
         serviceProvider.getPaymentSet().add(mobilePayment);
+
+        mobilePayment.setOffer(offer);
+        offer.setPayment(mobilePayment);
 
         mobilePayment.setPaymentType(PaymentType.MOBILE);
 
@@ -124,6 +127,9 @@ public class PaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("User with id: " + transferPaymentDto.getFinalUserId() + " not found"));
         ServiceProvider serviceProvider = serviceProviderRepository.findById(transferPaymentDto.getServiceProviderId())
                 .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + transferPaymentDto.getServiceProviderId() + " not found"));
+        Offer offer = offerRepository.findById(transferPaymentDto.getOfferId())
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + transferPaymentDto.getOfferId() + " not found"));
+
 
         Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
 
@@ -132,6 +138,9 @@ public class PaymentService {
 
         transferPayment.setServiceProvider(serviceProvider);
         serviceProvider.getPaymentSet().add(transferPayment);
+
+        transferPayment.setOffer(offer);
+        offer.setPayment(transferPayment);
 
         transferPayment.setPaymentType(PaymentType.TRANSFER);
 
