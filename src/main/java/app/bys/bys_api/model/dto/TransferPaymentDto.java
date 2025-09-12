@@ -51,6 +51,10 @@ public class TransferPaymentDto {
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private Long serviceProviderId;
 
+    @JsonProperty("offer_id")
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    private Long offerId;
+
     @Enumerated(EnumType.STRING)
     @JsonProperty ("payment_type")
     private PaymentType paymentType;

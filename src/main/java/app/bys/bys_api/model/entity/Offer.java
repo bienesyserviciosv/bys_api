@@ -40,4 +40,7 @@ public class Offer {
     @Column(name = "accepted")
     private Boolean accepted = false;
 
+    @OneToOne(mappedBy = "offer")
+    private Payment payment;
+
 }

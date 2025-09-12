@@ -50,4 +50,8 @@ public class Payment {
     @ManyToOne
     @JoinColumn(name = "service_provider_id")
     private ServiceProvider serviceProvider;
+
+    @OneToOne
+    @JoinColumn(name = "offer_id")
+    private Offer offer;
 }
