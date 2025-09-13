@@ -3,8 +3,10 @@ package app.bys.bys_api.controller;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.entity.FinalUser;
+import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
+import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.service.PictureService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +24,12 @@ public class PictureController {
     private final FinalUserRepository finalUserRepository;
     private final FinalUserMapper finalUserMapper;
     private final MediaRepository mediaRepository;
+    private final PictureRepository pictureRepository;
 
     @PostMapping("/final_user/{userId}")
     public ResponseEntity<FinalUserDto> uploadPicture(@PathVariable Long userId, @RequestParam("image") MultipartFile newImage) {
         FinalUser finalUser = finalUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + userId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
         String oldImage = finalUser.getProfilePicture();
         if (oldImage != null) {
@@ -39,9 +42,19 @@ public class PictureController {
         return ResponseEntity.status(HttpStatus.CREATED).body(finalUserDto);
     }
 
-    @DeleteMapping("/final_user/{pictureId}")
-    public ResponseEntity<Void> deletePicture(@PathVariable Long pictureId) {
+    @DeleteMapping("/final_user/{userId}")
+    public ResponseEntity<Void> deletePicture(@PathVariable Long userId) {
+        FinalUser finalUser = finalUserRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
+
+        Picture picture = pictureRepository.findByFinalUserId(finalUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " does not have a picture"));
+        Long pictureId = picture.getId();
         pictureService.deletePicture(pictureId);
+
+        finalUser.setProfilePicture(null);
+        finalUserRepository.save(finalUser);
+
         return ResponseEntity.noContent().build();
     }
 }
