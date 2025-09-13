@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -35,6 +36,11 @@ public class MediaRepositoryImpl implements MediaRepository{
 
     @Override
     public void deleteImage(String imageName) {
+        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(imageName)
+                .build();
 
+        s3Client.deleteObject(deleteRequest);
     }
 }

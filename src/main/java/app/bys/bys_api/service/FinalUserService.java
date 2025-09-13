@@ -12,7 +12,6 @@ import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
-import app.bys.bys_api.utils.MediaConstants;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +34,7 @@ public class FinalUserService {
     private final RoleService roleService;
     private final PictureRepository pictureRepository;
     private final MediaRepository mediaRepository;
+    private final PictureService pictureService;
 
     public FinalUserDto get(Long id) {
         return mapper.entityToDto(finalUserRepository.findById(id).
@@ -91,8 +89,11 @@ public class FinalUserService {
         if (!finalUserRepository.existsById(id)) {
             throw new EntityNotFoundException("Final user with id: " + id + " not found");
         }
-        Picture picture = pictureRepository.findByFinalUserId(id).orElseThrow();
-        pictureRepository.delete(picture);
+        Optional<Picture> optionalPicture = pictureRepository.findByFinalUserId(id);
+        optionalPicture.ifPresent(picture -> {
+            mediaRepository.deleteImage(picture.getUrl());
+            pictureRepository.delete(picture);
+        });
 
         finalUserRepository.deleteById(id);
     }
@@ -147,27 +148,34 @@ public class FinalUserService {
         return finalUserRepository.save(newUser);
     }
 
-    public void attachPictureToUser(MultipartFile profilePicture, FinalUser finalUser) {
-        if (profilePicture != null) {
-            Picture picture = new Picture();
-            picture.setFinalUser(finalUser);
-            String url = uploadImage(profilePicture);
-            picture.setUrl(url);
-            finalUser.setProfilePicture(url);
-            pictureRepository.save(picture);
+    public void attachProfilePicture(MultipartFile image, FinalUser user) {
+        if (image != null) {
+            String url = pictureService.uploadForFinalUser(image, user);
+            user.setProfilePicture(url);
         }
     }
 
-    public String uploadImage(MultipartFile image) {
-        if (image != null) {
-            String imageName = MediaConstants.USER_FOLDER + UUID.randomUUID();
-            try {
-                mediaRepository.saveImage(imageName, image);
-                return imageName;
-            } catch (IOException exception) {
-                throw new RuntimeException("Error happened uploading the images: " + exception.getMessage());
-            }
-        }
-        return null;
-    }
+//    public void attachPictureToUser(MultipartFile profilePicture, FinalUser finalUser) {
+//        if (profilePicture != null) {
+//            Picture picture = new Picture();
+//            picture.setFinalUser(finalUser);
+//            String url = uploadImage(profilePicture);
+//            picture.setUrl(url);
+//            finalUser.setProfilePicture(url);
+//            pictureRepository.save(picture);
+//        }
+//    }
+//
+//    public String uploadImage(MultipartFile image) {
+//        if (image != null) {
+//            String imageName = MediaConstants.USER_FOLDER + UUID.randomUUID();
+//            try {
+//                mediaRepository.saveImage(imageName, image);
+//                return imageName;
+//            } catch (IOException exception) {
+//                throw new RuntimeException("Error happened uploading the images: " + exception.getMessage());
+//            }
+//        }
+//        return null;
+//    }
 }

@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -75,13 +76,14 @@ public class AuthService {
                 .phoneVerified(false)
                 .emailVerified(false)
                 .status(UserStatus.ACTIVE)
-                .roles(Set.of(roleService.getRoleOrThrow("ROLE_USER")))
+                .roles(new HashSet<>(Set.of(roleService.getRoleOrThrow("ROLE_USER"))))
                 .registrationDate(LocalDateTime.now())
                 .build();
 
 
         FinalUser savedUser = finalUserRepo.save(user);
-        finalUserService.attachPictureToUser(profilePicture, savedUser);
+        finalUserService.attachProfilePicture(profilePicture, savedUser);
+        finalUserRepo.save(savedUser);
         return userMapper.entityToDto(savedUser);
     }
 
