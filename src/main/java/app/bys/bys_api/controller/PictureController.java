@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/picture")
 @RequiredArgsConstructor
+@RequestMapping("/picture")
 public class PictureController {
 
     private final PictureService pictureService;
@@ -52,7 +52,7 @@ public class PictureController {
         if (oldImage != null) {
             mediaRepository.deleteImage(oldImage);
         }
-        String newImageUrl = pictureService.uploadForFinalUser(newImage, finalUser);
+        String newImageUrl = pictureService.uploadProfilePictureForFinalUser(newImage, finalUser);
         finalUser.setProfilePicture(newImageUrl);
         finalUserRepository.save(finalUser);
         FinalUserDto finalUserDto = finalUserMapper.entityToDto(finalUser);

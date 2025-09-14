@@ -9,6 +9,7 @@ import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
@@ -155,6 +156,7 @@ public class ServiceRequestService {
                 Picture picture = new Picture();
                 picture.setServiceRequest(serviceRequest);
                 picture.setUrl(uploadImage(file));
+                picture.setPictureType(PictureType.SERVICE_REQUEST);
                 serviceRequest.getPictureSet().add(picture);
                 pictureRepository.save(picture);
             });

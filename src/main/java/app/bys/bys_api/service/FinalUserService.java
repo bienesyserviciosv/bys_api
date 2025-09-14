@@ -150,7 +150,7 @@ public class FinalUserService {
 
     public void attachProfilePicture(MultipartFile image, FinalUser user) {
         if (image != null) {
-            String url = pictureService.uploadForFinalUser(image, user);
+            String url = pictureService.uploadProfilePictureForFinalUser(image, user);
             user.setProfilePicture(url);
         }
     }

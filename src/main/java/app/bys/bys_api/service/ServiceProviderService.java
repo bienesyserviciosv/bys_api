@@ -10,6 +10,7 @@ import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.model.enums.MembershipType;
@@ -170,6 +171,7 @@ public class ServiceProviderService {
             picture.setServiceProvider(serviceProvider);
             String url = uploadImage(profilePicture);
             picture.setUrl(url);
+            picture.setPictureType(PictureType.PROFILE);
             serviceProvider.setProfilePicture(url);
             pictureRepository.save(picture);
         }
@@ -178,6 +180,7 @@ public class ServiceProviderService {
                 Picture picture = new Picture();
                 picture.setServiceProvider(serviceProvider);
                 picture.setUrl(uploadImage(file));
+                picture.setPictureType(PictureType.WORK);
                 serviceProvider.getWorkPictureSet().add(picture);
                 pictureRepository.save(picture);
             });

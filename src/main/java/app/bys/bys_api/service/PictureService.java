@@ -2,6 +2,8 @@ package app.bys.bys_api.service;
 
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
+import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.utils.MediaConstants;
@@ -12,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -22,7 +26,7 @@ public class PictureService {
     private final MediaRepository mediaRepository;
 
     @Transactional
-    public String uploadForFinalUser(MultipartFile profilePicture, FinalUser user) {
+    public String uploadProfilePictureForFinalUser(MultipartFile profilePicture, FinalUser user) {
         String imageName = MediaConstants.USER_FOLDER + UUID.randomUUID();
         try {
             mediaRepository.saveImage(imageName, profilePicture);
@@ -32,6 +36,7 @@ public class PictureService {
             Picture picture = Picture.builder()
                     .finalUser(user)
                     .url(imageName)
+                    .pictureType(PictureType.PROFILE)
                     .build();
             pictureRepository.save(picture);
             return imageName;
