@@ -53,4 +53,70 @@ public class PictureService {
         pictureRepository.delete(picture);
     }
 
+    @Transactional
+    public String uploadProfilePictureForProvider(MultipartFile image, ServiceProvider provider) {
+        String oldImage = provider.getProfilePicture();
+        if (oldImage != null) {
+            mediaRepository.deleteImage(oldImage);
+            pictureRepository.deleteByServiceProviderAndUrl(provider, oldImage);
+        }
+
+        String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
+
+
+        try {
+            mediaRepository.saveImage(imageName, image);
+            Picture picture = Picture.builder()
+                    .serviceProvider(provider)
+                    .url(imageName)
+                    .pictureType(PictureType.PROFILE)
+                    .build();
+            pictureRepository.save(picture);
+
+            return imageName;
+        } catch (IOException e) {
+            throw new RuntimeException("Error happened uploading the images: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void uploadWorkPictures(MultipartFile[] workPictureList, ServiceProvider provider) {
+        Set<Picture> oldPictures = provider.getWorkPictureSet();
+
+        oldPictures.forEach(picture -> {
+            mediaRepository.deleteImage(picture.getUrl());
+            pictureRepository.delete(picture);
+        });
+        provider.getWorkPictureSet().clear();
+
+        Arrays.stream(workPictureList).forEach(image -> {
+            String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
+            try {
+                mediaRepository.saveImage(imageName, image);
+                Picture picture = Picture.builder()
+                        .serviceProvider(provider)
+                        .url(imageName)
+                        .pictureType(PictureType.WORK)
+                        .build();
+                pictureRepository.save(picture);
+                provider.getWorkPictureSet().add(picture);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error happened uploading the images: " + e.getMessage());
+            }
+
+        });
+    }
+//
+//    @Transactional
+//    public void deleteProfilePictureForProvider(ServiceProvider provider) {
+//        String url = provider.getProfilePicture();
+//        if (url != null) {
+//            Picture picture = pictureRepository.findByServiceProviderAndUrl(provider, url)
+//                    .orElseThrow(() -> new EntityNotFoundException("Profile picture not found"));
+//            storageService.deletePicture(picture);
+//            provider.setProfilePicture(null);
+//        }
+//    }
+//
 }
