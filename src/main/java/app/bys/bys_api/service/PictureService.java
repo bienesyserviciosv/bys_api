@@ -107,16 +107,22 @@ public class PictureService {
 
         });
     }
-//
-//    @Transactional
-//    public void deleteProfilePictureForProvider(ServiceProvider provider) {
-//        String url = provider.getProfilePicture();
-//        if (url != null) {
-//            Picture picture = pictureRepository.findByServiceProviderAndUrl(provider, url)
-//                    .orElseThrow(() -> new EntityNotFoundException("Profile picture not found"));
-//            storageService.deletePicture(picture);
-//            provider.setProfilePicture(null);
-//        }
-//    }
-//
+
+    @Transactional
+    public void deleteAllWorkPictures(ServiceProvider provider) {
+        Set<Picture> workPictures = provider.getWorkPictureSet();
+
+        if (workPictures.isEmpty()) {
+            return;
+        }
+
+        workPictures.forEach(picture -> {
+            mediaRepository.deleteImage(picture.getUrl());
+            pictureRepository.delete(picture);
+        });
+
+        provider.getWorkPictureSet().clear();
+    }
+
+
 }
