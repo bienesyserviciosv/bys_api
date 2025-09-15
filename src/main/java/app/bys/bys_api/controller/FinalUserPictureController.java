@@ -19,8 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/picture")
-public class PictureController {
+@PreAuthorize("hasAuthority('ROLE_USER')")
+@RequestMapping("/picture/final_user")
+public class FinalUserPictureController {
 
     private final PictureService pictureService;
     private final FinalUserRepository finalUserRepository;
@@ -28,26 +29,12 @@ public class PictureController {
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PostMapping("/final_user/{userId}")
-    public ResponseEntity<FinalUserDto> uploadPictureAsAdmin(@PathVariable Long userId, @RequestParam("image") MultipartFile newImage) {
-        FinalUser finalUser = finalUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
-
-        return updateProfilePicture(newImage, finalUser);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    @PostMapping("/final_user/me")
+    @PostMapping("/profile/me")
     public ResponseEntity<FinalUserDto> uploadPicture(Authentication authentication, @RequestParam("image") MultipartFile newImage) {
         String email = authentication.getName();
         FinalUser finalUser = finalUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
-        return updateProfilePicture(newImage, finalUser);
-    }
-
-    private ResponseEntity<FinalUserDto> updateProfilePicture(MultipartFile newImage, FinalUser finalUser) {
         String oldImage = finalUser.getProfilePicture();
         if (oldImage != null) {
             mediaRepository.deleteImage(oldImage);
@@ -59,17 +46,7 @@ public class PictureController {
         return ResponseEntity.status(HttpStatus.CREATED).body(finalUserDto);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @DeleteMapping("/final_user/{userId}")
-    public ResponseEntity<Void> deletePictureAsAdmin(@PathVariable Long userId) {
-        FinalUser finalUser = finalUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
-
-        return deleteProfilePicture(finalUser, userId);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    @DeleteMapping("/final_user/me")
+    @DeleteMapping("/profile/me")
     public ResponseEntity<Void> deletePicture(Authentication authentication) {
         String email = authentication.getName();
         FinalUser finalUser = finalUserRepository.findByEmail(email)
@@ -77,10 +54,6 @@ public class PictureController {
 
         Long userId = finalUser.getId();
 
-        return deleteProfilePicture(finalUser, userId);
-    }
-
-    private ResponseEntity<Void> deleteProfilePicture(FinalUser finalUser, Long userId) {
         Picture picture = pictureRepository.findByFinalUserId(finalUser.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " does not have a picture"));
         Long pictureId = picture.getId();
@@ -91,6 +64,4 @@ public class PictureController {
 
         return ResponseEntity.noContent().build();
     }
-
-
 }
