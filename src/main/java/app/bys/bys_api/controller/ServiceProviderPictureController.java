@@ -38,9 +38,7 @@ public class ServiceProviderPictureController {
         ServiceProvider provider = serviceProviderRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("ServiceProvider with email " + email + " not found"));
 
-        String newImageUrl = pictureService.uploadProfilePictureForProvider(image, provider);
-
-        provider.setProfilePicture(newImageUrl);
+        pictureService.uploadProfilePictureForProvider(image, provider);
         serviceProviderRepository.save(provider);
 
         ServiceProviderWithPictureDto providerWithPictureDto = providerMapper.entityToDtoWithPicture(provider);

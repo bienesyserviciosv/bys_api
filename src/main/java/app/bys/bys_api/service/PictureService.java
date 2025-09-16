@@ -59,7 +59,7 @@ public class PictureService {
     }
 
     @Transactional
-    public String uploadProfilePictureForProvider(MultipartFile image, ServiceProvider provider) {
+    public void uploadProfilePictureForProvider(MultipartFile image, ServiceProvider provider) {
         String oldImage = provider.getProfilePicture();
         if (oldImage != null) {
             mediaRepository.deleteImage(oldImage);
@@ -68,7 +68,6 @@ public class PictureService {
 
         String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
 
-
         try {
             mediaRepository.saveImage(imageName, image);
             Picture picture = Picture.builder()
@@ -76,9 +75,9 @@ public class PictureService {
                     .url(imageName)
                     .pictureType(PictureType.PROFILE)
                     .build();
+            provider.setProfilePicture(imageName);
             pictureRepository.save(picture);
 
-            return imageName;
         } catch (IOException e) {
             throw new RuntimeException("Error happened uploading the images: " + e.getMessage());
         }

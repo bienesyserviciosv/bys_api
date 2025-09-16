@@ -32,9 +32,7 @@ public class AdminServiceProviderPictureController {
         ServiceProvider provider = serviceProviderRepository.findById(providerId)
                 .orElseThrow(() -> new EntityNotFoundException("ServiceProvider with id " + providerId + " not found"));
 
-        String newImageUrl = pictureService.uploadProfilePictureForProvider(image, provider);
-
-        provider.setProfilePicture(newImageUrl);
+        pictureService.uploadProfilePictureForProvider(image, provider);
         serviceProviderRepository.save(provider);
 
         ServiceProviderWithPictureDto providerWithPictureDto = providerMapper.entityToDtoWithPicture(provider);

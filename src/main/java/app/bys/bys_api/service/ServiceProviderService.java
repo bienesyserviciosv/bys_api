@@ -8,15 +8,10 @@ import app.bys.bys_api.mapper.SpecializationMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
-import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
-import app.bys.bys_api.model.enums.PictureType;
-import app.bys.bys_api.repository.MediaRepository;
-import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.specification.ServiceProviderSpecification;
-import app.bys.bys_api.utils.MediaConstants;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,8 +34,7 @@ public class ServiceProviderService {
     private final ServiceProviderMapper mapper;
     private final RoleService roleService;
     private final SpecializationMapper specializationMapper;
-    private final MediaRepository mediaRepository;
-    private final PictureRepository pictureRepository;
+    private final PictureService pictureService;
 
     public ServiceProviderWithPictureDto get(Long id) {
         return mapper.entityToDtoWithPicture(serviceProviderRepository.findById(id)
@@ -117,7 +110,8 @@ public class ServiceProviderService {
                 .build();
 
         ServiceProvider providerSaved = serviceProviderRepository.save(provider);
-        uploadPictureSet(workPictureSet, profilePicture, providerSaved);
+        pictureService.uploadProfilePictureForProvider(profilePicture, providerSaved);
+        pictureService.uploadWorkPictures(workPictureSet, providerSaved);
         return mapper.entityToDtoWithPicture(providerSaved);
     }
 
@@ -162,42 +156,6 @@ public class ServiceProviderService {
         newProvider.setRoles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")));
 
         return serviceProviderRepository.save(newProvider);
-    }
-
-
-    public void uploadPictureSet(MultipartFile[] workPictureList, MultipartFile profilePicture, ServiceProvider serviceProvider) {
-        if (profilePicture != null) {
-            Picture picture = new Picture();
-            picture.setServiceProvider(serviceProvider);
-            String url = uploadImage(profilePicture);
-            picture.setUrl(url);
-            picture.setPictureType(PictureType.PROFILE);
-            serviceProvider.setProfilePicture(url);
-            pictureRepository.save(picture);
-        }
-        if (workPictureList != null) {
-            Arrays.stream(workPictureList).forEach(file -> {
-                Picture picture = new Picture();
-                picture.setServiceProvider(serviceProvider);
-                picture.setUrl(uploadImage(file));
-                picture.setPictureType(PictureType.WORK);
-                serviceProvider.getWorkPictureSet().add(picture);
-                pictureRepository.save(picture);
-            });
-        }
-    }
-
-    public String uploadImage(MultipartFile image) {
-        if (image != null) {
-            String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
-            try {
-                mediaRepository.saveImage(imageName, image);
-                return imageName;
-            } catch (IOException exception) {
-                throw new RuntimeException("Error happened uploading the images: " + exception.getMessage());
-            }
-        }
-        return null;
     }
 
 }
