@@ -2,6 +2,7 @@ package app.bys.bys_api.model.entity;
 
 import app.bys.bys_api.model.enums.BankName;
 import app.bys.bys_api.model.enums.PaymentType;
+import app.bys.bys_api.model.enums.PhoneCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +37,10 @@ public class Payment {
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "phone_code")
+//    private PhoneCode phoneCode;
 
     @Column(name = "id_number")
     private String idNumber;

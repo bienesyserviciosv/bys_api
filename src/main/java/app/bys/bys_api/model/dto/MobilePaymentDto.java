@@ -3,6 +3,7 @@ package app.bys.bys_api.model.dto;
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.model.enums.BankName;
 import app.bys.bys_api.model.enums.PaymentType;
+import app.bys.bys_api.model.enums.PhoneCode;
 import app.bys.bys_api.validation.OnCreate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
@@ -39,6 +40,10 @@ public class MobilePaymentDto {
     @JsonProperty("phone_number")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String phoneNumber;
+
+//    @JsonProperty("phone_code")
+//    @Enumerated(EnumType.STRING)
+//    private PhoneCode phoneCode;
 
     @JsonProperty("final_user_id")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)

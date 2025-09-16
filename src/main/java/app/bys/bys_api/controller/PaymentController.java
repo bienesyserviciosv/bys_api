@@ -71,7 +71,7 @@ public class PaymentController {
     @GetMapping("/banks")
     public ResponseEntity<List<String>> getAvailableBanks() {
         List<String> banks = Arrays.stream(BankName.values())
-                .map(Enum::name)
+                .map(BankName::getDisplayName)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(banks);
     }
