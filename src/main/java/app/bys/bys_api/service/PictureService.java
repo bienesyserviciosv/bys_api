@@ -1,5 +1,7 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.mapper.PictureMapper;
+import app.bys.bys_api.model.dto.PictureDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
@@ -15,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,6 +27,8 @@ public class PictureService {
 
     private final PictureRepository pictureRepository;
     private final MediaRepository mediaRepository;
+    private final PictureMapper pictureMapper;
+
 
     @Transactional
     public String uploadProfilePictureForFinalUser(MultipartFile profilePicture, FinalUser user) {
@@ -124,5 +129,13 @@ public class PictureService {
         provider.getWorkPictureSet().clear();
     }
 
+    @Transactional
+    public List<PictureDto> getWorkPictures(ServiceProvider provider) {
+        List<Picture> pictures = pictureRepository.findByServiceProviderAndPictureType(provider, PictureType.WORK);
+
+        return pictures.stream()
+                .map(pictureMapper::entityToDto)
+                .toList();
+    }
 
 }

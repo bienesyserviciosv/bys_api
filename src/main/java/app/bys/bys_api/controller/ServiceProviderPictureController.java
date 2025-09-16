@@ -1,6 +1,8 @@
 package app.bys.bys_api.controller;
 
+import app.bys.bys_api.error.InvalidPictureException;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
+import app.bys.bys_api.model.dto.PictureDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
@@ -10,13 +12,14 @@ import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.PictureService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -103,8 +106,18 @@ public class ServiceProviderPictureController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/work/me")
+    public ResponseEntity<List<PictureDto>> getMyWorkPictures(Authentication authentication) {
+        String email = authentication.getName();
+        ServiceProvider provider = serviceProviderRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Service Provider with email: " + email + " not found"));
+
+        return ResponseEntity.ok(pictureService.getWorkPictures(provider));
+    }
+
+
     @DeleteMapping("/work/{pictureId}")
-    public ResponseEntity<Void> deleteWorkPicture(Authentication authentication, @PathVariable Long pictureId) throws BadRequestException {
+    public ResponseEntity<Void> deleteWorkPicture(Authentication authentication, @PathVariable Long pictureId)  {
         String email = authentication.getName();
         ServiceProvider provider = serviceProviderRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Service Provider with email: " + email + " not found"));
@@ -118,7 +131,7 @@ public class ServiceProviderPictureController {
             serviceProviderRepository.save(provider);
             return ResponseEntity.noContent().build();
         }
-        throw new BadRequestException("Picture is not a work image or does not belong to the authenticated provider");
+        throw new InvalidPictureException("The picture is not a work image or does not belong to the authenticated provider");
     }
 
 }

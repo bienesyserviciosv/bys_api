@@ -3,6 +3,7 @@ package app.bys.bys_api.repository;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.enums.PictureType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,6 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
     Optional<Picture> findByPaymentId(Long id);
 
     void deleteByServiceProviderAndUrl(ServiceProvider serviceProvider, String url);
+
+    List<Picture> findByServiceProviderAndPictureType(ServiceProvider serviceProvider, PictureType pictureType);
 }
