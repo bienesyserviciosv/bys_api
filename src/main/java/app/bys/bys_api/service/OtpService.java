@@ -84,7 +84,7 @@ public class OtpService {
             throw new RuntimeException("You must wait before requesting another OTP");
         }
 
-        // Generar nuevo OTP (opcional: puedes usar el mismo)
+        // Generar nuevo OTP
         String newOtp = generateOTP();
         otpStorage.put(email, newOtp);
 

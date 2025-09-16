@@ -79,19 +79,6 @@ public class ServiceProviderPictureController {
         return ResponseEntity.noContent().build();
     }
 
-//    private ResponseEntity<Void> deleteProfilePicture(ServiceProvider serviceProvider, Long providerId) {
-//        Picture picture = pictureRepository.findProfilePictureByServiceProviderId(serviceProvider.getId())
-//                .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + providerId + " does not have a profile picture"));
-//        Long pictureId = picture.getId();
-//        pictureService.deletePicture(pictureId);
-//
-//        serviceProvider.setProfilePicture(null);
-//        serviceProviderRepository.save(serviceProvider);
-//
-//        return ResponseEntity.noContent().build();
-//    }
-
-
     @DeleteMapping("/work/me")
     public ResponseEntity<Void> deleteAllWorkPictures(Authentication authentication) {
         String email = authentication.getName();

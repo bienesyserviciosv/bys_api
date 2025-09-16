@@ -59,17 +59,4 @@ public abstract class ServiceProviderMapper {
                 .collect(Collectors.toSet());
     }
 
-//    @Named("pictureToUrl")
-//    default String pictureToUrl(Picture picture) {
-//        return picture.getUrl();
-//    }
-//
-//    @IterableMapping(qualifiedByName = "pictureToUrl")
-//    @Named("pictureSetToUrlSet")
-//    default Set<String> pictureSetToUrlSet(Set<Picture> pictures) {
-//        return pictures.stream()
-//                .map(this::pictureToUrl)
-//                .collect(Collectors.toSet());
-//    }
-
 }

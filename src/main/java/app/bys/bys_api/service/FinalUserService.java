@@ -154,28 +154,4 @@ public class FinalUserService {
             user.setProfilePicture(url);
         }
     }
-
-//    public void attachPictureToUser(MultipartFile profilePicture, FinalUser finalUser) {
-//        if (profilePicture != null) {
-//            Picture picture = new Picture();
-//            picture.setFinalUser(finalUser);
-//            String url = uploadImage(profilePicture);
-//            picture.setUrl(url);
-//            finalUser.setProfilePicture(url);
-//            pictureRepository.save(picture);
-//        }
-//    }
-//
-//    public String uploadImage(MultipartFile image) {
-//        if (image != null) {
-//            String imageName = MediaConstants.USER_FOLDER + UUID.randomUUID();
-//            try {
-//                mediaRepository.saveImage(imageName, image);
-//                return imageName;
-//            } catch (IOException exception) {
-//                throw new RuntimeException("Error happened uploading the images: " + exception.getMessage());
-//            }
-//        }
-//        return null;
-//    }
 }
