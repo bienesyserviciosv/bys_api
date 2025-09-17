@@ -9,7 +9,7 @@ public enum BankName {
     BANK_BANCAMIGA("Bancamiga"),
     BANK_BANCARIBE("BanCaribe"),
     BANK_ACTIVO("Banco Activo"),
-    BANK_DIGITAL_TABAJADORES("Banco Digital de los Tabajadores"),
+    BANK_DIGITAL_TRABAJADORES("Banco Digital de los Trabajadores"),
     BANK_CARONI("Banco Caroní"),
     BANK_VENEZUELA("Banco de Venezuela"),
     BANK_TESORO("Banco del Tesoro"),

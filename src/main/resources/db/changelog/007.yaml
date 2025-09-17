@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: update-payment-bank-check
+      author: carlos
+      changes:
+        - sql:
+            stripComments: true
+            splitStatements: false
+            sql: >
+              ALTER TABLE payment DROP CONSTRAINT payment_bank_check;
+        - sql:
+            stripComments: true
+            splitStatements: false
+            sql: >
+              ALTER TABLE payment ADD CONSTRAINT payment_bank_check
+              CHECK (
+                bank IN (
+                'BANK_100_PORCIENTO',
+                'BANK_BANCAMIGA',
+                'BANK_BANCARIBE',
+                'BANK_ACTIVO',
+                'BANK_DIGITAL_TRABAJADORES',
+                'BANK_CARONI',
+                'BANK_VENEZUELA',
+                'BANK_TESORO',
+                'BANK_EXTERIOR_MERCANTIL',
+                'BANK_NACIONAL_CREDITO',
+                'BANK_PLAZA',
+                'BANK_SOFITASA',
+                'BANK_VENEZOLANO_CREDITO',
+                'BANK_BANCRECER',
+                'BANK_BANESCO',
+                'BANK_BANFANB',
+                'BANK_BANPLUS',
+                'BANK_BBVA_PROVINCIAL',
+                'BANK_BFC',
+                'BANK_DELSUR',
+                'BANK_R4',
+                'BANK_BANGENTE'
+                )
+              );
