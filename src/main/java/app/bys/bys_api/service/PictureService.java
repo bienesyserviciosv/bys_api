@@ -60,56 +60,60 @@ public class PictureService {
 
     @Transactional
     public void uploadProfilePictureForProvider(MultipartFile image, ServiceProvider provider) {
-        String oldImage = provider.getProfilePicture();
-        if (oldImage != null) {
-            mediaRepository.deleteImage(oldImage);
-            pictureRepository.deleteByServiceProviderAndUrl(provider, oldImage);
-        }
+        if (image != null && !image.isEmpty()) {
+            String oldImage = provider.getProfilePicture();
+            if (oldImage != null) {
+                mediaRepository.deleteImage(oldImage);
+                pictureRepository.deleteByServiceProviderAndUrl(provider, oldImage);
+            }
 
-        String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
-
-        try {
-            mediaRepository.saveImage(imageName, image);
-            Picture picture = Picture.builder()
-                    .serviceProvider(provider)
-                    .url(imageName)
-                    .pictureType(PictureType.PROFILE)
-                    .build();
-            provider.setProfilePicture(imageName);
-            pictureRepository.save(picture);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error happened uploading the images: " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void uploadWorkPictures(MultipartFile[] workPictureList, ServiceProvider provider) {
-        Set<Picture> oldPictures = provider.getWorkPictureSet();
-
-        oldPictures.forEach(picture -> {
-            mediaRepository.deleteImage(picture.getUrl());
-            pictureRepository.delete(picture);
-        });
-        provider.getWorkPictureSet().clear();
-
-        Arrays.stream(workPictureList).forEach(image -> {
             String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
+
             try {
                 mediaRepository.saveImage(imageName, image);
                 Picture picture = Picture.builder()
                         .serviceProvider(provider)
                         .url(imageName)
-                        .pictureType(PictureType.WORK)
+                        .pictureType(PictureType.PROFILE)
                         .build();
+                provider.setProfilePicture(imageName);
                 pictureRepository.save(picture);
-                provider.getWorkPictureSet().add(picture);
 
             } catch (IOException e) {
                 throw new RuntimeException("Error happened uploading the images: " + e.getMessage());
             }
+        }
+    }
 
-        });
+    @Transactional
+    public void uploadWorkPictures(MultipartFile[] workPictureList, ServiceProvider provider) {
+        if (workPictureList != null) {
+            Set<Picture> oldPictures = provider.getWorkPictureSet();
+
+            oldPictures.forEach(picture -> {
+                mediaRepository.deleteImage(picture.getUrl());
+                pictureRepository.delete(picture);
+            });
+            provider.getWorkPictureSet().clear();
+
+            Arrays.stream(workPictureList).forEach(image -> {
+                String imageName = MediaConstants.PROVIDER_FOLDER + UUID.randomUUID();
+                try {
+                    mediaRepository.saveImage(imageName, image);
+                    Picture picture = Picture.builder()
+                            .serviceProvider(provider)
+                            .url(imageName)
+                            .pictureType(PictureType.WORK)
+                            .build();
+                    pictureRepository.save(picture);
+                    provider.getWorkPictureSet().add(picture);
+
+                } catch (IOException e) {
+                    throw new RuntimeException("Error happened uploading the images: " + e.getMessage());
+                }
+
+            });
+        }
     }
 
     @Transactional
