@@ -1,6 +1,6 @@
 package app.bys.bys_api.model.enums;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -12,7 +12,7 @@ public enum PhoneCode {
     CODE_0424("0424"),
     CODE_0426("0426"),;
 
-    @JsonProperty
+    @JsonValue
     private final String code;
 
     PhoneCode(String code) {

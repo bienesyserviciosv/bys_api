@@ -37,13 +37,13 @@ public class MobilePaymentDto {
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String referenceNumber;
 
+    @JsonProperty("phone_code")
+    @Enumerated(EnumType.STRING)
+    private PhoneCode phoneCode;
+
     @JsonProperty("phone_number")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String phoneNumber;
-
-//    @JsonProperty("phone_code")
-//    @Enumerated(EnumType.STRING)
-//    private PhoneCode phoneCode;
 
     @JsonProperty("final_user_id")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)

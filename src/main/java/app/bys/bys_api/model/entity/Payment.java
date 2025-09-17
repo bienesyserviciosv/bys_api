@@ -38,9 +38,9 @@ public class Payment {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "phone_code")
-//    private PhoneCode phoneCode;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "phone_code")
+    private PhoneCode phoneCode;
 
     @Column(name = "id_number")
     private String idNumber;
