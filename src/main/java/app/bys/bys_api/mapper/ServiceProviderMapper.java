@@ -4,6 +4,7 @@ import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.enums.PictureType;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -25,7 +26,9 @@ public abstract class ServiceProviderMapper {
                         .filter(Objects::nonNull)
                         .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
                         .collect(Collectors.toSet()));
-        providerDto.setProfilePicture(mediaUrl + provider.getProfilePicture());
+        if (providerDto.getProfilePicture() != null) {
+            providerDto.setProfilePicture(mediaUrl + provider.getProfilePicture());
+        }
     }
 
     @BeforeMapping
@@ -51,21 +54,9 @@ public abstract class ServiceProviderMapper {
     public Set<String> pictureToUrlSet(Set<Picture> pictures) {
         if (pictures == null) return Set.of();
         return pictures.stream()
+                .filter(p -> p.getPictureType() == PictureType.WORK)
                 .map(Picture::getUrl)
                 .collect(Collectors.toSet());
     }
-
-//    @Named("pictureToUrl")
-//    default String pictureToUrl(Picture picture) {
-//        return picture.getUrl();
-//    }
-//
-//    @IterableMapping(qualifiedByName = "pictureToUrl")
-//    @Named("pictureSetToUrlSet")
-//    default Set<String> pictureSetToUrlSet(Set<Picture> pictures) {
-//        return pictures.stream()
-//                .map(this::pictureToUrl)
-//                .collect(Collectors.toSet());
-//    }
 
 }

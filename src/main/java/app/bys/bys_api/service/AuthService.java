@@ -49,8 +49,8 @@ public class AuthService {
     private final ServiceProviderMapper serviceProviderMapper;
     private final OtpService otpService;
     private final UserDetailsService userDetailsService;
-    private final ServiceProviderService serviceProviderService;
     private final FinalUserService finalUserService;
+    private final PictureService pictureService;
 
     public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
 
@@ -121,7 +121,8 @@ public class AuthService {
                 .build();
 
         ServiceProvider savedProvider = serviceProviderRepo.save(provider);
-        serviceProviderService.uploadPictureSet(workPictureSet, profilePicture, savedProvider);
+        pictureService.uploadProfilePictureForProvider(profilePicture, savedProvider);
+        pictureService.uploadWorkPictures(workPictureSet, savedProvider);
         return serviceProviderMapper.entityToDtoWithPicture(savedProvider);
     }
 

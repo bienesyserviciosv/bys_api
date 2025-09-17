@@ -7,6 +7,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.*;
 import app.bys.bys_api.model.enums.PaymentType;
+import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.PaymentSpecification;
 import app.bys.bys_api.utils.MediaConstants;
@@ -179,6 +180,7 @@ public class PaymentService {
             picture.setPayment(payment);
             String url = uploadImage(screenshot);
             picture.setUrl(url);
+            picture.setPictureType(PictureType.PAYMENT_PROOF);
             payment.setScreenshot(url);
             pictureRepository.save(picture);
         }

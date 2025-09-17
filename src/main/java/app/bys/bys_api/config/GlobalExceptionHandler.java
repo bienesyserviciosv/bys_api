@@ -1,9 +1,6 @@
 package app.bys.bys_api.config;
 
-import app.bys.bys_api.error.DuplicateEmailException;
-import app.bys.bys_api.error.DuplicatePhoneException;
-import app.bys.bys_api.error.EmailNotVerifiedException;
-import app.bys.bys_api.error.UserAcceptingWrongOfferException;
+import app.bys.bys_api.error.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +63,14 @@ public class GlobalExceptionHandler {
                         "error", "USER_ACCEPT_WRONG_OFFER",
                         "timestamp", LocalDateTime.now()
                 ));
+    }
+
+    @ExceptionHandler(InvalidPictureException.class)
+    public ResponseEntity<Map<String, String>> handleBadRequest(InvalidPictureException ex) {
+        Map<String, String> errorBody = new HashMap<>();
+        errorBody.put("error", "Bad Request");
+        errorBody.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }
 
 

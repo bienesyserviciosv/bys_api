@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.entity;
 
+import app.bys.bys_api.model.enums.PictureType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,10 @@ public class Picture {
 
     @Column(name = "url")
     private String url;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "picture_type")
+    private PictureType pictureType;
 
     @ManyToOne
     @JoinColumn(name = "service_request_id")

@@ -89,7 +89,7 @@ public class ServiceProvider {
     private String profilePicture;
 
     @Builder.Default
-    @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private Set<Picture> workPictureSet = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = CascadeType.PERSIST)

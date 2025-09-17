@@ -12,13 +12,16 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/picture")
 @RequiredArgsConstructor
-public class PictureController {
+@PreAuthorize("hasAuthority('ROLE_USER')")
+@RequestMapping("/picture/final_user")
+public class FinalUserPictureController {
 
     private final PictureService pictureService;
     private final FinalUserRepository finalUserRepository;
@@ -26,26 +29,30 @@ public class PictureController {
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
 
-    @PostMapping("/final_user/{userId}")
-    public ResponseEntity<FinalUserDto> uploadPicture(@PathVariable Long userId, @RequestParam("image") MultipartFile newImage) {
-        FinalUser finalUser = finalUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
+    @PostMapping("/profile/me")
+    public ResponseEntity<FinalUserDto> uploadPicture(Authentication authentication, @RequestParam("image") MultipartFile newImage) {
+        String email = authentication.getName();
+        FinalUser finalUser = finalUserRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
         String oldImage = finalUser.getProfilePicture();
         if (oldImage != null) {
             mediaRepository.deleteImage(oldImage);
         }
-        String newImageUrl = pictureService.uploadForFinalUser(newImage, finalUser);
+        String newImageUrl = pictureService.uploadProfilePictureForFinalUser(newImage, finalUser);
         finalUser.setProfilePicture(newImageUrl);
         finalUserRepository.save(finalUser);
         FinalUserDto finalUserDto = finalUserMapper.entityToDto(finalUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(finalUserDto);
     }
 
-    @DeleteMapping("/final_user/{userId}")
-    public ResponseEntity<Void> deletePicture(@PathVariable Long userId) {
-        FinalUser finalUser = finalUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
+    @DeleteMapping("/profile/me")
+    public ResponseEntity<Void> deletePicture(Authentication authentication) {
+        String email = authentication.getName();
+        FinalUser finalUser = finalUserRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
+
+        Long userId = finalUser.getId();
 
         Picture picture = pictureRepository.findByFinalUserId(finalUser.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " does not have a picture"));
