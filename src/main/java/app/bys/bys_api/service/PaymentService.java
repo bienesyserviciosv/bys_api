@@ -8,6 +8,7 @@ import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.*;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.model.enums.PictureType;
+import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.PaymentSpecification;
 import app.bys.bys_api.utils.MediaConstants;
@@ -36,6 +37,7 @@ public class PaymentService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final OfferRepository offerRepository;
     private final MediaRepository mediaRepository;
+    private final ServiceRequestRepository serviceRequestRepository;
 
     public Object getPayment(Long id) {
         Payment payment = paymentRepository.findById(id)
@@ -118,8 +120,14 @@ public class PaymentService {
 
         mobilePayment.setPaymentType(PaymentType.MOBILE);
 
+        ServiceRequest serviceRequest = serviceRequestRepository.findById(offer.getServiceRequestId())
+                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found"));
+        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
+
         Payment savedPayment = paymentRepository.save(mobilePayment);
+        serviceRequestRepository.save(serviceRequest);
         attachScreenshotToPayment(picture, savedPayment);
+
         return paymentMapper.entityToMobileDto(savedPayment);
     }
 
@@ -145,7 +153,12 @@ public class PaymentService {
 
         transferPayment.setPaymentType(PaymentType.TRANSFER);
 
+        ServiceRequest serviceRequest = serviceRequestRepository.findById(offer.getServiceRequestId())
+                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found"));
+        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
+
         Payment savedPayment = paymentRepository.save(transferPayment);
+        serviceRequestRepository.save(serviceRequest);
         attachScreenshotToPayment(picture, savedPayment);
         return paymentMapper.entityToTransferDto(savedPayment);
     }

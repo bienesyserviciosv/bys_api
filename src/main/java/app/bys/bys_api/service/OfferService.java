@@ -130,13 +130,6 @@ public class OfferService {
         serviceProviderRepo.save(serviceProvider);
         serviceRequestRepo.save(request);
 
-       /* MOVER ESTA LOGICA A CUANDO SE ACEPTA EL PAGO
-        ServiceRequest serviceRequest = serviceRequestRepo.findById(offer.getServiceRequestId())
-                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found"));
-
-        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
-        serviceRequestRepo.save(serviceRequest);*/
-
         return offerMapper.entityToDto(offerRepo.save(offer));
     }
 
