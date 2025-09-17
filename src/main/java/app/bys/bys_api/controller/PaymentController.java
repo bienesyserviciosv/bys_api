@@ -4,6 +4,7 @@ import app.bys.bys_api.model.dto.MobilePaymentDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.enums.BankName;
+import app.bys.bys_api.model.enums.PhoneCode;
 import app.bys.bys_api.service.PaymentService;
 import app.bys.bys_api.validation.OnCreate;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,14 @@ public class PaymentController {
     public ResponseEntity<List<String>> getAvailableBanks() {
         List<String> banks = Arrays.stream(BankName.values())
                 .map(BankName::getDisplayName)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(banks);
+    }
+
+    @GetMapping("/phone_codes")
+    public ResponseEntity<List<String>> getPhoneCodes() {
+        List<String> banks = Arrays.stream(PhoneCode.values())
+                .map(PhoneCode::getCode)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(banks);
     }
