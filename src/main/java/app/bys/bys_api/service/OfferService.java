@@ -1,6 +1,6 @@
 package app.bys.bys_api.service;
 
-import app.bys.bys_api.error.UserAcceptingWrongOfferException;
+import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.OfferMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.OfferDto;
@@ -115,7 +115,7 @@ public class OfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found"));
 
         if (!isUserAuthorizedToAcceptThisOffer(finalUser, offer)) {
-            throw new UserAcceptingWrongOfferException("The user can only accept offers from requests they made");
+            throw new ForbiddenActionException("The user can only accept offers from requests they made");
         }
 
         offer.setFinalUser(finalUser);

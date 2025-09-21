@@ -1,17 +1,22 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.NotificationMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.NotificationDto;
 import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Notification;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.Province;
+import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.NotificationRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
+import app.bys.bys_api.repository.ServiceRequestRepository;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +38,8 @@ public class NotificationService {
     private final FinalUserRepository finalUserRepository;
     private final ServiceRequestRepository serviceRequestRepository;
 
-    public void notifyProviders(Long specializationId, Province address, ServiceRequest serviceRequest) {
+
+    public void notifyProvidersOfNewRequest(Long specializationId, Province address, ServiceRequest serviceRequest) {
 
         List<ServiceProvider> providers = serviceProviderRepository.findByAddressAndSpecializations_Id(address, specializationId);
 
@@ -58,10 +61,14 @@ public class NotificationService {
         }
     }
 
-    public PageDto<NotificationDto> getNotifications(Pageable pageable, String search, List<Long> providerIdList) {
+    public PageDto<NotificationDto> getAllNotifications(Pageable pageable, String search, List<Long> providerIdList, List<Long> finalUserIdList) {
 
         Specification<Notification> providerSpec =
                 providerIdList != null ? NotificationSpecification.hasProvider(providerIdList)
+                        : null;
+
+        Specification<Notification> userSpec =
+                finalUserIdList != null ? NotificationSpecification.hasUser(finalUserIdList)
                         : null;
 
         NotificationSpecification searchSpec =
@@ -76,6 +83,7 @@ public class NotificationService {
 
         List<Specification<Notification>> specList = new ArrayList<>(Arrays.asList(
                 providerSpec,
+                userSpec,
                 searchSpec
         ));
 
@@ -87,15 +95,49 @@ public class NotificationService {
 
     }
 
+    public NotificationDto getById(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification with id " + notificationId + " not found"));
+
+        return notificationMapper.toDto(notification);
+    }
+
+    public NotificationDto readNotification(Long notificationId, String email) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification with id " + notificationId + " not found"));
+
+        Optional<FinalUser> finalUserOpt = finalUserRepository.findByEmail(email);
+        Optional<ServiceProvider> providerOpt = serviceProviderRepository.findByEmail(email);
+
+        if (finalUserOpt.isPresent() && notification.getFinalUser() != null) {
+            if (Objects.equals(notification.getFinalUser().getId(), finalUserOpt.get().getId())) {
+                notification.setRead(true);
+                notificationRepository.save(notification);
+                return notificationMapper.toDto(notification);
+            }
+        }
+
+        if (providerOpt.isPresent() && notification.getServiceProvider() != null) {
+            if (Objects.equals(notification.getServiceProvider().getId(), providerOpt.get().getId())) {
+                notification.setRead(true);
+                notificationRepository.save(notification);
+                return notificationMapper.toDto(notification);
+            }
+        }
+
+        throw new ForbiddenActionException("The user can't read this notification");
+    }
+
+
     public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId) {
         FinalUser finalUser = finalUserRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("Final user with id: " + userId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
         ServiceProvider serviceProvider = serviceProviderRepository.findById(providerId)
-                .orElseThrow(()-> new EntityNotFoundException("ServiceProvider with id: " + providerId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("ServiceProvider with id: " + providerId + " not found"));
 
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
-                .orElseThrow(()-> new EntityNotFoundException("ServiceRequest with id: " + requestId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("ServiceRequest with id: " + requestId + " not found"));
 
         Notification providerNotification = Notification.builder()
                 .serviceProvider(serviceProvider)

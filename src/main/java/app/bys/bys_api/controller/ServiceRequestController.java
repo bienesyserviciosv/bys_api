@@ -57,7 +57,7 @@ public class ServiceRequestController {
         ServiceRequest serviceRequest = serviceRequestService.createWithUserId(id, serviceRequestDto, files);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
-        notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
+        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequestDto.getAddress(), serviceRequest);
 
         return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
     }
@@ -72,7 +72,7 @@ public class ServiceRequestController {
         ServiceRequest serviceRequest = serviceRequestService.create(auth.getName(), serviceRequestDto, files);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
-        notificationService.notifyProviders(specializationId, serviceRequestDto.getAddress(), serviceRequest);
+        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequestDto.getAddress(), serviceRequest);
 
         return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
     }
