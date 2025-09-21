@@ -33,6 +33,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final ServiceProviderRepository serviceProviderRepository;
     private final NotificationMapper notificationMapper;
+    private final FinalUserRepository finalUserRepository;
+    private final ServiceRequestRepository serviceRequestRepository;
 
     public void notifyProviders(Long specializationId, Province address, ServiceRequest serviceRequest) {
 
@@ -84,5 +86,38 @@ public class NotificationService {
                 pageable).map(notificationMapper::toDto));
 
     }
+
+    public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId) {
+        FinalUser finalUser = finalUserRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("Final user with id: " + userId + " not found"));
+
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(providerId)
+                .orElseThrow(()-> new EntityNotFoundException("ServiceProvider with id: " + providerId + " not found"));
+
+        ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
+                .orElseThrow(()-> new EntityNotFoundException("ServiceRequest with id: " + requestId + " not found"));
+
+        Notification providerNotification = Notification.builder()
+                .serviceProvider(serviceProvider)
+                .message("Su oferta a la solicitud fue aceptada")
+                .read(false)
+                .serviceRequest(serviceRequest)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+
+        Notification userNotification = Notification.builder()
+                .finalUser(finalUser)
+                .message("Su solicitud fue aceptada")
+                .read(false)
+                .serviceRequest(serviceRequest)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(providerNotification);
+        notificationRepository.save(userNotification);
+
+    }
+
 
 }

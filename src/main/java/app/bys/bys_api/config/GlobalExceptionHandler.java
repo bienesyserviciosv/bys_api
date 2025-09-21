@@ -55,20 +55,18 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(UserAcceptingWrongOfferException.class)
-    public ResponseEntity<Map<String, Object>> handleUserAcceptingWrongOffer(UserAcceptingWrongOfferException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of(
-                        "message", ex.getMessage(),
-                        "error", "USER_ACCEPT_WRONG_OFFER",
-                        "timestamp", LocalDateTime.now()
-                ));
-    }
-
     @ExceptionHandler(InvalidPictureException.class)
     public ResponseEntity<Map<String, String>> handleBadRequest(InvalidPictureException ex) {
         Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", "Bad Request");
+        errorBody.put("error", "INVALID_PICTURE");
+        errorBody.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
+    }
+
+    @ExceptionHandler(ServiceRequestAlreadyAcceptedException.class)
+    public ResponseEntity<Map<String, String>> handleRequestAlreadyAccepted(ServiceRequestAlreadyAcceptedException ex) {
+        Map<String, String> errorBody = new HashMap<>();
+        errorBody.put("error", "REQUEST_ALREADY_ACCEPTED");
         errorBody.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }

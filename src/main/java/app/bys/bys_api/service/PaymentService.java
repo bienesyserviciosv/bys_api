@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.ServiceRequestAlreadyAcceptedException;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.PaymentMapper;
 import app.bys.bys_api.model.dto.MobilePaymentDto;
@@ -120,12 +121,7 @@ public class PaymentService {
 
         mobilePayment.setPaymentType(PaymentType.MOBILE);
 
-        ServiceRequest serviceRequest = serviceRequestRepository.findById(offer.getServiceRequestId())
-                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found"));
-        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
-
         Payment savedPayment = paymentRepository.save(mobilePayment);
-        serviceRequestRepository.save(serviceRequest);
         attachScreenshotToPayment(picture, savedPayment);
 
         return paymentMapper.entityToMobileDto(savedPayment);
@@ -153,12 +149,7 @@ public class PaymentService {
 
         transferPayment.setPaymentType(PaymentType.TRANSFER);
 
-        ServiceRequest serviceRequest = serviceRequestRepository.findById(offer.getServiceRequestId())
-                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found"));
-        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
-
         Payment savedPayment = paymentRepository.save(transferPayment);
-        serviceRequestRepository.save(serviceRequest);
         attachScreenshotToPayment(picture, savedPayment);
         return paymentMapper.entityToTransferDto(savedPayment);
     }
@@ -185,6 +176,23 @@ public class PaymentService {
         pictureRepository.findByPaymentId(id).ifPresent(pictureRepository::delete);
 
         paymentRepository.deleteById(id);
+    }
+
+    public Payment acceptPayment(Long id) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Payment with id: " + id + " not found"));
+
+        Long requestId = payment.getOffer().getServiceRequestId();
+        ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
+
+        if (serviceRequest.getRequestStatus()==RequestStatus.ACCEPTED) {
+            throw new ServiceRequestAlreadyAcceptedException("Service Request with id: " + requestId + " already accepted");
+        }
+        serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
+        serviceRequestRepository.save(serviceRequest);
+
+        return payment;
     }
 
     public void attachScreenshotToPayment(MultipartFile screenshot, Payment payment) {

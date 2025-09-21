@@ -31,14 +31,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPayment(id));
     }
 
-    @GetMapping
-    public ResponseEntity<PageDto<Object>> getAll(Pageable pageable,
-                                                  @RequestParam(name = "search", required = false) String search,
-                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
-                                                  @RequestParam(name = "provider", required = false) List<Long> providerIdList) {
-        return ResponseEntity.ok(paymentService.getAllPayments(pageable, search, userIdList, providerIdList));
-    }
-
     @PostMapping("/mobile")
     public ResponseEntity<MobilePaymentDto> createMobilePayment(
             @Validated(OnCreate.class) @RequestPart(name = "payment") MobilePaymentDto mobilePaymentDto,
