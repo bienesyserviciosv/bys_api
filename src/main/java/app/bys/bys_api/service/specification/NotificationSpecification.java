@@ -31,7 +31,7 @@ public class NotificationSpecification extends ASpecification<Notification> {
             if (query != null) {
                 query.distinct(true);
             }
-            Join<Notification, ServiceProvider> courses = root.join("recipient");
+            Join<Notification, ServiceProvider> courses = root.join("serviceProvider");
             return criteriaBuilder.in(courses.get("id")).value(providerIdList);
         };
     }

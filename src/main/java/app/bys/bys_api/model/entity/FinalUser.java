@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -64,6 +65,9 @@ public class FinalUser {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "finalUser")
     private Set<Payment> paymentSet;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "finalUser", cascade = CascadeType.REMOVE)
+    private List<Notification> notificationList;
 
 
 }

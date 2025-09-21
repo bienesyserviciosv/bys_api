@@ -41,7 +41,7 @@ public class NotificationService {
         if (providers != null && !providers.isEmpty()) {
             List<Notification> notifications = providers.stream()
                     .map(provider -> Notification.builder()
-                            .recipient(provider)
+                            .serviceProvider(provider)
                             .message("Nueva solicitud disponible en tu zona")
                             .read(false)
                             .timestamp(LocalDateTime.now())

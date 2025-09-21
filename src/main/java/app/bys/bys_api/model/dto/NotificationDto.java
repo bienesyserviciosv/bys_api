@@ -29,8 +29,12 @@ public class NotificationDto {
     private LocalDateTime timestamp;
 
     @JsonProperty("service_provider_id")
-    private Long recipient;
+    private Long serviceProviderId;
 
     @JsonProperty("service_request_id")
     private Long serviceRequestId;
+
+    @JsonProperty("final_user_id")
+    private Long finalUserId;
+
 }
