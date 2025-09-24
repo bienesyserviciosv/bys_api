@@ -39,4 +39,8 @@ public class Notification {
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
+
 }
