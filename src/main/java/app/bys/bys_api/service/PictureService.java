@@ -29,28 +29,35 @@ public class PictureService {
     private final MediaRepository mediaRepository;
     private final PictureMapper pictureMapper;
 
-
     @Transactional
-    public String uploadProfilePictureForFinalUser(MultipartFile profilePicture, FinalUser user) {
-        String imageName = MediaConstants.USER_FOLDER + UUID.randomUUID();
-        try {
-            mediaRepository.saveImage(imageName, profilePicture);
+    public void uploadProfilePictureForFinalUser(MultipartFile profilePicture, FinalUser user) {
+        if (profilePicture != null && !profilePicture.isEmpty()) {
 
-            pictureRepository.deleteByFinalUser(user);
+            String oldImage = user.getProfilePicture();
+            if (oldImage != null) {
+                mediaRepository.deleteImage(oldImage);
+                pictureRepository.deleteByFinalUser(user);
+            }
 
-            Picture picture = Picture.builder()
-                    .finalUser(user)
-                    .url(imageName)
-                    .pictureType(PictureType.PROFILE)
-                    .build();
-            pictureRepository.save(picture);
-            return imageName;
-        } catch (IOException e) {
-            throw new RuntimeException("Error uploading image: " + e.getMessage());
+            String imageName = MediaConstants.USER_FOLDER + UUID.randomUUID();
+
+            try {
+                mediaRepository.saveImage(imageName, profilePicture);
+                Picture picture = Picture.builder()
+                        .finalUser(user)
+                        .url(imageName)
+                        .pictureType(PictureType.PROFILE)
+                        .build();
+                user.setProfilePicture(imageName);
+                pictureRepository.save(picture);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error uploading image: " + e.getMessage());
+            }
         }
     }
 
-    @Transactional
+   @Transactional
     public void deletePicture(Long pictureId) {
         Picture picture = pictureRepository.findById(pictureId)
                 .orElseThrow(() -> new EntityNotFoundException("Picture not found"));

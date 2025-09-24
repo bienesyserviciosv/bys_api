@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -59,4 +60,7 @@ public class Payment {
     @OneToOne
     @JoinColumn(name = "offer_id")
     private Offer offer;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "payment", cascade = CascadeType.REMOVE)
+    private List<Notification> notificationList;
 }

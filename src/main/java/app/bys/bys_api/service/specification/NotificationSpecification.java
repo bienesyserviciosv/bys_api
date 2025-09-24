@@ -22,7 +22,7 @@ public class NotificationSpecification extends ASpecification<Notification> {
                 builder.like(
                         builder.lower(
                                 root.get(
-                                        "name"
+                                        "message"
                                 )
                         ), "%" + ((String) criteria.getValue()).toLowerCase() + "%");
     }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,4 +20,6 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
     Optional<FinalUser> findByPhoneNumber(String phoneNumber);
 
     void deleteByEmail(String email);
+
+    List<FinalUser> findByRoles_Name(String roleName);
 }

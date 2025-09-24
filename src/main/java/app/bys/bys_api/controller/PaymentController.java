@@ -4,11 +4,13 @@ import app.bys.bys_api.model.dto.MobilePaymentDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.enums.BankName;
 import app.bys.bys_api.model.enums.PhoneCode;
+import app.bys.bys_api.service.NotificationService;
 import app.bys.bys_api.service.PaymentService;
 import app.bys.bys_api.validation.OnCreate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,24 +25,32 @@ import java.util.stream.Collectors;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final NotificationService notificationService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getPayment(@PathVariable Long id) {
         return ResponseEntity.ok(paymentService.getPayment(id));
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     @PostMapping("/mobile")
     public ResponseEntity<MobilePaymentDto> createMobilePayment(
             @Validated(OnCreate.class) @RequestPart(name = "payment") MobilePaymentDto mobilePaymentDto,
             @RequestPart(name = "screenshot") MultipartFile picture) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createMobilePayment(mobilePaymentDto, picture));
+
+        MobilePaymentDto paymentDto = paymentService.createMobilePayment(mobilePaymentDto, picture);
+        notificationService.notifyAdminsOfNewPayment(paymentDto.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentDto);
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     @PostMapping("/transfer")
     public ResponseEntity<TransferPaymentDto> createTransferPayment(
             @Validated(OnCreate.class) @RequestPart(name = "payment") TransferPaymentDto transferPaymentDto,
             @RequestPart(name = "screenshot") MultipartFile picture) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createTransferPayment(transferPaymentDto, picture));
+        TransferPaymentDto paymentDto = paymentService.createTransferPayment(transferPaymentDto, picture);
+        notificationService.notifyAdminsOfNewPayment(paymentDto.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentDto);
     }
 
     @PatchMapping("/mobile/{id}")

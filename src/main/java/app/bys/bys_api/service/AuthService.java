@@ -17,6 +17,7 @@ import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -36,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
     private final AuthenticationManager authenticationManager;
@@ -49,7 +52,6 @@ public class AuthService {
     private final ServiceProviderMapper serviceProviderMapper;
     private final OtpService otpService;
     private final UserDetailsService userDetailsService;
-    private final FinalUserService finalUserService;
     private final PictureService pictureService;
 
     public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
@@ -81,12 +83,20 @@ public class AuthService {
                 .build();
 
 
-        FinalUser savedUser = finalUserRepo.save(user);
-        finalUserService.attachProfilePicture(profilePicture, savedUser);
-        finalUserRepo.save(savedUser);
-        return userMapper.entityToDto(savedUser);
+        try {
+            FinalUser savedUser = finalUserRepo.save(user);
+            pictureService.uploadProfilePictureForFinalUser(profilePicture, savedUser);
+
+            return userMapper.entityToDto(savedUser);
+
+        } catch (Exception e) {
+            finalUserRepo.delete(user);
+            log.error("Error during user registration. Cause: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to register new user", e);
+        }
     }
 
+    @Transactional
     public ServiceProviderWithPictureDto registerServiceProvider(ServiceProviderDto dto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
@@ -120,10 +130,19 @@ public class AuthService {
                 .registrationDate(LocalDateTime.now())
                 .build();
 
-        ServiceProvider savedProvider = serviceProviderRepo.save(provider);
-        pictureService.uploadProfilePictureForProvider(profilePicture, savedProvider);
-        pictureService.uploadWorkPictures(workPictureSet, savedProvider);
-        return serviceProviderMapper.entityToDtoWithPicture(savedProvider);
+        try {
+            ServiceProvider savedProvider = serviceProviderRepo.save(provider);
+            pictureService.uploadProfilePictureForProvider(profilePicture, savedProvider);
+            pictureService.uploadWorkPictures(workPictureSet, savedProvider);
+
+            return serviceProviderMapper.entityToDtoWithPicture(savedProvider);
+
+        } catch (Exception e) {
+            serviceProviderRepo.delete(provider);
+            log.error("Error during provider registration. Cause: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to register new provider", e);
+        }
+
     }
 
     //TODO COMPLETE METHOD

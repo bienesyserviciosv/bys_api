@@ -5,7 +5,6 @@ import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.repository.FinalUserRepository;
-import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.service.PictureService;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,7 +25,6 @@ public class FinalUserPictureController {
     private final PictureService pictureService;
     private final FinalUserRepository finalUserRepository;
     private final FinalUserMapper finalUserMapper;
-    private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
 
     @PostMapping("/profile/me")
@@ -35,13 +33,9 @@ public class FinalUserPictureController {
         FinalUser finalUser = finalUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
-        String oldImage = finalUser.getProfilePicture();
-        if (oldImage != null) {
-            mediaRepository.deleteImage(oldImage);
-        }
-        String newImageUrl = pictureService.uploadProfilePictureForFinalUser(newImage, finalUser);
-        finalUser.setProfilePicture(newImageUrl);
+        pictureService.uploadProfilePictureForFinalUser(newImage, finalUser);
         finalUserRepository.save(finalUser);
+
         FinalUserDto finalUserDto = finalUserMapper.entityToDto(finalUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(finalUserDto);
     }

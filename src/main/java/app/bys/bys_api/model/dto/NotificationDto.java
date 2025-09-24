@@ -37,4 +37,7 @@ public class NotificationDto {
     @JsonProperty("final_user_id")
     private Long finalUserId;
 
+    @JsonProperty("payment_id")
+    private Long paymentId;
+
 }

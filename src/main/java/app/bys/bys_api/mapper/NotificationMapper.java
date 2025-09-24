@@ -13,6 +13,7 @@ public interface NotificationMapper {
     @Mapping(source = "serviceProvider.id", target = "serviceProviderId")
     @Mapping(source = "serviceRequest.id", target = "serviceRequestId")
     @Mapping(source = "finalUser.id", target = "finalUserId")
+    @Mapping(source = "payment.id", target = "paymentId")
     NotificationDto toDto(Notification notification);
 
     List<NotificationDto> toDtoList(List<Notification> notifications);
