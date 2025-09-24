@@ -52,7 +52,6 @@ public class AuthService {
     private final ServiceProviderMapper serviceProviderMapper;
     private final OtpService otpService;
     private final UserDetailsService userDetailsService;
-    private final FinalUserService finalUserService;
     private final PictureService pictureService;
 
     public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
