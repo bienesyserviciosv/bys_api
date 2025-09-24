@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -34,7 +33,6 @@ public class FinalUserService {
     private final RoleService roleService;
     private final PictureRepository pictureRepository;
     private final MediaRepository mediaRepository;
-    private final PictureService pictureService;
 
     public FinalUserDto get(Long id) {
         return mapper.entityToDto(finalUserRepository.findById(id).
@@ -148,10 +146,4 @@ public class FinalUserService {
         return finalUserRepository.save(newUser);
     }
 
-    public void attachProfilePicture(MultipartFile image, FinalUser user) {
-        if (image != null && !image.isEmpty()) {
-            String url = pictureService.uploadProfilePictureForFinalUser(image, user);
-            user.setProfilePicture(url);
-        }
-    }
 }

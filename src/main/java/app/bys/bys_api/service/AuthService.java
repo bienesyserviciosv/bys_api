@@ -84,10 +84,17 @@ public class AuthService {
                 .build();
 
 
-        FinalUser savedUser = finalUserRepo.save(user);
-        finalUserService.attachProfilePicture(profilePicture, savedUser);
-        finalUserRepo.save(savedUser);
-        return userMapper.entityToDto(savedUser);
+        try {
+            FinalUser savedUser = finalUserRepo.save(user);
+            pictureService.uploadProfilePictureForFinalUser(profilePicture, savedUser);
+
+            return userMapper.entityToDto(savedUser);
+
+        } catch (Exception e) {
+            finalUserRepo.delete(user);
+            log.error("Error during user registration. Cause: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to register new user", e);
+        }
     }
 
     @Transactional
