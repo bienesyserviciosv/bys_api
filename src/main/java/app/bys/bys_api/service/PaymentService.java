@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.error.ServiceRequestAlreadyAcceptedException;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.PaymentMapper;
@@ -108,6 +109,10 @@ public class PaymentService {
         Offer offer = offerRepository.findById(mobilePaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + mobilePaymentDto.getOfferId() + " not found"));
 
+        if (offer.getPayment() != null){
+            throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
+        }
+
         Payment mobilePayment = paymentMapper.mobileDtoToEntity(mobilePaymentDto);
 
         mobilePayment.setFinalUser(finalUser);
@@ -135,6 +140,9 @@ public class PaymentService {
         Offer offer = offerRepository.findById(transferPaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + transferPaymentDto.getOfferId() + " not found"));
 
+        if (offer.getPayment() != null){
+            throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
+        }
 
         Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
 
