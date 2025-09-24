@@ -10,8 +10,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
-    @Mapping(source = "recipient.id", target = "recipient")
+    @Mapping(source = "serviceProvider.id", target = "serviceProviderId")
     @Mapping(source = "serviceRequest.id", target = "serviceRequestId")
+    @Mapping(source = "finalUser.id", target = "finalUserId")
     NotificationDto toDto(Notification notification);
 
     List<NotificationDto> toDtoList(List<Notification> notifications);

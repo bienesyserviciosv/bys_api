@@ -1,14 +1,12 @@
 package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.MobilePaymentDto;
-import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.enums.BankName;
 import app.bys.bys_api.model.enums.PhoneCode;
 import app.bys.bys_api.service.PaymentService;
 import app.bys.bys_api.validation.OnCreate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -29,14 +27,6 @@ public class PaymentController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getPayment(@PathVariable Long id) {
         return ResponseEntity.ok(paymentService.getPayment(id));
-    }
-
-    @GetMapping
-    public ResponseEntity<PageDto<Object>> getAll(Pageable pageable,
-                                                  @RequestParam(name = "search", required = false) String search,
-                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
-                                                  @RequestParam(name = "provider", required = false) List<Long> providerIdList) {
-        return ResponseEntity.ok(paymentService.getAllPayments(pageable, search, userIdList, providerIdList));
     }
 
     @PostMapping("/mobile")

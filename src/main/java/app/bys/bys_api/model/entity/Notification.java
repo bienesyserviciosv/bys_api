@@ -29,9 +29,14 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "service_provider_id")
-    private ServiceProvider recipient;
+    private ServiceProvider serviceProvider;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_request_id")
     private ServiceRequest serviceRequest;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "final_user_id")
+    private FinalUser finalUser;
+
 }

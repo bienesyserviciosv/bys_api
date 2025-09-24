@@ -7,10 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,12 +16,24 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/notification")
 public class NotificationController {
+
     private final NotificationService notificationService;
 
     @GetMapping
     public ResponseEntity<PageDto<NotificationDto>> getAll(Pageable pageable,
                                                            @RequestParam(name = "search", required = false) String search,
-                                                           @RequestParam(name = "provider", required = false) List<Long> providerIdList) {
-        return new ResponseEntity<>(notificationService.getNotifications(pageable, search, providerIdList), HttpStatus.OK);
+                                                           @RequestParam(name = "provider", required = false) List<Long> providerIdList,
+                                                           @RequestParam(name = "user", required = false) List<Long> finalUserIdList) {
+        return new ResponseEntity<>(notificationService.getAllNotifications(pageable, search, providerIdList, finalUserIdList), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<NotificationDto> get(@PathVariable Long id) {
+        return new ResponseEntity<>(notificationService.getById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/read/{id}")
+    public ResponseEntity<NotificationDto> read(@PathVariable Long id, Authentication auth) {
+        return new ResponseEntity<>(notificationService.readNotification(id, auth.getName()), HttpStatus.OK);
     }
 }

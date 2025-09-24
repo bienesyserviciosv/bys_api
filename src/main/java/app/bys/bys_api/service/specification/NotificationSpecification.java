@@ -1,5 +1,6 @@
 package app.bys.bys_api.service.specification;
 
+import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Notification;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -31,8 +32,18 @@ public class NotificationSpecification extends ASpecification<Notification> {
             if (query != null) {
                 query.distinct(true);
             }
-            Join<Notification, ServiceProvider> courses = root.join("recipient");
+            Join<Notification, ServiceProvider> courses = root.join("serviceProvider");
             return criteriaBuilder.in(courses.get("id")).value(providerIdList);
+        };
+    }
+
+    public static Specification<Notification> hasUser(List<Long> finalUserIdList) {
+        return (root, query, criteriaBuilder) -> {
+            if (query != null) {
+                query.distinct(true);
+            }
+            Join<Notification, FinalUser> courses = root.join("finalUser");
+            return criteriaBuilder.in(courses.get("id")).value(finalUserIdList);
         };
     }
 }
