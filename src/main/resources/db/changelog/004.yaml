@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1759077269056-1
+      author: Carlos
+      changes:
+        - renameColumn:
+            tableName: service_provider
+            oldColumnName: level
+            newColumnName: membership_type
+            columnDataType: SMALLINT
+
+  - changeSet:
+      id: 1759077269056-2
+      author: Carlos
+      changes:
+        - modifyDataType:
+            tableName: service_provider
+            columnName: membership_type
+            newDataType: VARCHAR(255)
+
+  - changeSet:
+      id: 1759077269056-3
+      author: Carlos
+      changes:
+        - sql:
+            sql: |
+              UPDATE service_provider SET membership_type = 'NOT_VERIFIED' WHERE membership_type = '0';
+              UPDATE service_provider SET membership_type = 'BRONZE'       WHERE membership_type = '1';
+              UPDATE service_provider SET membership_type = 'SILVER'       WHERE membership_type = '2';
+              UPDATE service_provider SET membership_type = 'GOLD'         WHERE membership_type = '3';
+              UPDATE service_provider SET membership_type = 'PLATINUM'     WHERE membership_type = '4';

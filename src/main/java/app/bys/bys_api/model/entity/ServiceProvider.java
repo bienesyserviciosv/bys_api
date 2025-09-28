@@ -38,7 +38,8 @@ public class ServiceProvider {
     @Column(name = "verified")
     private Boolean verified;
 
-    @Column(name = "level")
+    @Column(name = "membership_type")
+    @Enumerated(EnumType.STRING)
     private MembershipType membershipType;
 
     @Column(name = "latitude")

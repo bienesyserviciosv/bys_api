@@ -7,4 +7,6 @@ databaseChangeLog:
       file: db/changelog/002.yaml
   - include:
       file: db/changelog/003.yaml
+  - include:
+      file: db/changelog/004.yaml
 
