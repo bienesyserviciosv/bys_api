@@ -2,6 +2,7 @@ package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.model.enums.BankName;
+import app.bys.bys_api.model.enums.PaymentStatus;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.validation.OnCreate;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -58,4 +59,7 @@ public class TransferPaymentDto {
 
     @JsonProperty ("payment_type")
     private PaymentType paymentType;
+
+    @JsonProperty("payment_status")
+    private PaymentStatus paymentStatus;
 }

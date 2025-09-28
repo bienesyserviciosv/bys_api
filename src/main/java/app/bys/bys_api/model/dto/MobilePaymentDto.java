@@ -2,6 +2,7 @@ package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.model.enums.BankName;
+import app.bys.bys_api.model.enums.PaymentStatus;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.model.enums.PhoneCode;
 import app.bys.bys_api.validation.OnCreate;
@@ -38,7 +39,6 @@ public class MobilePaymentDto {
     private String referenceNumber;
 
     @JsonProperty("phone_code")
-    @Enumerated(EnumType.STRING)
     private PhoneCode phoneCode;
 
     @JsonProperty("phone_number")
@@ -57,7 +57,9 @@ public class MobilePaymentDto {
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private Long offerId;
 
-    @Enumerated(EnumType.STRING)
     @JsonProperty ("payment_type")
     private PaymentType paymentType;
+
+    @JsonProperty("payment_status")
+    private PaymentStatus paymentStatus;
 }
