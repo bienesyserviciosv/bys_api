@@ -5,8 +5,6 @@ import app.bys.bys_api.model.enums.BankName;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.validation.OnCreate;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -24,7 +22,6 @@ public class TransferPaymentDto {
     @JsonProperty("id")
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @JsonProperty("bank")
     private BankName bank;
 
@@ -39,6 +36,10 @@ public class TransferPaymentDto {
     @Size(min = 6, max = 6, groups = OnCreate.class, message = "Must have 6 numbers")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String referenceNumber;
+
+    @JsonProperty("account_holder_name")
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    private String accountHolderName;
 
     @JsonProperty ("payment_date")
     private LocalDateTime paymentDate;
@@ -55,7 +56,6 @@ public class TransferPaymentDto {
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private Long offerId;
 
-    @Enumerated(EnumType.STRING)
     @JsonProperty ("payment_type")
     private PaymentType paymentType;
 }

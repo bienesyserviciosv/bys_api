@@ -49,6 +49,8 @@ public class Payment {
     @Column(name = "screenshot")
     private String screenshot;
 
+    @Column(name = "account_holder_name")
+    private String accountHolderName;
     @ManyToOne
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
