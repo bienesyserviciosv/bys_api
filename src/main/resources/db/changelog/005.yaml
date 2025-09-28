@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1759078810832-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - modifyDataType:
+            tableName: service_request
+            columnName: request_status
+            newDataType: VARCHAR(255)
+
+  - changeSet:
+      id: 1759078810832-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - sql:
+            sql: |
+              UPDATE service_request SET request_status = 'PENDING' WHERE request_status = '0';
+              UPDATE service_request SET request_status = 'ACCEPTED' WHERE request_status = '1';
+              UPDATE service_request SET request_status = 'COMPLETED' WHERE request_status = '2';
+              UPDATE service_request SET request_status = 'CANCELLED' WHERE request_status = '3';
+              

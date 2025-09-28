@@ -44,6 +44,7 @@ public class ServiceRequest {
     private LocalTime time;
 
     @Column(name = "request_status")
+    @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
     @Column(name = "offer_quantity")
