@@ -52,7 +52,7 @@ public class FinalUser {
     private String profilePicture;
 
     @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private Set<ServiceRequest> serviceRequest;
+    private Set<ServiceRequest> serviceRequestSet;
 
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(name = "final_users_roles",

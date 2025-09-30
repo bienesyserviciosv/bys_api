@@ -44,7 +44,6 @@ public class ServiceRequestWithPictureDto {
 
     @Builder.Default
     @JsonProperty("status")
-    @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus = RequestStatus.PENDING;
 
     @JsonProperty("specialization")
@@ -65,5 +64,8 @@ public class ServiceRequestWithPictureDto {
     @Builder.Default
     @JsonProperty("new_offer")
     private Boolean newOffer = false;
+
+    @JsonProperty("service_provider_id")
+    private Long serviceProviderId;
 
 }

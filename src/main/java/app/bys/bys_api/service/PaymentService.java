@@ -8,6 +8,7 @@ import app.bys.bys_api.model.dto.MobilePaymentDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.*;
+import app.bys.bys_api.model.enums.PaymentStatus;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.model.enums.RequestStatus;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -108,9 +110,15 @@ public class PaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + mobilePaymentDto.getServiceProviderId() + " not found"));
         Offer offer = offerRepository.findById(mobilePaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + mobilePaymentDto.getOfferId() + " not found"));
+        ServiceRequest request = serviceRequestRepository.findById(offer.getServiceRequest().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " +  offer.getServiceRequest().getId() + " not found"));
 
         if (offer.getPayment() != null){
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
+        }
+
+        if (!offer.equals(request.getAcceptedOffer())) {
+            throw new ForbiddenActionException("The offer has not been accepted");
         }
 
         Payment mobilePayment = paymentMapper.mobileDtoToEntity(mobilePaymentDto);
@@ -125,6 +133,7 @@ public class PaymentService {
         offer.setPayment(mobilePayment);
 
         mobilePayment.setPaymentType(PaymentType.MOBILE);
+        mobilePayment.setPaymentStatus(PaymentStatus.PENDING);
 
         Payment savedPayment = paymentRepository.save(mobilePayment);
         attachScreenshotToPayment(picture, savedPayment);
@@ -139,9 +148,15 @@ public class PaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + transferPaymentDto.getServiceProviderId() + " not found"));
         Offer offer = offerRepository.findById(transferPaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + transferPaymentDto.getOfferId() + " not found"));
+        ServiceRequest request = serviceRequestRepository.findById(offer.getServiceRequest().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " +  offer.getServiceRequest().getId() + " not found"));
 
         if (offer.getPayment() != null){
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
+        }
+
+        if (!offer.equals(request.getAcceptedOffer())) {
+            throw new ForbiddenActionException("The offer has not been accepted");
         }
 
         Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
@@ -156,6 +171,7 @@ public class PaymentService {
         offer.setPayment(transferPayment);
 
         transferPayment.setPaymentType(PaymentType.TRANSFER);
+        transferPayment.setPaymentStatus(PaymentStatus.PENDING);
 
         Payment savedPayment = paymentRepository.save(transferPayment);
         attachScreenshotToPayment(picture, savedPayment);
@@ -186,17 +202,27 @@ public class PaymentService {
         paymentRepository.deleteById(id);
     }
 
+    @Transactional
     public Payment acceptPayment(Long id) {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment with id: " + id + " not found"));
 
-        Long requestId = payment.getOffer().getServiceRequestId();
+        Long requestId = payment.getOffer().getServiceRequest().getId();
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
         if (serviceRequest.getRequestStatus()==RequestStatus.ACCEPTED) {
             throw new ServiceRequestAlreadyAcceptedException("Service Request with id: " + requestId + " already accepted");
         }
+
+        if (serviceRequest.getAcceptedOffer() == null){
+            throw new ForbiddenActionException("Service Request with id: " + requestId + " doesn't have an accepted offer");
+        }
+
+        payment.setPaymentStatus(PaymentStatus.ACCEPTED);
+        paymentRepository.save(payment);
+
+        serviceRequest.setServiceProvider(serviceRequest.getAcceptedOffer().getProvider());
         serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
         serviceRequestRepository.save(serviceRequest);
 

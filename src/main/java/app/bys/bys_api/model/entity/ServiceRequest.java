@@ -69,8 +69,12 @@ public class ServiceRequest {
     @JoinColumn(name = "service_provider_id")
     private ServiceProvider serviceProvider;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private Set<Offer> offerSet =  new HashSet<>();
+    @OneToMany(mappedBy = "serviceRequest", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private Set<Offer> offerSet = new HashSet<>();
+
+    @OneToOne
+    @JoinColumn(name = "accepted_offer_id")
+    private Offer acceptedOffer;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest", cascade = CascadeType.REMOVE)
     private List<Notification> notificationList;

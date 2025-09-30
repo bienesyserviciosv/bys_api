@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.entity;
 
 import app.bys.bys_api.model.enums.BankName;
+import app.bys.bys_api.model.enums.PaymentStatus;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.model.enums.PhoneCode;
 import jakarta.persistence.*;

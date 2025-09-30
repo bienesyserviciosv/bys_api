@@ -9,9 +9,9 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.OfferRepository;
-import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
 import app.bys.bys_api.service.specification.OfferSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -21,7 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +35,6 @@ public class OfferService {
     private final OfferMapper offerMapper;
     private final ServiceRequestRepository serviceRequestRepo;
     private final FinalUserRepository finalUserRepo;
-    private final ServiceProviderRepository serviceProviderRepo;
 
     public OfferDto get(Long id) {
         return offerMapper.entityToDto(offerRepo.findById(id)
@@ -78,6 +80,10 @@ public class OfferService {
         ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
+        if (!serviceRequest.getRequestStatus().equals(RequestStatus.PENDING)) {
+            throw new ForbiddenActionException("Cannot create offers for non-pending requests");
+        }
+
         Integer offerQuantity = serviceRequest.getOfferQuantity();
         offerQuantity++;
 
@@ -88,6 +94,7 @@ public class OfferService {
 
         Offer offer = offerMapper.dtoToEntity(offerDto);
         offer.setProvider(provider);
+        offer.setServiceRequest(serviceRequest);
 
         return offerMapper.entityToDto(offerRepo.save(offer));
     }
@@ -114,30 +121,27 @@ public class OfferService {
         Offer offer = offerRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found"));
 
-        if (!isUserAuthorizedToAcceptThisOffer(finalUser, offer)) {
+        ServiceRequest request = serviceRequestRepo.findById(offer.getServiceRequest().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequest().getId() + " not found in this offer"));
+
+        if (!offer.getServiceRequest().getFinalUser().equals(finalUser)) {
             throw new ForbiddenActionException("The user can only accept offers from requests they made");
+        }
+
+        if (request.getAcceptedOffer() != null) {
+            throw new ForbiddenActionException("This service request already has an accepted offer");
+        }
+
+        if (!request.getOfferSet().contains(offer)) {
+            throw new IllegalArgumentException("This offer does not belong to the service request");
         }
 
         offer.setFinalUser(finalUser);
         offer.setAccepted(true);
 
-        ServiceProvider serviceProvider = offer.getProvider();
-        Set<ServiceRequest> servRequestSet = serviceProvider.getServiceRequestSet();
-        ServiceRequest request = serviceRequestRepo.findById(offer.getServiceRequestId())
-                .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequestId() + " not found in this offer"));
-        servRequestSet.add(request);
-        request.setServiceProvider(serviceProvider);
-        serviceProviderRepo.save(serviceProvider);
+        request.setAcceptedOffer(offer);
         serviceRequestRepo.save(request);
 
         return offerMapper.entityToDto(offerRepo.save(offer));
-    }
-
-    private boolean isUserAuthorizedToAcceptThisOffer(FinalUser finalUser, Offer offer) {
-        Long requestId = offer.getServiceRequestId();
-
-        return finalUser.getServiceRequest().stream()
-                .map(ServiceRequest::getId)
-                .anyMatch(id -> id.equals(requestId));
     }
 }

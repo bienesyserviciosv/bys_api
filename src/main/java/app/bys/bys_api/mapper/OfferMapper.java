@@ -7,9 +7,12 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface OfferMapper {
 
+    @Mapping(target = "provider.id", source = "providerId")
+    @Mapping(target = "serviceRequest.id", source = "serviceRequestId")
     Offer dtoToEntity(OfferDto offerDto);
 
     @Mapping(target = "providerId", source = "provider.id")
+    @Mapping(target = "serviceRequestId", source = "serviceRequest.id")
     OfferDto entityToDto(Offer offer);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

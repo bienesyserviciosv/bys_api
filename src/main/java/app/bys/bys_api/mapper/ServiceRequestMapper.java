@@ -37,11 +37,13 @@ public abstract class ServiceRequestMapper {
 
     public abstract ServiceRequest dtoToEntity(ServiceRequestDto serviceRequestDto);
 
+    @Mapping(target = "serviceProviderId", source = "serviceProvider.id")
     public abstract ServiceRequestDto entityToDto(ServiceRequest serviceRequest);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateServiceRequestFromDto(ServiceRequestDto serviceRequestDto, @MappingTarget ServiceRequest serviceRequest);
 
+    @Mapping(target = "serviceProviderId", source = "serviceProvider.id")
     @Mapping(target = "pictureSet", source = "pictureSet", qualifiedByName = "pictureToUrlSet")
     public abstract ServiceRequestWithPictureDto entityToDtoWithPicture(ServiceRequest serviceRequest);
 

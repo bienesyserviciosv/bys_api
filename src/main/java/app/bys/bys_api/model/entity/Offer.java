@@ -29,8 +29,9 @@ public class Offer {
     @JoinColumn(name = "provider_id", nullable = false)
     private ServiceProvider provider;
 
-    @Column(name = "service_request_id", nullable = false)
-    private Long serviceRequestId;
+    @ManyToOne
+    @JoinColumn(name = "service_request_id", nullable = false)
+    private ServiceRequest serviceRequest;
 
     @ManyToOne
     @JoinColumn(name = "final_user_id")

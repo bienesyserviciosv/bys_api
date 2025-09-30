@@ -39,7 +39,7 @@ public class AdminPaymentController {
     @PatchMapping("/accept/{id}")
     public ResponseEntity<ServiceRequestDto> acceptPayment(@PathVariable Long id) {
         Payment payment = paymentService.acceptPayment(id);
-        Long requestId = payment.getOffer().getServiceRequestId();
+        Long requestId = payment.getOffer().getServiceRequest().getId();
         Long userId = payment.getFinalUser().getId();
         Long providerId = payment.getServiceProvider().getId();
         notificationService.notifyPaymentAccepted(userId, providerId, requestId);
@@ -49,6 +49,5 @@ public class AdminPaymentController {
 
         return ResponseEntity.ok(serviceRequestMapper.entityToDto(serviceRequest));
     }
-
 
 }
