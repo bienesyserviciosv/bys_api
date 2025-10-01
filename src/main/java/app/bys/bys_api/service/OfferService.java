@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,6 +115,7 @@ public class OfferService {
         offerRepo.deleteById(id);
     }
 
+    @Transactional
     public OfferDto acceptOffer(String email, Long id) {
         FinalUser finalUser = finalUserRepo.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " not found"));
@@ -124,22 +126,30 @@ public class OfferService {
         ServiceRequest request = serviceRequestRepo.findById(offer.getServiceRequest().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequest().getId() + " not found in this offer"));
 
+        //Validación de estado de la solicitud. Si tiene el estado valido es que puede aceptar una oferta
         if (!offer.getServiceRequest().getFinalUser().equals(finalUser)) {
             throw new ForbiddenActionException("The user can only accept offers from requests they made");
         }
 
-        if (request.getAcceptedOffer() != null) {
-            throw new ForbiddenActionException("This service request already has an accepted offer");
+        if (offer.equals(request.getAcceptedOffer())) {
+            throw new ForbiddenActionException("This offer is already the accepted one");
         }
 
         if (!request.getOfferSet().contains(offer)) {
             throw new IllegalArgumentException("This offer does not belong to the service request");
         }
 
+        Offer previousAccepted = request.getAcceptedOffer();
+        if (previousAccepted != null) {
+            previousAccepted.setAccepted(false);
+            offerRepo.save(previousAccepted);
+        }
+
         offer.setFinalUser(finalUser);
         offer.setAccepted(true);
 
         request.setAcceptedOffer(offer);
+        request.setRequestStatus(RequestStatus.IN_PROGRESS);
         serviceRequestRepo.save(request);
 
         return offerMapper.entityToDto(offerRepo.save(offer));

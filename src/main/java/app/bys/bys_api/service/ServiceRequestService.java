@@ -127,6 +127,7 @@ public class ServiceRequestService {
         FinalUser finalUser = finalUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
+        //Setearle el estado de creada (estado 1)
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
         ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
 

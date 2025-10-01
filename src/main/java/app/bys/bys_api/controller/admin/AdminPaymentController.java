@@ -37,7 +37,7 @@ public class AdminPaymentController {
     }
 
     @PatchMapping("/accept/{id}")
-    public ResponseEntity<ServiceRequestDto> acceptPayment(@PathVariable Long id) {
+    public ResponseEntity<ServiceRequestDto> accept(@PathVariable Long id) {
         Payment payment = paymentService.acceptPayment(id);
         Long requestId = payment.getOffer().getServiceRequest().getId();
         Long userId = payment.getFinalUser().getId();
@@ -50,4 +50,14 @@ public class AdminPaymentController {
         return ResponseEntity.ok(serviceRequestMapper.entityToDto(serviceRequest));
     }
 
+    @PatchMapping("/reject/{id}")
+    public ResponseEntity<ServiceRequestDto> reject(@PathVariable Long id) {
+        Payment payment = paymentService.rejectPayment(id);
+
+        Long requestId = payment.getOffer().getServiceRequest().getId();
+        ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Service request not found"));
+
+        return ResponseEntity.ok(serviceRequestMapper.entityToDto(serviceRequest));
+    }
 }

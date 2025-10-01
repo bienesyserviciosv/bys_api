@@ -135,6 +135,8 @@ public class PaymentService {
         mobilePayment.setPaymentType(PaymentType.MOBILE);
         mobilePayment.setPaymentStatus(PaymentStatus.PENDING);
 
+        //Setea el estado Pending a la solicitud
+
         Payment savedPayment = paymentRepository.save(mobilePayment);
         attachScreenshotToPayment(picture, savedPayment);
 
@@ -172,6 +174,8 @@ public class PaymentService {
 
         transferPayment.setPaymentType(PaymentType.TRANSFER);
         transferPayment.setPaymentStatus(PaymentStatus.PENDING);
+
+        //Setea el estado Pending a la solicitud
 
         Payment savedPayment = paymentRepository.save(transferPayment);
         attachScreenshotToPayment(picture, savedPayment);
@@ -229,7 +233,30 @@ public class PaymentService {
         return payment;
     }
 
-    public void attachScreenshotToPayment(MultipartFile screenshot, Payment payment) {
+    @Transactional
+    public Payment rejectPayment(Long id) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Payment with id: " + id + " not found"));
+
+        Long requestId = payment.getOffer().getServiceRequest().getId();
+        ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
+
+        if (serviceRequest.getAcceptedOffer() == null){
+            throw new ForbiddenActionException("Service Request with id: " + requestId + " doesn't have an accepted offer");
+        }
+
+        payment.setPaymentStatus(PaymentStatus.REJECTED);
+        paymentRepository.save(payment);
+
+        serviceRequest.setRequestStatus(RequestStatus.IN_REVIEW);
+        serviceRequestRepository.save(serviceRequest);
+
+        return payment;
+
+    }
+
+        public void attachScreenshotToPayment(MultipartFile screenshot, Payment payment) {
         if (screenshot != null) {
             Picture picture = new Picture();
             picture.setPayment(payment);
