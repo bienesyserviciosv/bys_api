@@ -160,7 +160,7 @@ public class NotificationService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found with ID: " + paymentId));
 
-        List<FinalUser> admins = finalUserRepository.findByRoles_Name("ROLE_ADMIN");
+        List<FinalUser> admins = finalUserRepository.findAdminsToNotify();
 
         if (admins.isEmpty()) {
             log.warn("No admins found to notify about payment ID: {}", paymentId);

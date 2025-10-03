@@ -31,6 +31,16 @@ public class AdminFinalUserController {
         return ResponseEntity.ok(finalUserService.getAll(pageable));
     }
 
+    @GetMapping("/role_user")
+    public ResponseEntity<PageDto<FinalUserDto>> getAllRoleUser(Pageable pageable) {
+        return ResponseEntity.ok(finalUserService.getAllRoleUser(pageable));
+    }
+
+    @GetMapping("/role_admin")
+    public ResponseEntity<PageDto<FinalUserDto>> getAllRoleAdmin(Pageable pageable) {
+        return ResponseEntity.ok(finalUserService.getAllRoleAdmin(pageable));
+    }
+
     @PostMapping
     public ResponseEntity<FinalUserDto> create(@Validated(OnCreate.class) @RequestBody FinalUserDto finalUserDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(finalUserService.create(finalUserDto));
