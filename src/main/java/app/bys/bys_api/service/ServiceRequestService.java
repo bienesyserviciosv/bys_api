@@ -10,6 +10,7 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.PictureType;
+import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
@@ -112,6 +113,7 @@ public class ServiceRequestService {
         FinalUser finalUser = finalUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
+        serviceRequestDto.setRequestStatus(RequestStatus.CREATED);
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
         ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
 
@@ -127,7 +129,7 @@ public class ServiceRequestService {
         FinalUser finalUser = finalUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
-        //Setearle el estado de creada (estado 1)
+        serviceRequestDto.setRequestStatus(RequestStatus.CREATED);
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
         ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
 

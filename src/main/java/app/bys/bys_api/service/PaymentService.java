@@ -135,10 +135,11 @@ public class PaymentService {
         mobilePayment.setPaymentType(PaymentType.MOBILE);
         mobilePayment.setPaymentStatus(PaymentStatus.PENDING);
 
-        //Setea el estado Pending a la solicitud
-
         Payment savedPayment = paymentRepository.save(mobilePayment);
         attachScreenshotToPayment(picture, savedPayment);
+
+        request.setRequestStatus(RequestStatus.PENDING);
+        serviceRequestRepository.save(request);
 
         return paymentMapper.entityToMobileDto(savedPayment);
     }
@@ -175,10 +176,12 @@ public class PaymentService {
         transferPayment.setPaymentType(PaymentType.TRANSFER);
         transferPayment.setPaymentStatus(PaymentStatus.PENDING);
 
-        //Setea el estado Pending a la solicitud
-
         Payment savedPayment = paymentRepository.save(transferPayment);
         attachScreenshotToPayment(picture, savedPayment);
+
+        request.setRequestStatus(RequestStatus.PENDING);
+        serviceRequestRepository.save(request);
+
         return paymentMapper.entityToTransferDto(savedPayment);
     }
 

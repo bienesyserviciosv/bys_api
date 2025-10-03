@@ -42,9 +42,8 @@ public class ServiceRequestWithPictureDto {
     @JsonProperty("time")
     private LocalTime time;
 
-    @Builder.Default
     @JsonProperty("status")
-    private RequestStatus requestStatus = RequestStatus.PENDING;
+    private RequestStatus requestStatus;
 
     @JsonProperty("specialization")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)

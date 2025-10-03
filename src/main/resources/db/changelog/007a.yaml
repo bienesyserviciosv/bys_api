@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20251002-01
+      author: Carlos
+      changes:
+        - sql:
+            sql: |
+              UPDATE service_request
+              SET request_status = 'CREATED'
+              WHERE request_status = 'PENDING';

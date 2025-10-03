@@ -81,8 +81,8 @@ public class OfferService {
         ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
-        if (!serviceRequest.getRequestStatus().equals(RequestStatus.PENDING)) {
-            throw new ForbiddenActionException("Cannot create offers for non-pending requests");
+        if (!serviceRequest.getRequestStatus().equals(RequestStatus.CREATED) && !serviceRequest.getRequestStatus().equals(RequestStatus.IN_PROGRESS)) {
+            throw new ForbiddenActionException("Cannot create offers for requests with payments created");
         }
 
         Integer offerQuantity = serviceRequest.getOfferQuantity();
@@ -127,6 +127,10 @@ public class OfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Request Service with id: " + offer.getServiceRequest().getId() + " not found in this offer"));
 
         //Validación de estado de la solicitud. Si tiene el estado valido es que puede aceptar una oferta
+        if (!request.getRequestStatus().equals(RequestStatus.CREATED) && !request.getRequestStatus().equals(RequestStatus.IN_PROGRESS)) {
+            throw new ForbiddenActionException("Cannot accept offers of requests with payments created");
+        }
+
         if (!offer.getServiceRequest().getFinalUser().equals(finalUser)) {
             throw new ForbiddenActionException("The user can only accept offers from requests they made");
         }
