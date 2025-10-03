@@ -55,6 +55,8 @@ public class AdminPaymentController {
         Payment payment = paymentService.rejectPayment(id);
 
         Long requestId = payment.getOffer().getServiceRequest().getId();
+
+        //Agregar Metodo de notificaciones para avisar al usuario de que se rechazó su pago
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service request not found"));
 
