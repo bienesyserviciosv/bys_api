@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +47,9 @@ public class ServiceRequest {
     @Column(name = "request_status")
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
+
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate;
 
     @Column(name = "offer_quantity")
     private Integer offerQuantity;

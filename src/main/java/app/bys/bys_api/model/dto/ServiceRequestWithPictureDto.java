@@ -12,6 +12,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,6 +45,9 @@ public class ServiceRequestWithPictureDto {
 
     @JsonProperty("status")
     private RequestStatus requestStatus;
+
+    @JsonProperty(value = "creation_date", access = JsonProperty.Access.READ_ONLY)
+    private LocalDateTime creationDate;
 
     @JsonProperty("specialization")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)

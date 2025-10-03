@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -113,8 +114,13 @@ public class ServiceRequestService {
         FinalUser finalUser = finalUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
+        return saveServiceRequest(serviceRequestDto, files, finalUser);
+    }
+
+    private ServiceRequest saveServiceRequest(ServiceRequestDto serviceRequestDto, MultipartFile[] files, FinalUser finalUser) {
         serviceRequestDto.setRequestStatus(RequestStatus.CREATED);
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
+        serviceRequestDto.setCreationDate(LocalDateTime.now());
         ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
 
         if (serviceRequest.getPictureSet() == null) {
@@ -129,15 +135,7 @@ public class ServiceRequestService {
         FinalUser finalUser = finalUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
-        serviceRequestDto.setRequestStatus(RequestStatus.CREATED);
-        serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
-        ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));
-
-        if (serviceRequest.getPictureSet() == null) {
-            throw new IllegalStateException("pictureSet no fue inicializado");
-        }
-        uploadPictureSet(files, serviceRequest);
-        return serviceRequest;
+        return saveServiceRequest(serviceRequestDto, files, finalUser);
     }
 
     public ServiceRequestDto update(Long id, ServiceRequestDto serviceRequestDto) {
