@@ -43,6 +43,9 @@ public class FinalUserDto {
     @JsonProperty("registration_date")
     private LocalDateTime registrationDate;
 
+    @JsonProperty(value = "last_login_date", access = JsonProperty.Access.READ_ONLY)
+    private LocalDateTime lastLoginDate;
+
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 8, message = "The length must be greater than 8 char", groups = OnCreate.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

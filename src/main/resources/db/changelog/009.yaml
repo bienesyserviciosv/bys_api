@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1759463127829-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: last_login_date
+                  type: DATETIME
+            tableName: final_user
+  - changeSet:
+      id: 1759463127829-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: last_login_date
+                  type: DATETIME
+            tableName: service_provider
+

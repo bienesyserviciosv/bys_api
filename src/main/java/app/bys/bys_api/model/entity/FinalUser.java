@@ -44,6 +44,9 @@ public class FinalUser {
     @Column(name = "registration_time")
     private LocalDateTime registrationDate;
 
+    @Column(name = "last_login_date")
+    private LocalDateTime lastLoginDate;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private UserStatus status;

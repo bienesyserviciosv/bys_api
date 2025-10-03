@@ -67,6 +67,9 @@ public class ServiceProviderDto {
     @JsonProperty("registration_date")
     private LocalDateTime registrationDate;
 
+    @JsonProperty(value = "last_login_date", access = JsonProperty.Access.READ_ONLY)
+    private LocalDateTime lastLoginDate;
+
     @Builder.Default
     @JsonProperty("completed_services")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)

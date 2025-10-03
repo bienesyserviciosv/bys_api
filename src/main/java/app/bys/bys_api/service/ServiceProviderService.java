@@ -158,4 +158,9 @@ public class ServiceProviderService {
         return serviceProviderRepository.save(newProvider);
     }
 
+    public void updateLastLoginDate(ServiceProvider provider) {
+        provider.setLastLoginDate(LocalDateTime.now());
+        serviceProviderRepository.save(provider);
+    }
+
 }

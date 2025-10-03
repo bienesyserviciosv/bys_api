@@ -146,4 +146,9 @@ public class FinalUserService {
         return finalUserRepository.save(newUser);
     }
 
+    public void updateLastLoginDate(FinalUser user) {
+        user.setLastLoginDate(LocalDateTime.now());
+        finalUserRepository.save(user);
+    }
+
 }

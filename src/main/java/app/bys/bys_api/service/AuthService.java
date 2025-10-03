@@ -53,6 +53,8 @@ public class AuthService {
     private final OtpService otpService;
     private final UserDetailsService userDetailsService;
     private final PictureService pictureService;
+    private final FinalUserService finalUserService;
+    private final ServiceProviderService serviceProviderService;
 
     public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
 
@@ -313,6 +315,7 @@ public class AuthService {
         AuthResponseDto authResponseDto = new AuthResponseDto();
         if (roles.stream().anyMatch(role -> role.getName().equals("ROLE_USER")) || roles.stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")) ) {
             FinalUser user = getUser(username);
+            finalUserService.updateLastLoginDate(user);
             authResponseDto = AuthResponseDto.builder()
                     .id(user.getId())
                     .email(user.getEmail())
@@ -326,6 +329,7 @@ public class AuthService {
 
         if (roles.stream().anyMatch(role -> role.getName().equals("ROLE_PROVIDER"))) {
             ServiceProvider user = getProvider(username);
+            serviceProviderService.updateLastLoginDate(user);
             authResponseDto = AuthResponseDto.builder()
                     .id(user.getId())
                     .email(user.getEmail())

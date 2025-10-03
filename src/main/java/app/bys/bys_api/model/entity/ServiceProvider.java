@@ -77,6 +77,9 @@ public class ServiceProvider {
     @Column(name = "registration_time")
     private LocalDateTime registrationDate;
 
+    @Column(name = "last_login_date")
+    private LocalDateTime lastLoginDate;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "provider_specialization",
             joinColumns = {@JoinColumn(name = "provider_id")},
