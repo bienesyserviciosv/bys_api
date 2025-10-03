@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,16 +43,23 @@ public class OfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found")));
     }
 
-    public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList, Long serviceRequestId) {
+    public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList, Long serviceRequestId, Boolean accepted, List<Long> userIdList) {
 
         Specification<Offer> providerSpec =
                 providerIdList != null ? OfferSpecification.hasProvider(providerIdList)
+                        : null;
+
+        Specification<Offer> userSpec =
+                providerIdList != null ? OfferSpecification.hasUser(userIdList)
                         : null;
 
         Specification<Offer> serviceRequestSpec =
                 serviceRequestId != null ? OfferSpecification.hasServiceRequestId(serviceRequestId)
                         : null;
 
+        Specification<Offer> acceptedSpec =
+                accepted != null ? OfferSpecification.isAccepted(accepted)
+                        : null;
 
         OfferSpecification searchSpec =
                 search != null ? new OfferSpecification(
@@ -65,8 +73,10 @@ public class OfferService {
 
         List<Specification<Offer>> specList = new ArrayList<>(Arrays.asList(
                 providerSpec,
+                userSpec,
                 serviceRequestSpec,
-                searchSpec
+                searchSpec,
+                acceptedSpec
         ));
 
         return PageMapper.pageToDto(offerRepo.findAll(

@@ -1,5 +1,6 @@
 package app.bys.bys_api.service.specification;
 
+import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -36,12 +37,31 @@ public class OfferSpecification extends ASpecification<Offer> {
         };
     }
 
+    public static Specification<Offer> hasUser(List<Long> userIdList) {
+        return (root, query, criteriaBuilder) -> {
+            if (query != null) {
+                query.distinct(true);
+            }
+            Join<Offer, FinalUser> courses = root.join("finalUser");
+            return criteriaBuilder.in(courses.get("id")).value(userIdList);
+        };
+    }
+
     public static Specification<Offer> hasServiceRequestId(Long serviceRequestId) {
         return (root, query, criteriaBuilder) -> {
             if (serviceRequestId == null) {
                 return criteriaBuilder.conjunction(); // No filtrar si no hay ID de solicitud
             }
             return criteriaBuilder.equal(root.get("serviceRequestId"), serviceRequestId);
+        };
+    }
+
+    public static Specification<Offer> isAccepted(Boolean accepted) {
+        return (root, query, criteriaBuilder) -> {
+            if (accepted == null) {
+                return criteriaBuilder.conjunction(); // No aplicar filtro si no se especifica
+            }
+            return criteriaBuilder.equal(root.get("accepted"), accepted);
         };
     }
 
