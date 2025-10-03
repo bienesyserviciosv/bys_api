@@ -3,6 +3,8 @@ package app.bys.bys_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -43,5 +45,11 @@ public class Offer {
 
     @OneToOne(mappedBy = "offer")
     private Payment payment;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "accepted_at")
+    private LocalDateTime acceptedAt;
 
 }

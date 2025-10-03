@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -44,5 +46,11 @@ public class OfferDto {
 
     @JsonProperty("accepted")
     private Boolean accepted = false;
+
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
+
+    @JsonProperty("accepted_at")
+    private LocalDateTime acceptedAt;
 
 }

@@ -97,6 +97,8 @@ public class OfferService {
         offer.setProvider(provider);
         offer.setServiceRequest(serviceRequest);
 
+        offer.setCreatedAt(LocalDateTime.now());
+
         return offerMapper.entityToDto(offerRepo.save(offer));
     }
 
@@ -146,11 +148,13 @@ public class OfferService {
         Offer previousAccepted = request.getAcceptedOffer();
         if (previousAccepted != null) {
             previousAccepted.setAccepted(false);
+            previousAccepted.setAcceptedAt(null);
             offerRepo.save(previousAccepted);
         }
 
         offer.setFinalUser(finalUser);
         offer.setAccepted(true);
+        offer.setAcceptedAt(LocalDateTime.now());
 
         request.setAcceptedOffer(offer);
         request.setRequestStatus(RequestStatus.IN_PROGRESS);
