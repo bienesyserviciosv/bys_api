@@ -34,12 +34,18 @@ public class ServiceRequestDto {
     @Enumerated(EnumType.STRING)
     private Province address;
 
-    @Future(groups = {OnCreate.class, OnUpdate.class})
+    @Future(groups = {OnCreate.class, OnUpdate.class}, message = "Must be in the future")
     @JsonProperty("date")
     private LocalDate date;
 
     @JsonProperty("time")
     private LocalTime time;
+
+    @JsonProperty("latitude")
+    private String latitude;
+
+    @JsonProperty("longitude")
+    private String longitude;
 
     @JsonProperty("status")
     private RequestStatus requestStatus;
@@ -57,14 +63,12 @@ public class ServiceRequestDto {
     @JsonProperty("final_user")
     private FinalUserDto finalUser;
 
-    @Builder.Default
     @JsonProperty("offer_quantity")
     @PositiveOrZero(message = "Must be positive", groups = {OnCreate.class, OnUpdate.class})
-    private Integer offerQuantity = 0;
+    private Integer offerQuantity;
 
-    @Builder.Default
     @JsonProperty("new_offer")
-    private Boolean newOffer = false;
+    private Boolean newOffer;
 
     @JsonProperty("service_provider_id")
     private Long serviceProviderId;

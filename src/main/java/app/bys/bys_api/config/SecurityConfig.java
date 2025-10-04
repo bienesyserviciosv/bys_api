@@ -1,10 +1,15 @@
 package app.bys.bys_api.config;
 
+import app.bys.bys_api.error.ErrorResponseDto;
 import app.bys.bys_api.security.filter.JwtAuthenticationFilter;
+import app.bys.bys_api.security.handler.CustomAccessDeniedHandler;
+import app.bys.bys_api.security.handler.CustomAuthenticationEntryPoint;
 import app.bys.bys_api.security.oauth2.ProviderSuccessHandler;
 import app.bys.bys_api.security.oauth2.UserSuccessHandler;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.utils.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +21,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,6 +31,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Configuration
@@ -35,6 +42,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final UserSuccessHandler userSuccessHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final ObjectMapper objectMapper;
     private final ProviderSuccessHandler providerSuccessHandler;
     private final FinalUserService finalUserService;
     private final JwtUtil jwtUtil;
@@ -52,8 +62,27 @@ public class SecurityConfig {
                                 .requestMatchers("/specialization", "/province").permitAll()
                                 .anyRequest().authenticated()
                 )
+                .with(new ExceptionHandlingConfigurer<>(), exceptionHandling ->
+                        exceptionHandling
+                                .authenticationEntryPoint(authenticationEntryPoint)
+                                .accessDeniedHandler(accessDeniedHandler)
+                )
+
                 .oauth2Login(oauth -> oauth
                         .successHandler(userSuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write(objectMapper.writeValueAsString(
+                                    ErrorResponseDto.builder()
+                                            .status(401)
+                                            .error("Unauthorized")
+                                            .message("Authentication required")
+                                            .path(request.getRequestURI())
+                                            .timestamp(LocalDateTime.now())
+                                            .build()
+                            ));
+                        })
                 )
 
                 .csrf(AbstractHttpConfigurer::disable)

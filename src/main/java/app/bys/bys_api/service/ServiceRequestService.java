@@ -119,6 +119,8 @@ public class ServiceRequestService {
 
     private ServiceRequest saveServiceRequest(ServiceRequestDto serviceRequestDto, MultipartFile[] files, FinalUser finalUser) {
         serviceRequestDto.setRequestStatus(RequestStatus.CREATED);
+        serviceRequestDto.setOfferQuantity(0);
+        serviceRequestDto.setNewOffer(false);
         serviceRequestDto.setFinalUser(userMapper.entityToDto(finalUser));
         serviceRequestDto.setCreationDate(LocalDateTime.now());
         ServiceRequest serviceRequest = serviceRequestRepository.save(requestMapper.dtoToEntity(serviceRequestDto));

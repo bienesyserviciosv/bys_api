@@ -34,7 +34,7 @@ public class JwtUtil {
                 .issuer("self")
                 .issuedAt(Date.from(now))
                 .subject(authentication.getName())
-                .expiration(Date.from(now.plus(24, ChronoUnit.HOURS)))
+                .expiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
                 .claim("authorities", scope)
                 .signWith(getSignatureKey(), Jwts.SIG.HS256)
                 .compact();
