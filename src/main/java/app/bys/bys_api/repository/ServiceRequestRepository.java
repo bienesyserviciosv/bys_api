@@ -12,4 +12,10 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
     @Query("SELECT COUNT(sr) FROM ServiceRequest sr")
     long countAllRequests();
 
+    @Query(value = """
+        SELECT AVG(EXTRACT(EPOCH FROM acceptance_date - creation_date)) / 3600
+        FROM service_request
+        WHERE creation_date IS NOT NULL AND acceptance_date IS NOT NULL
+        """, nativeQuery = true)
+    Double findAverageAcceptanceDurationInHours();
 }

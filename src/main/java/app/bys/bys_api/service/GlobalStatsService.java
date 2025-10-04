@@ -20,6 +20,12 @@ public class GlobalStatsService {
                 .totalCompletedTransactions(paymentRepository.countCompletedTransactions())
                 .totalOffers(offerRepository.countAllOffers())
                 .totalRequests(serviceRequestRepository.countAllRequests())
+                .averageAcceptanceDurationInHours(getAverageDuration())
                 .build();
+    }
+
+    private long getAverageDuration() {
+        Double avg = serviceRequestRepository.findAverageAcceptanceDurationInHours();
+        return avg == null ? 0 : avg.longValue();
     }
 }

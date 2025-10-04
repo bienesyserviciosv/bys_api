@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpecificationExecutor<Payment> {
 
-    @Query("SELECT COUNT(p) FROM Payment p")
+    @Query("SELECT COUNT(p) FROM Payment p  WHERE p.paymentStatus = 'ACCEPTED'")
     long countCompletedTransactions();
 }
