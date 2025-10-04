@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1759584716160-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: acceptance_date
+                  type: DATETIME
+            tableName: service_request
+
+        - sql:
+            sql: |
+              UPDATE service_request
+              SET acceptance_date = CURRENT_TIMESTAMP
+              WHERE request_status = 'ACCEPTED' AND acceptance_date IS NULL;

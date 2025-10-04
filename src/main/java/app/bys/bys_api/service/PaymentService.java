@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -231,6 +232,7 @@ public class PaymentService {
 
         serviceRequest.setServiceProvider(serviceRequest.getAcceptedOffer().getProvider());
         serviceRequest.setRequestStatus(RequestStatus.ACCEPTED);
+        serviceRequest.setAcceptanceDate(LocalDateTime.now());
         serviceRequestRepository.save(serviceRequest);
 
         return payment;

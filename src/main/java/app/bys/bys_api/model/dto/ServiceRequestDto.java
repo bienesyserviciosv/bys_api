@@ -47,6 +47,9 @@ public class ServiceRequestDto {
     @JsonProperty(value = "creation_date", access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime creationDate;
 
+    @JsonProperty(value = "acceptance_date", access = JsonProperty.Access.READ_ONLY)
+    private LocalDateTime acceptanceDate;
+
     @JsonProperty("specialization")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private SpecializationDto specialization;

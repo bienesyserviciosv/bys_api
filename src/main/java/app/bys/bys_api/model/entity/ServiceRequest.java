@@ -51,6 +51,9 @@ public class ServiceRequest {
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
 
+    @Column(name = "acceptance_date")
+    private LocalDateTime acceptanceDate;
+
     @Column(name = "offer_quantity")
     private Integer offerQuantity;
 
