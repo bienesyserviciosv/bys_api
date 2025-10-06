@@ -1,6 +1,7 @@
 package app.bys.bys_api.mapper;
 
 import app.bys.bys_api.model.dto.OfferDto;
+import app.bys.bys_api.model.dto.OfferMetricsDto;
 import app.bys.bys_api.model.entity.Offer;
 import org.mapstruct.*;
 
@@ -17,4 +18,8 @@ public interface OfferMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateOfferFromDto(OfferDto offerDto, @MappingTarget Offer offer);
+
+    @Mapping(target = "serviceRequestId", source = "serviceRequest.id")
+    @Mapping(target = "workerName", source = "provider.name")
+    OfferMetricsDto entityToMetricsDto(Offer offer);
 }

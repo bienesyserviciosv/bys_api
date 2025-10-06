@@ -12,9 +12,7 @@ import app.bys.bys_api.validation.OnUpdate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -47,24 +45,7 @@ public class ServiceRequestController {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
     }
 
-    //Crear solicitud con el id del usuario
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    @PostMapping("/user/{id}")
-    public ResponseEntity<ServiceRequestWithPictureDto> createAsAdmin(@PathVariable Long id,
-                                                               @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
-                                                               @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
-
-        ServiceRequest serviceRequest = serviceRequestService.createWithUserId(id, serviceRequestDto, files);
-
-        Long specializationId = serviceRequestDto.getSpecialization().getId();
-        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequestDto.getAddress(), serviceRequest);
-
-        return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
-    }
-
-    //Crear con authentication
-    @PreAuthorize("hasAnyAuthority('ROLE_USER')")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<ServiceRequestWithPictureDto> create(Authentication auth,
                                                                @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
                                                                @RequestPart(name = "pictures", required = false) MultipartFile[] files) {

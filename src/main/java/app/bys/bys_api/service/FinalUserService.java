@@ -5,6 +5,7 @@ import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.FinalUserDto;
+import app.bys.bys_api.model.dto.FinalUserMetricsDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
@@ -39,6 +40,11 @@ public class FinalUserService {
                 orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found")));
     }
 
+    public FinalUserMetricsDto getUserMetrics(Long id) {
+        return finalUserRepository.findUserMetricsById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + id + " not found"));
+    }
+
     public FinalUserDto getWithEmail(String email) {
         return mapper.entityToDto(finalUserRepository.findByEmail(email).
                 orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found")));
@@ -48,8 +54,8 @@ public class FinalUserService {
         return PageMapper.pageToDto(finalUserRepository.findAll(pageable).map(mapper::entityToDto));
     }
 
-    public PageDto<FinalUserDto> getAllRoleUser(Pageable pageable) {
-        return PageMapper.pageToDto(finalUserRepository.findByRoles_Name("ROLE_USER", pageable).map(mapper::entityToDto));
+    public PageDto<FinalUserMetricsDto> getAllUserMetrics(Pageable pageable) {
+        return PageMapper.pageToDto(finalUserRepository.findAllUserMetrics(pageable));
     }
 
     public PageDto<FinalUserDto> getAllRoleAdmin(Pageable pageable) {

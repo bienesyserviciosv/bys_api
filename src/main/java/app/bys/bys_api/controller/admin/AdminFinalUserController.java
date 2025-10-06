@@ -1,6 +1,7 @@
 package app.bys.bys_api.controller.admin;
 
 import app.bys.bys_api.model.dto.FinalUserDto;
+import app.bys.bys_api.model.dto.FinalUserMetricsDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.validation.OnCreate;
@@ -31,14 +32,19 @@ public class AdminFinalUserController {
         return ResponseEntity.ok(finalUserService.getAll(pageable));
     }
 
-    @GetMapping("/role_user")
-    public ResponseEntity<PageDto<FinalUserDto>> getAllRoleUser(Pageable pageable) {
-        return ResponseEntity.ok(finalUserService.getAllRoleUser(pageable));
-    }
-
     @GetMapping("/role_admin")
     public ResponseEntity<PageDto<FinalUserDto>> getAllRoleAdmin(Pageable pageable) {
         return ResponseEntity.ok(finalUserService.getAllRoleAdmin(pageable));
+    }
+
+    @GetMapping("/metrics/{id}")
+    public ResponseEntity<FinalUserMetricsDto> getUserMetrics(@PathVariable Long id) {
+        return ResponseEntity.ok(finalUserService.getUserMetrics(id));
+    }
+
+    @GetMapping("/metrics")
+    public ResponseEntity<PageDto<FinalUserMetricsDto>> getAllUserMetrics(Pageable pageable) {
+        return ResponseEntity.ok(finalUserService.getAllUserMetrics(pageable));
     }
 
     @PostMapping

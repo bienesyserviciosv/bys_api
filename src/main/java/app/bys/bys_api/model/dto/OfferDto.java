@@ -45,7 +45,7 @@ public class OfferDto {
     private Long providerId;
 
     @JsonProperty("accepted")
-    private Boolean accepted = false;
+    private Boolean accepted;
 
     @JsonProperty("created_at")
     private LocalDateTime createdAt;

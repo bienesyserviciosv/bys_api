@@ -1,6 +1,7 @@
 package app.bys.bys_api.mapper;
 
 import app.bys.bys_api.model.dto.FinalUserDto;
+import app.bys.bys_api.model.dto.FinalUserMetricsDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,4 +25,7 @@ public abstract class FinalUserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateFinalUserFromDto(FinalUserDto finalUserDto, @MappingTarget FinalUser finalUser);
+
+    public abstract FinalUserMetricsDto entityToUserMetricsDto(FinalUser finalUser);
+
 }

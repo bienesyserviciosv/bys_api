@@ -4,6 +4,7 @@ import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.OfferMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.OfferDto;
+import app.bys.bys_api.model.dto.OfferMetricsDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
@@ -43,18 +44,33 @@ public class OfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found")));
     }
 
-    public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList, Long serviceRequestId, Boolean accepted, List<Long> userIdList) {
+    public OfferMetricsDto getMetrics(Long id) {
+        return offerMapper.entityToMetricsDto(offerRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found")));
+    }
 
+    public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList) {
+
+        List<Specification<Offer>> specList = getSpecificationList(search, providerIdList, serviceRequestIdList, accepted, userIdList);
+
+        return PageMapper.pageToDto(offerRepo.findAll(
+                Specification.allOf(specList.stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())),
+                pageable).map(offerMapper::entityToDto));
+    }
+
+    private List<Specification<Offer>> getSpecificationList(String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList){
         Specification<Offer> providerSpec =
                 providerIdList != null ? OfferSpecification.hasProvider(providerIdList)
                         : null;
 
         Specification<Offer> userSpec =
-                providerIdList != null ? OfferSpecification.hasUser(userIdList)
+                userIdList != null ? OfferSpecification.hasUser(userIdList)
                         : null;
 
         Specification<Offer> serviceRequestSpec =
-                serviceRequestId != null ? OfferSpecification.hasServiceRequestId(serviceRequestId)
+                serviceRequestIdList != null ? OfferSpecification.hasServiceRequest(serviceRequestIdList)
                         : null;
 
         Specification<Offer> acceptedSpec =
@@ -71,7 +87,7 @@ public class OfferService {
                 )
                         : null;
 
-        List<Specification<Offer>> specList = new ArrayList<>(Arrays.asList(
+        return new ArrayList<>(Arrays.asList(
                 providerSpec,
                 userSpec,
                 serviceRequestSpec,
@@ -79,11 +95,17 @@ public class OfferService {
                 acceptedSpec
         ));
 
+    }
+
+    public PageDto<OfferMetricsDto> getAllOfferMetrics(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList) {
+
+        List<Specification<Offer>> specList = getSpecificationList(search, providerIdList, serviceRequestIdList, accepted, userIdList);
+
         return PageMapper.pageToDto(offerRepo.findAll(
                 Specification.allOf(specList.stream()
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList())),
-                pageable).map(offerMapper::entityToDto));
+                pageable).map(offerMapper::entityToMetricsDto));
     }
 
     public OfferDto create(ServiceProvider provider, OfferDto offerDto) {
@@ -106,7 +128,7 @@ public class OfferService {
         Offer offer = offerMapper.dtoToEntity(offerDto);
         offer.setProvider(provider);
         offer.setServiceRequest(serviceRequest);
-
+        offer.setAccepted(false);
         offer.setCreatedAt(LocalDateTime.now());
 
         return offerMapper.entityToDto(offerRepo.save(offer));
@@ -121,9 +143,16 @@ public class OfferService {
     }
 
     public void delete(Long id) {
-        if (!offerRepo.existsById(id)) {
-            throw new EntityNotFoundException("Offer with id: " + id + "not found");
-        }
+        Offer offer = offerRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found"));
+        Long requestId = offer.getServiceRequest().getId();
+        ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
+        Integer offerQuantity = serviceRequest.getOfferQuantity();
+        offerQuantity--;
+        serviceRequest.setOfferQuantity(offerQuantity);
+        serviceRequestRepo.save(serviceRequest);
+
         offerRepo.deleteById(id);
     }
 
@@ -159,6 +188,7 @@ public class OfferService {
         if (previousAccepted != null) {
             previousAccepted.setAccepted(false);
             previousAccepted.setAcceptedAt(null);
+            previousAccepted.setFinalUser(null);
             offerRepo.save(previousAccepted);
         }
 

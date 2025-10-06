@@ -39,9 +39,8 @@ public class Offer {
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
 
-    @Builder.Default
     @Column(name = "accepted")
-    private Boolean accepted = false;
+    private Boolean accepted;
 
     @OneToOne(mappedBy = "offer")
     private Payment payment;

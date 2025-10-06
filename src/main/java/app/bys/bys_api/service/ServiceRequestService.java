@@ -5,8 +5,10 @@ import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceRequestDto;
+import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
 import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
 import app.bys.bys_api.model.entity.FinalUser;
+import app.bys.bys_api.model.entity.Payment;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.PictureType;
@@ -21,6 +23,7 @@ import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
@@ -62,7 +65,16 @@ public class ServiceRequestService {
         return requestMapper.entityToDtoWithPicture(request);
     }
 
-    public PageDto<ServiceRequestWithPictureDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
+    public PageDto<ServiceRequestWithPictureDto> getAll (Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
+        List<Specification<ServiceRequest>> specList = getSpecificationsList(search, specializationList, address, userList, providerList);
+        return PageMapper.pageToDto(serviceRequestRepository.findAll(
+                Specification.allOf(specList.stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())),
+                pageable).map(requestMapper::entityToDtoWithPicture));
+    }
+
+    private List<Specification<ServiceRequest>> getSpecificationsList(String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList){
         Specification<ServiceRequest> specializationSpec =
                 specializationList != null ? ServiceRequestSpecification.hasSpecialization(specializationList)
                         : null;
@@ -95,19 +107,52 @@ public class ServiceRequestService {
                 providerList != null ? ServiceRequestSpecification.hasProvider(providerList)
                         : null;
 
-        List<Specification<ServiceRequest>> specList = new ArrayList<>(Arrays.asList(
-                specializationSpec,
-                searchSpec,
-                addressSpec,
-                userSpec,
-                providerSpec
-        ));
+        return new ArrayList<>(Arrays.asList(
+               specializationSpec,
+               searchSpec,
+               addressSpec,
+               userSpec,
+               providerSpec
+       ));
+    }
 
-        return PageMapper.pageToDto(serviceRequestRepository.findAll(
-                Specification.allOf(specList.stream()
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())),
-                pageable).map(requestMapper::entityToDtoWithPicture));
+    public PageDto<ServiceRequestMetricsDto> getAllRequestMetrics(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList){
+        List<Specification<ServiceRequest>> specList = getSpecificationsList(search, specializationList, address, userList, providerList);
+        Specification<ServiceRequest> spec = Specification.allOf(
+                specList.stream().filter(Objects::nonNull).toList()
+        );
+
+        Page<ServiceRequest> page = serviceRequestRepository.findAll(spec, pageable);
+
+        Page<ServiceRequestMetricsDto> dtoPage = page.map(sr -> {
+            Payment payment = sr.getAcceptedOffer() != null ? sr.getAcceptedOffer().getPayment() : null;
+
+            return ServiceRequestMetricsDto.builder()
+                    .id(sr.getId())
+                    .clientName(sr.getFinalUser().getName())
+                    .description(sr.getDescription())
+                    .date(sr.getDate())
+                    .time(sr.getTime())
+                    .requestStatus(sr.getRequestStatus())
+                    .creationDate(sr.getCreationDate())
+                    .acceptanceDate(sr.getAcceptanceDate())
+                    .offerQuantity(sr.getOfferQuantity())
+                    .paymentAmount(payment != null ? sr.getAcceptedOffer().getPrice() : null)
+                    .paymentType(payment != null ? payment.getPaymentType() : null)
+                    .paymentDate(payment != null ? payment.getPaymentDate() : null)
+                    .build();
+        });
+
+        return PageMapper.pageToDto(dtoPage);
+    }
+
+//    public PageDto<ServiceRequestMetricsDto> getAllRequestMetrics(Pageable pageable) {
+//        return PageMapper.pageToDto(serviceRequestRepository.findAllRequestMetrics(pageable));
+//    }
+
+    public ServiceRequestMetricsDto getRequestMetrics(Long id) {
+        return serviceRequestRepository.findRequestMetricsById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found"));
     }
 
     public ServiceRequest createWithUserId(Long userId, ServiceRequestDto serviceRequestDto, MultipartFile[] files) {
