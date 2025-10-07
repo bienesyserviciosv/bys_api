@@ -16,40 +16,40 @@ import java.time.LocalTime;
 @Setter
 public class ServiceRequestMetricsDto {
 
-    @JsonProperty("id")
+//    @JsonProperty("id")
     private Long id;
 
-    @JsonProperty("client_name")
+//    @JsonProperty("client_name")
     private String clientName;
 
-    @JsonProperty("description")
+//    @JsonProperty("description")
     private String description;
 
-    @JsonProperty("date")
+//    @JsonProperty("date")
     private LocalDate date;
 
-    @JsonProperty("time")
+//    @JsonProperty("time")
     private LocalTime time;
 
-    @JsonProperty("status")
+//    @JsonProperty("status")
     private RequestStatus requestStatus;
 
-    @JsonProperty("creation_date")
+//    @JsonProperty("creation_date")
     private LocalDateTime creationDate;
 
-    @JsonProperty("acceptance_date")
+//    @JsonProperty("acceptance_date")
     private LocalDateTime acceptanceDate;
 
-    @JsonProperty("offer_quantity")
+//    @JsonProperty("offer_quantity")
     private Integer offerQuantity;
 
-    @JsonProperty("payment_amount")
+//    @JsonProperty("payment_amount")
     private Double paymentAmount;
 
-    @JsonProperty("payment_type")
+//    @JsonProperty("payment_type")
     private PaymentType paymentType;
 
-    @JsonProperty("payment_date")
+//    @JsonProperty("payment_date")
     private LocalDateTime paymentDate;
 
 

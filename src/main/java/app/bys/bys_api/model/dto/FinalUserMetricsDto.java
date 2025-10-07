@@ -12,34 +12,34 @@ import java.time.LocalDateTime;
 @Setter
 public class FinalUserMetricsDto {
 
-    @JsonProperty("id")
+    //@JsonProperty("id")
     private Long id;
 
-    @JsonProperty("name")
+    //@JsonProperty("name")
     private String name;
 
-    @JsonProperty("email")
+    //@JsonProperty("email")
     private String email;
 
-    @JsonProperty("phone_number")
+    //@JsonProperty("phone_number")
     private String phoneNumber;
 
-    @JsonProperty("registration_date")
+    //@JsonProperty("registration_date")
     private LocalDateTime registrationDate;
 
-    @JsonProperty("last_login_date")
+    //@JsonProperty("last_login_date")
     private LocalDateTime lastLoginDate;
 
-    @JsonProperty("total_request")
+    //@JsonProperty("total_request")
     private Long totalRequests;
 
-    @JsonProperty("accepted_requests")
+    //@JsonProperty("accepted_requests")
     private Long acceptedRequests;
 
-    @JsonProperty("rejected_requests")
+    //@JsonProperty("rejected_requests")
     private Long rejectedRequests;
 
-    @JsonProperty("pending_requests")
+    //@JsonProperty("pending_requests")
     private Long pendingRequests;
 
 }

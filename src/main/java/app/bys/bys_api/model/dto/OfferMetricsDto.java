@@ -12,27 +12,27 @@ import java.time.LocalDateTime;
 @Setter
 public class OfferMetricsDto {
 
-    @JsonProperty("id")
+//    @JsonProperty("id")
     private Long id;
 
-    @JsonProperty("worker_name")
+//    @JsonProperty("worker_name")
     private String workerName;
 
-    @JsonProperty("description")
+//    @JsonProperty("description")
     private String description;
 
-    @JsonProperty("price")
+//    @JsonProperty("price")
     private Double price;
 
-    @JsonProperty("service_request_id")
+//    @JsonProperty("service_request_id")
     private Long serviceRequestId;
 
-    @JsonProperty("created_at")
+//    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
-    @JsonProperty("accepted")
+//    @JsonProperty("accepted")
     private Boolean accepted;
 
-    @JsonProperty("accepted_at")
+//    @JsonProperty("accepted_at")
     private LocalDateTime acceptedAt;
 }
