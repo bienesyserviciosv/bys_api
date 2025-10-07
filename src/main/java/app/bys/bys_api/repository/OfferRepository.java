@@ -12,4 +12,11 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
     @Query("SELECT COUNT(o) FROM Offer o")
     long countAllOffers();
 
+    @Query("""
+    SELECT COALESCE(SUM(o.price), 0)
+    FROM Offer o
+    WHERE o.serviceRequest.requestStatus = app.bys.bys_api.model.enums.RequestStatus.ACCEPTED
+""")
+    Double calculateTotalProfit();
+
 }

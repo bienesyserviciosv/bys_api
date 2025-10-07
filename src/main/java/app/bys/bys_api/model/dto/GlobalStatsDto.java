@@ -19,6 +19,9 @@ public class GlobalStatsDto {
     @JsonProperty("total_completed_transactions")
     private long totalCompletedTransactions;
 
+    @JsonProperty("total_profit")
+    private Double totalProfit;
+
     @JsonProperty("average_acceptance_duration_in_hours")
     private long averageAcceptanceDurationInHours;
 }

@@ -20,6 +20,7 @@ public class GlobalStatsService {
                 .totalCompletedTransactions(paymentRepository.countCompletedTransactions())
                 .totalOffers(offerRepository.countAllOffers())
                 .totalRequests(serviceRequestRepository.countAllRequests())
+                .totalProfit(offerRepository.calculateTotalProfit())
                 .averageAcceptanceDurationInHours(getAverageDuration())
                 .build();
     }
