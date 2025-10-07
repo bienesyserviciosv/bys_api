@@ -28,8 +28,9 @@ public class AdminFinalUserController {
     }
 
     @GetMapping
-    public ResponseEntity<PageDto<FinalUserDto>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(finalUserService.getAll(pageable));
+    public ResponseEntity<PageDto<FinalUserDto>> getAll(Pageable pageable,
+                                                        @RequestParam(value = "search", required = false) String search) {
+        return ResponseEntity.ok(finalUserService.getAll(pageable, search));
     }
 
     @GetMapping("/role_admin")
@@ -43,8 +44,9 @@ public class AdminFinalUserController {
     }
 
     @GetMapping("/metrics")
-    public ResponseEntity<PageDto<FinalUserMetricsDto>> getAllUserMetrics(Pageable pageable) {
-        return ResponseEntity.ok(finalUserService.getAllUserMetrics(pageable));
+    public ResponseEntity<PageDto<FinalUserMetricsDto>> getAllUserMetrics(Pageable pageable,
+                                                                          @RequestParam(value = "search", required = false) String search) {
+        return ResponseEntity.ok(finalUserService.getAllUserMetrics(pageable, search));
     }
 
     @PostMapping

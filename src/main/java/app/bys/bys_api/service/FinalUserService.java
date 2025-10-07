@@ -13,16 +13,19 @@ import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
+import app.bys.bys_api.service.specification.FinalUserSpecification;
+import app.bys.bys_api.utils.specification.SearchCriteria;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,12 +53,30 @@ public class FinalUserService {
                 orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found")));
     }
 
-    public PageDto<FinalUserDto> getAll(Pageable pageable) {
-        return PageMapper.pageToDto(finalUserRepository.findAll(pageable).map(mapper::entityToDto));
+    public PageDto<FinalUserDto> getAll(Pageable pageable, String search) {
+        FinalUserSpecification searchSpec =
+                search != null ? new FinalUserSpecification(
+                        new SearchCriteria(
+                                "name",
+                                "s",
+                                search
+                        )
+                )
+                        : null;
+
+        List<Specification<FinalUser>> specList = new ArrayList<>(Collections.singletonList(
+                searchSpec
+        ));
+
+        return PageMapper.pageToDto(finalUserRepository.findAll(
+                Specification.allOf(specList.stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())),
+                pageable).map(mapper::entityToDto));
     }
 
-    public PageDto<FinalUserMetricsDto> getAllUserMetrics(Pageable pageable) {
-        return PageMapper.pageToDto(finalUserRepository.findAllUserMetrics(pageable));
+    public PageDto<FinalUserMetricsDto> getAllUserMetrics(Pageable pageable, String search) {
+        return PageMapper.pageToDto(finalUserRepository.findAllUserMetrics(search, pageable));
     }
 
     public PageDto<FinalUserDto> getAllRoleAdmin(Pageable pageable) {
