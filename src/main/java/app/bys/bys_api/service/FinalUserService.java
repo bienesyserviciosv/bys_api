@@ -76,7 +76,8 @@ public class FinalUserService {
     }
 
     public PageDto<FinalUserMetricsDto> getAllUserMetrics(Pageable pageable, String search) {
-        return PageMapper.pageToDto(finalUserRepository.findAllUserMetrics(search, pageable));
+        String safeName = (search == null || search.isBlank()) ? "" : search;
+        return PageMapper.pageToDto(finalUserRepository.findAllUserMetrics(safeName, pageable));
     }
 
     public PageDto<FinalUserDto> getAllRoleAdmin(Pageable pageable) {

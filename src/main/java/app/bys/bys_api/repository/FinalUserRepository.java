@@ -46,7 +46,7 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
             )
             FROM FinalUser u
             LEFT JOIN u.serviceRequestSet r
-            WHERE :name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))
+            WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))
             GROUP BY u.id, u.name, u.email, u.phoneNumber, u.registrationDate, u.lastLoginDate
             """)
     Page<FinalUserMetricsDto> findAllUserMetrics(@Param("name") String name, Pageable pageable);
