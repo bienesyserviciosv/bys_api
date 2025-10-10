@@ -17,6 +17,8 @@ public class RoleService {
         createRoleIfNotFound("ROLE_USER");
         createRoleIfNotFound("ROLE_PROVIDER");
         createRoleIfNotFound("ROLE_ADMIN");
+        createRoleIfNotFound("ROLE_SUPER_ADMIN");
+
     }
 
     private void createRoleIfNotFound(String roleName) {

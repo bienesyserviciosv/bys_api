@@ -2,7 +2,6 @@ package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.model.enums.RequestStatus;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -21,6 +20,10 @@ public class ServiceRequestMetricsDto {
 
 //    @JsonProperty("client_name")
     private String clientName;
+
+    private String email;
+
+    private String phone;
 
 //    @JsonProperty("description")
     private String description;

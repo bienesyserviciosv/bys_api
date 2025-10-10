@@ -313,8 +313,9 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(username, password));
         String jwt = jwtUtil.generateToken(auth);
         AuthResponseDto authResponseDto = new AuthResponseDto();
-        if (roles.stream().anyMatch(role -> role.getName().equals("ROLE_USER")) || roles.stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")) ) {
-            FinalUser user = getUser(username);
+        Set<String> targetRoles = Set.of("ROLE_USER", "ROLE_ADMIN", "ROLE_SUPER_ADMIN");
+        if (roles.stream().anyMatch(role -> targetRoles.contains(role.getName()))){
+         FinalUser user = getUser(username);
             finalUserService.updateLastLoginDate(user);
             authResponseDto = AuthResponseDto.builder()
                     .id(user.getId())

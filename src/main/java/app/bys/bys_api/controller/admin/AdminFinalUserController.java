@@ -33,11 +33,6 @@ public class AdminFinalUserController {
         return ResponseEntity.ok(finalUserService.getAll(pageable, search));
     }
 
-    @GetMapping("/role_admin")
-    public ResponseEntity<PageDto<FinalUserDto>> getAllRoleAdmin(Pageable pageable) {
-        return ResponseEntity.ok(finalUserService.getAllRoleAdmin(pageable));
-    }
-
     @GetMapping("/metrics/{id}")
     public ResponseEntity<FinalUserMetricsDto> getUserMetrics(@PathVariable Long id) {
         return ResponseEntity.ok(finalUserService.getUserMetrics(id));

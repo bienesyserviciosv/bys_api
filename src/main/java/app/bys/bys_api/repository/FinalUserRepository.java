@@ -27,7 +27,10 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
     void deleteByEmail(String email);
 
     @Query("SELECT fu FROM FinalUser fu JOIN fu.roles r WHERE r.name = 'ROLE_ADMIN'")
-    List<FinalUser> findAdminsToNotify();
+    List<FinalUser> findAdmins();
+
+    @Query("SELECT fu FROM FinalUser fu JOIN fu.roles r WHERE r.name = 'ROLE_SUPER_ADMIN'")
+    FinalUser findSuperAdmin();
 
     Page<FinalUser> findByRoles_Name(String roleName, Pageable pageable);
 

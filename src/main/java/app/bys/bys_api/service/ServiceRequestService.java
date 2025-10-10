@@ -82,7 +82,7 @@ public class ServiceRequestService {
         ServiceRequestSpecification searchSpec =
                 search != null ? new ServiceRequestSpecification(
                         new SearchCriteria(
-                                "name",
+                                "description",
                                 "s",
                                 search
                         )
@@ -130,6 +130,8 @@ public class ServiceRequestService {
             return ServiceRequestMetricsDto.builder()
                     .id(sr.getId())
                     .clientName(sr.getFinalUser().getName())
+                    .email(sr.getFinalUser().getEmail())
+                    .phone(sr.getFinalUser().getPhoneNumber())
                     .description(sr.getDescription())
                     .date(sr.getDate())
                     .time(sr.getTime())

@@ -67,11 +67,11 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(providerRegistered);
     }
 
-    @PostMapping("/admin/register")
-    public ResponseEntity<FinalUserDto> registerAdmin(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
-        FinalUserDto userRegistered = authService.registerAdmin(finalUserDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userRegistered);
-    }
+//    @PostMapping("/admin/register")
+//    public ResponseEntity<FinalUserDto> registerAdmin(@Validated({OnCreate.class}) @RequestBody FinalUserDto finalUserDto) {
+//        FinalUserDto userRegistered = authService.registerAdmin(finalUserDto);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(userRegistered);
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequestDto) {

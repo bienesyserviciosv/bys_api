@@ -80,11 +80,6 @@ public class FinalUserService {
         return PageMapper.pageToDto(finalUserRepository.findAllUserMetrics(safeName, pageable));
     }
 
-    public PageDto<FinalUserDto> getAllRoleAdmin(Pageable pageable) {
-        return PageMapper.pageToDto(finalUserRepository.findByRoles_Name("ROLE_ADMIN", pageable).map(mapper::entityToDto));
-    }
-
-
     public FinalUserDto create(FinalUserDto finalUserDto) {
         if (finalUserRepository.existsByEmail(finalUserDto.getEmail())) {
             throw new DuplicateEmailException("The email is already registered");
