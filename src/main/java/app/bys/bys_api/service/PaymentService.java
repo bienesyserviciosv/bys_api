@@ -43,6 +43,7 @@ public class PaymentService {
     private final OfferRepository offerRepository;
     private final MediaRepository mediaRepository;
     private final ServiceRequestRepository serviceRequestRepository;
+    //private final NotificationService notificationService;
 
     public Object getPayment(Long id) {
         Payment payment = paymentRepository.findById(id)
@@ -141,6 +142,7 @@ public class PaymentService {
 
         request.setRequestStatus(RequestStatus.PENDING);
         serviceRequestRepository.save(request);
+        //notificationService.notifyAdminOfNewPayment(mobilePayment);
 
         return paymentMapper.entityToMobileDto(savedPayment);
     }
@@ -182,6 +184,7 @@ public class PaymentService {
 
         request.setRequestStatus(RequestStatus.PENDING);
         serviceRequestRepository.save(request);
+        //notificationService.notifyAdminOfNewPayment(transferPayment);
 
         return paymentMapper.entityToTransferDto(savedPayment);
     }

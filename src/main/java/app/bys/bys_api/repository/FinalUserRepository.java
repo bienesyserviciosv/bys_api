@@ -48,8 +48,10 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
                 SUM(CASE WHEN r.requestStatus = 'PENDING' THEN 1 ELSE 0 END)
             )
             FROM FinalUser u
+            JOIN u.roles role
             LEFT JOIN u.serviceRequestSet r
             WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))
+                AND role.name = 'ROLE_USER'
             GROUP BY u.id, u.name, u.email, u.phoneNumber, u.registrationDate, u.lastLoginDate
             """)
     Page<FinalUserMetricsDto> findAllUserMetrics(@Param("name") String name, Pageable pageable);
@@ -68,8 +70,10 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
                 SUM(CASE WHEN r.requestStatus = 'PENDING' THEN 1 ELSE 0 END)
             )
             FROM FinalUser u
+            JOIN u.roles role
             LEFT JOIN u.serviceRequestSet r
             WHERE u.id = :userId
+                AND role.name = 'ROLE_USER'
             GROUP BY u.id, u.name, u.email, u.phoneNumber, u.registrationDate, u.lastLoginDate
             """)
     Optional<FinalUserMetricsDto> findUserMetricsById(@Param("userId") Long userId);
