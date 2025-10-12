@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {FinalUserMapper.class})
 public abstract class ServiceRequestMapper {
 
     @Value("${media.url}")
