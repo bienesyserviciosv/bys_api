@@ -38,10 +38,9 @@ public class AdminOfferController {
     public ResponseEntity<PageDto<OfferMetricsDto>> getAllMetrics(Pageable pageable,
                                                                       @RequestParam(name = "search", required = false) String search,
                                                                       @RequestParam(name = "provider", required = false) List<Long> providerIdList,
-                                                                      @RequestParam(name = "user", required = false) List<Long> userIdList,
                                                                       @RequestParam(name = "service_request", required = false) List<Long> serviceRequestIdList,
                                                                       @RequestParam(name = "accepted", required = false) Boolean accepted) {
-        return new ResponseEntity<>(offerService.getAllOfferMetrics(pageable, search, providerIdList, serviceRequestIdList, accepted, userIdList), HttpStatus.OK);
+        return new ResponseEntity<>(offerService.getAllOfferMetrics(pageable, search, providerIdList, serviceRequestIdList, accepted), HttpStatus.OK);
     }
 
     @GetMapping("/metrics/{id}")

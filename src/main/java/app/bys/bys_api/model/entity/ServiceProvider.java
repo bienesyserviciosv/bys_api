@@ -58,21 +58,18 @@ public class ServiceProvider {
     @Column(name = "status")
     private UserStatus status;
 
-    @Builder.Default
     @Column(name = "email_verified")
-    private boolean emailVerified = false;
+    private boolean emailVerified;
 
-    @Builder.Default
     @Column(name = "phone_verified")
-    private boolean phoneVerified = false;
+    private boolean phoneVerified;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "address")
     private Province address;
 
-    @Builder.Default
     @Column(name = "completed_services")
-    private int completedServices = 0;
+    private int completedServices;
 
     @Column(name = "registration_time")
     private LocalDateTime registrationDate;

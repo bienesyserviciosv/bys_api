@@ -18,6 +18,7 @@ import app.bys.bys_api.service.specification.OfferSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +37,7 @@ public class OfferService {
     private final OfferMapper offerMapper;
     private final ServiceRequestRepository serviceRequestRepo;
     private final FinalUserRepository finalUserRepo;
+    private final OfferRepository offerRepository;
 
     public OfferDto get(Long id) {
         return offerMapper.entityToDto(offerRepo.findById(id)
@@ -51,13 +51,14 @@ public class OfferService {
 
     public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList) {
 
-        List<Specification<Offer>> specList = getSpecificationList(search, providerIdList, serviceRequestIdList, accepted, userIdList);
+        if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
+        if (serviceRequestIdList != null && serviceRequestIdList.isEmpty()) serviceRequestIdList = null;
+        if (userIdList != null && userIdList.isEmpty()) userIdList = null;
+        if (search == null) search = "";
 
-        return PageMapper.pageToDto(offerRepo.findAll(
-                Specification.allOf(specList.stream()
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())),
-                pageable).map(offerMapper::entityToDto));
+        Page<OfferDto> page = offerRepository.findAllOffersFiltered(search, serviceRequestIdList, providerIdList, accepted, userIdList, pageable);
+
+        return PageMapper.pageToDto(page);
     }
 
     private List<Specification<Offer>> getSpecificationList(String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList){
@@ -97,15 +98,15 @@ public class OfferService {
 
     }
 
-    public PageDto<OfferMetricsDto> getAllOfferMetrics(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList) {
+    public PageDto<OfferMetricsDto> getAllOfferMetrics(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted) {
 
-        List<Specification<Offer>> specList = getSpecificationList(search, providerIdList, serviceRequestIdList, accepted, userIdList);
+        if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
+        if (serviceRequestIdList != null && serviceRequestIdList.isEmpty()) serviceRequestIdList = null;
+        if (search == null) search = "";
 
-        return PageMapper.pageToDto(offerRepo.findAll(
-                Specification.allOf(specList.stream()
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())),
-                pageable).map(offerMapper::entityToMetricsDto));
+        Page<OfferMetricsDto> page = offerRepository.findAllOfferMetricsFiltered(search, serviceRequestIdList, providerIdList, accepted, pageable);
+
+        return PageMapper.pageToDto(page);
     }
 
     public OfferDto create(ServiceProvider provider, OfferDto offerDto) {

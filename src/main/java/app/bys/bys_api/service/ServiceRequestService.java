@@ -3,15 +3,12 @@ package app.bys.bys_api.service;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
-import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.dto.ServiceRequestDto;
-import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
-import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.FinalUser;
-import app.bys.bys_api.model.entity.Payment;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.PictureType;
+import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
@@ -23,6 +20,8 @@ import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -39,6 +38,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ServiceRequestService {
+
+    @Value("${media.url}")
+    public String mediaUrl;
 
     private final ServiceRequestRepository serviceRequestRepository;
     private final FinalUserRepository finalUserRepository;
@@ -65,13 +67,33 @@ public class ServiceRequestService {
         return requestMapper.entityToDtoWithPicture(request);
     }
 
-    public PageDto<ServiceRequestWithPictureDto> getAll (Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
-        List<Specification<ServiceRequest>> specList = getSpecificationsList(search, specializationList, address, userList, providerList);
-        return PageMapper.pageToDto(serviceRequestRepository.findAll(
-                Specification.allOf(specList.stream()
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())),
-                pageable).map(requestMapper::entityToDtoWithPicture));
+    public PageDto<ServiceRequestSummary> getAll (Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList) throws BadRequestException {
+        Province province = null;
+        if (address != null) {
+            try {
+                province = Province.valueOf(address);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid province: " + address);
+            }
+        }
+        if (search == null) {
+            search = "";
+        }
+        if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
+
+        Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(search, specializationList, province, userList, providerIdList, pageable);
+
+        page.forEach(summary -> {
+            Set<String> pictures = pictureRepository.findByServiceRequestId(summary.getId())
+                    .stream()
+                    .map(Picture::getUrl)
+                    .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
+                    .collect(Collectors.toSet());
+
+            summary.setPictureSet(pictures);
+        });
+        return PageMapper.pageToDto(page);
+
     }
 
     private List<Specification<ServiceRequest>> getSpecificationsList(String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList){
@@ -116,41 +138,24 @@ public class ServiceRequestService {
        ));
     }
 
-    public PageDto<ServiceRequestMetricsDto> getAllRequestMetrics(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList){
-        List<Specification<ServiceRequest>> specList = getSpecificationsList(search, specializationList, address, userList, providerList);
-        Specification<ServiceRequest> spec = Specification.allOf(
-                specList.stream().filter(Objects::nonNull).toList()
-        );
+    public PageDto<ServiceRequestMetricsDto> getAllRequestMetrics(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList) throws BadRequestException {
 
-        Page<ServiceRequest> page = serviceRequestRepository.findAll(spec, pageable);
+        Province province = null;
+        if (address != null) {
+            try {
+                province = Province.valueOf(address);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid province: " + address);
+            }
+        }
+        if (search == null) {
+            search = "";
+        }
+        Page<ServiceRequestMetricsDto> page = serviceRequestRepository.findAllRequestMetrics(search, specializationList, province, userList, pageable);
 
-        Page<ServiceRequestMetricsDto> dtoPage = page.map(sr -> {
-            Payment payment = sr.getAcceptedOffer() != null ? sr.getAcceptedOffer().getPayment() : null;
+        return PageMapper.pageToDto(page);
 
-            return ServiceRequestMetricsDto.builder()
-                    .id(sr.getId())
-                    .clientName(sr.getFinalUser().getName())
-                    .email(sr.getFinalUser().getEmail())
-                    .phone(sr.getFinalUser().getPhoneNumber())
-                    .description(sr.getDescription())
-                    .date(sr.getDate())
-                    .time(sr.getTime())
-                    .requestStatus(sr.getRequestStatus())
-                    .creationDate(sr.getCreationDate())
-                    .acceptanceDate(sr.getAcceptanceDate())
-                    .offerQuantity(sr.getOfferQuantity())
-                    .paymentAmount(payment != null ? sr.getAcceptedOffer().getPrice() : null)
-                    .paymentType(payment != null ? payment.getPaymentType() : null)
-                    .paymentDate(payment != null ? payment.getPaymentDate() : null)
-                    .build();
-        });
-
-        return PageMapper.pageToDto(dtoPage);
     }
-
-//    public PageDto<ServiceRequestMetricsDto> getAllRequestMetrics(Pageable pageable) {
-//        return PageMapper.pageToDto(serviceRequestRepository.findAllRequestMetrics(pageable));
-//    }
 
     public ServiceRequestMetricsDto getRequestMetrics(Long id) {
         return serviceRequestRepository.findRequestMetricsById(id)

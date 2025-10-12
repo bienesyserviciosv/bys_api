@@ -7,22 +7,26 @@ import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.mapper.SpecializationMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
+import app.bys.bys_api.model.dto.ServiceProviderSummary;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.entity.Specialization;
 import app.bys.bys_api.model.enums.MembershipType;
+import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.repository.ServiceProviderRepository;
-import app.bys.bys_api.service.specification.ServiceProviderSpecification;
-import app.bys.bys_api.utils.specification.SearchCriteria;
+import app.bys.bys_api.repository.SpecializationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +39,7 @@ public class ServiceProviderService {
     private final RoleService roleService;
     private final SpecializationMapper specializationMapper;
     private final PictureService pictureService;
+    private final SpecializationRepository specializationRepository;
 
     public ServiceProviderWithPictureDto get(Long id) {
         return mapper.entityToDtoWithPicture(serviceProviderRepository.findById(id)
@@ -46,42 +51,31 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException("Service provider with email " + email + " not found")));
     }
 
-    public PageDto<ServiceProviderWithPictureDto> getAll(Pageable pageable, String search, List<Long> specializationList, String address) {
-        Specification<ServiceProvider> specializationSpec =
-                specializationList != null ? ServiceProviderSpecification.hasSpecialization(specializationList)
-                        : null;
+    public PageDto<ServiceProviderSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, MembershipType membershipType, Boolean verified) throws BadRequestException {
+        Province province = null;
+        if (address != null) {
+            try {
+                province = Province.valueOf(address);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid province: " + address);
+            }
+        }
+        if (search == null) {
+            search = "";
+        }
+        if (specializationList != null && specializationList.isEmpty()) specializationList = null;
+        Page<ServiceProviderSummary> page = serviceProviderRepository.findAllProviderSummariesFiltered(search, specializationList, province, membershipType, verified, pageable);
 
-        ServiceProviderSpecification searchSpec =
-                search != null ? new ServiceProviderSpecification(
-                        new SearchCriteria(
-                                "name",
-                                "s",
-                                search
-                        )
-                )
-                        : null;
+        page.forEach(dto -> {
+            Set<String> specializationSet = specializationRepository.findByServiceProviderId(dto.getId())
+                    .stream()
+                    .map(Specialization::getSpecializationType)
+                    .collect(Collectors.toSet());
 
-        ServiceProviderSpecification addressSpec =
-                address != null ? new ServiceProviderSpecification(
-                        new SearchCriteria(
-                                "address",
-                                ":",
-                                address
-                        )
-                )
-                        : null;
+            dto.setSpecializations(specializationSet);
+        });
 
-        List<Specification<ServiceProvider>> specList = new ArrayList<>(Arrays.asList(
-                specializationSpec,
-                searchSpec,
-                addressSpec
-        ));
-
-        return PageMapper.pageToDto(serviceProviderRepository.findAll(
-                Specification.allOf(specList.stream()
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())),
-                pageable).map(mapper::entityToDtoWithPicture));
+        return PageMapper.pageToDto(page);
     }
 
     public ServiceProviderWithPictureDto create(ServiceProviderDto serviceProviderDto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {

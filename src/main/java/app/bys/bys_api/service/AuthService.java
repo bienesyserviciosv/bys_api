@@ -228,7 +228,7 @@ public class AuthService {
             return authenticateAndRespond(provider.getEmail(), authRequestDto.getPassword(), provider.getRoles());
         }
 
-        throw new UsernameNotFoundException("User not found");
+        throw new UsernameNotFoundException("Credenciales erróneas");
     }
 
     public ResponseEntity<AuthResponseDto> adminLogin(AuthRequestDto authRequestDto) {
@@ -249,7 +249,7 @@ public class AuthService {
             return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword(), user.getRoles());
         }
 
-        throw new UsernameNotFoundException("Admin user not found");
+        throw new UsernameNotFoundException("Credenciales erróneas");
     }
 
 
