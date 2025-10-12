@@ -1,7 +1,6 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
-import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.validation.OnCreate;
@@ -84,6 +83,6 @@ public class ServiceProviderDto {
     private String profilePicture;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Set<Role> roles;
+    private String role;
 
 }

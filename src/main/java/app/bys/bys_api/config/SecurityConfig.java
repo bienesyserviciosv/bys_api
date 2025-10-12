@@ -4,10 +4,7 @@ import app.bys.bys_api.error.ErrorResponseDto;
 import app.bys.bys_api.security.filter.JwtAuthenticationFilter;
 import app.bys.bys_api.security.handler.CustomAccessDeniedHandler;
 import app.bys.bys_api.security.handler.CustomAuthenticationEntryPoint;
-import app.bys.bys_api.security.oauth2.ProviderSuccessHandler;
 import app.bys.bys_api.security.oauth2.UserSuccessHandler;
-import app.bys.bys_api.service.FinalUserService;
-import app.bys.bys_api.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -45,9 +42,6 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final ObjectMapper objectMapper;
-    private final ProviderSuccessHandler providerSuccessHandler;
-    private final FinalUserService finalUserService;
-    private final JwtUtil jwtUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,

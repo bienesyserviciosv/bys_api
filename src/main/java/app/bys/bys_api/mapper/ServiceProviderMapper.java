@@ -3,9 +3,12 @@ package app.bys.bys_api.mapper;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.model.entity.Picture;
+import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.enums.PictureType;
+import app.bys.bys_api.service.RoleService;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Objects;
@@ -14,6 +17,9 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public abstract class ServiceProviderMapper {
+
+    @Autowired
+    private RoleService roleService;
 
     @Value("${media.url}")
     public String mediaUrl;
@@ -39,14 +45,16 @@ public abstract class ServiceProviderMapper {
                 .collect(Collectors.toSet()));
     }
 
-
+    @Mapping(source = "role", target = "roles")
     public abstract ServiceProvider dtoToEntity(ServiceProviderDto serviceProviderDto);
 
+    @Mapping(source = "roles", target = "role")
     public abstract ServiceProviderDto entityToDto(ServiceProvider serviceProvider);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateServiceProviderFromDto(ServiceProviderDto serviceProviderDto, @MappingTarget ServiceProvider serviceProvider);
 
+    @Mapping(source = "roles", target = "role")
     @Mapping(target = "workPictureSet", source = "workPictureSet", qualifiedByName = "pictureToUrlSet")
     public abstract ServiceProviderWithPictureDto entityToDtoWithPicture(ServiceProvider serviceProvider);
 
@@ -59,4 +67,13 @@ public abstract class ServiceProviderMapper {
                 .collect(Collectors.toSet());
     }
 
+    protected String mapFirstRole(Set<Role> roles) {
+        if (roles == null || roles.isEmpty()) return null;
+        return roles.iterator().next().getName();
+    }
+
+    protected Set<Role> mapRoleName(String roleName) {
+        if (roleName == null) return null;
+        return Set.of(roleService.getRoleOrThrow(roleName));
+    }
 }
