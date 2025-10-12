@@ -3,6 +3,7 @@ package app.bys.bys_api.controller;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceRequestDto;
+import app.bys.bys_api.model.dto.ServiceRequestSummary;
 import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.service.NotificationService;
@@ -10,6 +11,7 @@ import app.bys.bys_api.service.ServiceRequestService;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,13 +37,13 @@ public class ServiceRequestController {
     }
 
     @GetMapping
-    public ResponseEntity<PageDto<ServiceRequestWithPictureDto>> getAll(Pageable pageable,
-                                                                        @RequestParam(name = "search", required = false) String search,
-                                                                        @RequestParam(name = "specialization", required = false) List<Long> specializationList,
-                                                                        @RequestParam(name = "address", required = false) String address,
-                                                                        @RequestParam(name = "user", required = false) List<Long> userIdList,
-                                                                        @RequestParam(name = "provider", required = false) List<Long> providerIdList
-    ) {
+    public ResponseEntity<PageDto<ServiceRequestSummary>> getAll(Pageable pageable,
+                                                                 @RequestParam(name = "search", required = false) String search,
+                                                                 @RequestParam(name = "specialization", required = false) List<Long> specializationList,
+                                                                 @RequestParam(name = "address", required = false) String address,
+                                                                 @RequestParam(name = "user", required = false) List<Long> userIdList,
+                                                                 @RequestParam(name = "provider", required = false) List<Long> providerIdList
+    ) throws BadRequestException {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
     }
 

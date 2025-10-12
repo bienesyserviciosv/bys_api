@@ -10,6 +10,7 @@ import app.bys.bys_api.service.NotificationService;
 import app.bys.bys_api.service.ServiceRequestService;
 import app.bys.bys_api.validation.OnCreate;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,9 +41,9 @@ public class AdminServiceRequestController {
                                                                                   @RequestParam(name = "search", required = false) String search,
                                                                                   @RequestParam(name = "specialization", required = false) List<Long> specializationList,
                                                                                   @RequestParam(name = "address", required = false) String address,
-                                                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
-                                                                                  @RequestParam(name = "provider", required = false) List<Long> providerIdList) {
-        return new ResponseEntity<>(serviceRequestService.getAllRequestMetrics(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
+                                                                                  @RequestParam(name = "user", required = false) List<Long> userIdList
+                                                                                  ) throws BadRequestException {
+        return new ResponseEntity<>(serviceRequestService.getAllRequestMetrics(pageable, search, specializationList, address, userIdList), HttpStatus.OK);
     }
 
     @PostMapping("/user/{id}")
