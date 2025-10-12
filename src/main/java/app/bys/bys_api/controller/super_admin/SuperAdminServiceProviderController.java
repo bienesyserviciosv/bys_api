@@ -25,19 +25,6 @@ public class SuperAdminServiceProviderController {
 
     private final ServiceProviderService serviceProviderService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ServiceProviderWithPictureDto> get(@PathVariable Long id) {
-        return ResponseEntity.ok(serviceProviderService.get(id));
-    }
-
-    @GetMapping
-    public ResponseEntity<PageDto<ServiceProviderWithPictureDto>> getAll(Pageable pageable,
-                                                                         @RequestParam(name = "search", required = false) String search,
-                                                                         @RequestParam(name = "specializations", required = false) List<Long> specializationList,
-                                                                         @RequestParam(name = "address", required = false) String address) {
-        return ResponseEntity.ok(serviceProviderService.getAll(pageable, search, specializationList, address));
-    }
-
     @PostMapping
     public ResponseEntity<ServiceProviderWithPictureDto> create(@Validated(OnCreate.class)
                                                                 @RequestPart(name = "provider") ServiceProviderDto serviceProviderDto,
