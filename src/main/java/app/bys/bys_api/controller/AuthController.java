@@ -79,6 +79,11 @@ public class AuthController {
         return authService.login(authRequestDto);
     }
 
+    @PostMapping("/admin/login")
+    public ResponseEntity<AuthResponseDto> adminLogin(@Valid @RequestBody AuthRequestDto authRequestDto) {
+        return authService.adminLogin(authRequestDto);
+    }
+
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam String email, @RequestParam String otp) {
         try {

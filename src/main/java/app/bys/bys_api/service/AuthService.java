@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -229,6 +230,28 @@ public class AuthService {
 
         throw new UsernameNotFoundException("User not found");
     }
+
+    public ResponseEntity<AuthResponseDto> adminLogin(AuthRequestDto authRequestDto) {
+        String identifier = authRequestDto.getIdentifier();
+
+        FinalUser user;
+        if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
+            user = getUser(identifier);
+            if (!user.isEmailVerified()) throw new EmailNotVerifiedException("The email is not verified");
+
+            boolean isAdmin = user.getRoles().stream()
+                    .anyMatch(role -> role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_SUPER_ADMIN"));
+
+            if (!isAdmin) {
+                throw new AccessDeniedException("Access denied: not an admin");
+            }
+
+            return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword(), user.getRoles());
+        }
+
+        throw new UsernameNotFoundException("Admin user not found");
+    }
+
 
     public void passwordRecovery(String email) {
         if (!finalUserRepo.existsByEmail(email) && !serviceProviderRepo.existsByEmail(email)) {
