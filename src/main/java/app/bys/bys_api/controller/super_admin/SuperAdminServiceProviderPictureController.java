@@ -1,4 +1,4 @@
-package app.bys.bys_api.controller.admin;
+package app.bys.bys_api.controller.super_admin;
 
 import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
@@ -18,9 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ROLE_ADMIN')")
-@RequestMapping("/admin/picture/service_provider")
-public class AdminServiceProviderPictureController {
+@PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+@RequestMapping("/super_admin/picture/service_provider")
+public class SuperAdminServiceProviderPictureController {
 
     private final PictureService pictureService;
     private final ServiceProviderRepository serviceProviderRepository;

@@ -127,6 +127,7 @@ public class AuthService {
                 .phoneVerified(false)
                 .membershipType(MembershipType.NOT_VERIFIED)
                 .verified(false)
+                .completedServices(0)
                 .address(dto.getAddress())
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
                 .registrationDate(LocalDateTime.now())
@@ -147,7 +148,7 @@ public class AuthService {
 
     }
 
-    //TODO COMPLETE METHOD
+    //TODO DELETE METHOD
     public FinalUserDto registerAdmin(FinalUserDto dto) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {

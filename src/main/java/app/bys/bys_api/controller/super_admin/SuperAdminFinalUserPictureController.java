@@ -1,4 +1,4 @@
-package app.bys.bys_api.controller.admin;
+package app.bys.bys_api.controller.super_admin;
 
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.model.dto.FinalUserDto;
@@ -17,9 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ROLE_ADMIN')")
-@RequestMapping("/admin/picture/final_user")
-public class AdminFinalUserPictureController {
+@PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+@RequestMapping("/super_admin/picture/final_user")
+public class SuperAdminFinalUserPictureController {
 
     private final PictureService pictureService;
     private final FinalUserRepository finalUserRepository;
@@ -28,7 +28,7 @@ public class AdminFinalUserPictureController {
 
 
     @PostMapping("/profile/{userId}")
-    public ResponseEntity<FinalUserDto> uploadPictureAsAdmin(@PathVariable Long userId, @RequestParam("image") MultipartFile newImage) {
+    public ResponseEntity<FinalUserDto> uploadPicture(@PathVariable Long userId, @RequestParam("image") MultipartFile newImage) {
         FinalUser finalUser = finalUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
@@ -40,7 +40,7 @@ public class AdminFinalUserPictureController {
     }
 
     @DeleteMapping("/profile/{userId}")
-    public ResponseEntity<Void> deletePictureAsAdmin(@PathVariable Long userId) {
+    public ResponseEntity<Void> deletePicture(@PathVariable Long userId) {
         FinalUser finalUser = finalUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 

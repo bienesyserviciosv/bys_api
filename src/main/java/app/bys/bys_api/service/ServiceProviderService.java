@@ -104,6 +104,7 @@ public class ServiceProviderService {
                 .phoneVerified(false)
                 .membershipType(MembershipType.NOT_VERIFIED)
                 .verified(false)
+                .completedServices(0)
                 .address(serviceProviderDto.getAddress())
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
                 .registrationDate(LocalDateTime.now())

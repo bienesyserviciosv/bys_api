@@ -1,4 +1,4 @@
-package app.bys.bys_api.controller.admin;
+package app.bys.bys_api.controller.super_admin;
 
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.PageDto;

@@ -16,6 +16,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ import static app.bys.bys_api.service.OtpService.MAX_RESEND_ATTEMPTS;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -46,7 +48,6 @@ public class AuthController {
     private final FinalUserRepository finalUserRepo;
     private final ServiceProviderRepository serviceProviderRepo;
     private final JwtUtil jwtUtil;
-
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
@@ -168,6 +169,8 @@ public class AuthController {
                     .collect(Collectors.toList());
 
             String jwt = jwtUtil.generateToken(user.getEmail(), authorities);
+
+            log.info("Token audience: {}", payload.getAudience());
 
             return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
         } catch (Exception e) {

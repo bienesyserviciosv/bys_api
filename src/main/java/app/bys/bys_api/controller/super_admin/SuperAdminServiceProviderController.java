@@ -1,4 +1,4 @@
-package app.bys.bys_api.controller.admin;
+package app.bys.bys_api.controller.super_admin;
 
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
@@ -19,9 +19,9 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/service_provider")
-@PreAuthorize("hasAuthority('ROLE_ADMIN')")
-public class AdminServiceProviderController {
+@RequestMapping("/super_admin/service_provider")
+@PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+public class SuperAdminServiceProviderController {
 
     private final ServiceProviderService serviceProviderService;
 
