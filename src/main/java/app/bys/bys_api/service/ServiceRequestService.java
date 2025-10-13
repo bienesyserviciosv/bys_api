@@ -23,7 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -148,14 +150,32 @@ public class ServiceRequestService {
                 throw new BadRequestException("Invalid province: " + address);
             }
         }
-        if (search == null) {
-            search = "";
-        }
-        Page<ServiceRequestMetricsDto> page = serviceRequestRepository.findAllRequestMetrics(search, specializationList, province, userList, pageable);
+        if (search == null || search.isBlank()) search = "";
+        if (specializationList != null && specializationList.isEmpty()) specializationList = null;
+        if (userList != null && userList.isEmpty()) userList = null;
+
+        // Se tradujeron los nombres de campos del DTO a propiedades reales de la entidad para que el sort funcione
+        Pageable translatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), translateSort(pageable.getSort()));
+
+        Page<ServiceRequestMetricsDto> page = serviceRequestRepository.findAllRequestMetrics(search, specializationList, province, userList, translatedPageable);
 
         return PageMapper.pageToDto(page);
 
     }
+
+    private Sort translateSort(Sort sort) {
+        return Sort.by(
+                sort.stream()
+                        .map(order -> {
+                            if ("clientName".equals(order.getProperty())) {
+                                return new Sort.Order(order.getDirection(), "finalUser.name");
+                            }
+                            return order;
+                        })
+                        .collect(Collectors.toList())
+        );
+    }
+
 
     public ServiceRequestMetricsDto getRequestMetrics(Long id) {
         return serviceRequestRepository.findRequestMetricsById(id)
