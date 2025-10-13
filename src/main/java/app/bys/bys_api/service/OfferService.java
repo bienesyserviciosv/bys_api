@@ -19,7 +19,9 @@ import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -104,9 +108,27 @@ public class OfferService {
         if (serviceRequestIdList != null && serviceRequestIdList.isEmpty()) serviceRequestIdList = null;
         if (search == null) search = "";
 
-        Page<OfferMetricsDto> page = offerRepository.findAllOfferMetricsFiltered(search, serviceRequestIdList, providerIdList, accepted, pageable);
+        // Se tradujeron los nombres de campos del DTO a propiedades reales de la entidad para que el sort funcione
+        Pageable translatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), translateSort(pageable.getSort()));
+
+        Page<OfferMetricsDto> page = offerRepository.findAllOfferMetricsFiltered(search, serviceRequestIdList, providerIdList, accepted, translatedPageable);
 
         return PageMapper.pageToDto(page);
+    }
+
+    private Sort translateSort(Sort sort) {
+        Map<String, String> sortMapping = Map.of(
+                "workerName", "provider.name",
+                "serviceRequestId", "serviceRequest.id"
+        );
+        return Sort.by(
+                sort.stream()
+                        .map(order -> {
+                            String mappedProperty = sortMapping.getOrDefault(order.getProperty(), order.getProperty());
+                            return new Sort.Order(order.getDirection(), mappedProperty);
+                        })
+                        .collect(Collectors.toList())
+        );
     }
 
     public OfferDto create(ServiceProvider provider, OfferDto offerDto) {
