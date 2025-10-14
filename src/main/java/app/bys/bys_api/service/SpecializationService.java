@@ -21,12 +21,12 @@ public class SpecializationService {
 
     @PostConstruct
     public void initializeSpecializations() {
-        createSpecializationIfNotFound("ELECTRICITY");
-        createSpecializationIfNotFound("REFRIGERATION");
-        createSpecializationIfNotFound("PLUMBING");
-        createSpecializationIfNotFound("ELECTRONIC");
-        createSpecializationIfNotFound("SMITHY");
-        createSpecializationIfNotFound("CONSTRUCTION");
+        createSpecializationIfNotFound("ELECTRICIDAD");
+        createSpecializationIfNotFound("REFRIGERACION");
+        createSpecializationIfNotFound("PLOMERIA");
+        createSpecializationIfNotFound("ELECTRONICA");
+        createSpecializationIfNotFound("HERRERIA");
+        createSpecializationIfNotFound("CONSTRUCCION");
 
     }
 
