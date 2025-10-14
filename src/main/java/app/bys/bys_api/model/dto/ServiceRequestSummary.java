@@ -63,12 +63,15 @@ public class ServiceRequestSummary {
     @JsonProperty("new_offer")
     private Boolean newOffer;
 
+    @JsonProperty("service_provider_id")
+    private Long serviceProviderId;
+
 
     public ServiceRequestSummary(Long id, String description, Province address,
                                  LocalDate date, LocalTime time, String latitude, String longitude,
                                  RequestStatus requestStatus, LocalDateTime creationDate, LocalDateTime acceptanceDate,
                                  String specialization, Long finalUserId, Integer offerQuantity,
-                                 Boolean newOffer) {
+                                 Boolean newOffer, Long serviceProviderId) {
 
         this.id = id;
         this.description = description;
@@ -83,6 +86,7 @@ public class ServiceRequestSummary {
         this.specialization = specialization;
         this.finalUserId = finalUserId;
         this.offerQuantity = offerQuantity;
+        this.serviceProviderId = serviceProviderId;
         this.newOffer = newOffer;
         this.pictureSet = new HashSet<>();
     }

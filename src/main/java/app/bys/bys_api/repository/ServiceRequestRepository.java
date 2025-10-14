@@ -103,7 +103,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
                 s.specializationType,
                 fu.id,
                 sr.offerQuantity,
-                sr.newOffer
+                sr.newOffer,
+                sr.serviceProvider.id
             )
             FROM ServiceRequest sr
             JOIN sr.specialization s
