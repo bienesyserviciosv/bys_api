@@ -49,7 +49,7 @@ public class AuthController {
     private final ServiceProviderRepository serviceProviderRepo;
     private final JwtUtil jwtUtil;
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    @Value("${google.oauth2.android-client-id}")
     private String googleClientId;
 
     @PostMapping("/final_user/register")
