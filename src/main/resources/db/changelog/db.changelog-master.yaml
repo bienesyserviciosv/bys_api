@@ -23,4 +23,6 @@ databaseChangeLog:
       file: db/changelog/010.yaml
   - include:
       file: db/changelog/011.yaml
+  - include:
+      file: db/changelog/012.yaml
 

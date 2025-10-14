@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20251013-01
+      author: Carlos
+      preConditions:
+        - or:
+            - sqlCheck:
+                expectedResult: "1"
+                sql: |
+                    SELECT CASE WHEN EXISTS (
+                      SELECT 1 FROM service_provider WHERE address IN ('PROVINCE_NAME_1','PROVINCE_NAME_2','PROVINCE_NAME_3','PROVINCE_NAME_4')
+                    ) THEN 1 ELSE 0 END;
+            - sqlCheck:
+                expectedResult: "1"
+                sql: |
+                    SELECT CASE WHEN EXISTS (
+                      SELECT 1 FROM service_request WHERE address IN ('PROVINCE_NAME_1','PROVINCE_NAME_2','PROVINCE_NAME_3','PROVINCE_NAME_4')
+                    ) THEN 1 ELSE 0 END;
+      changes:
+        - sql:
+            sql: |
+              UPDATE service_provider SET address = 'BARCELONA' WHERE address = 'PROVINCE_NAME_1';
+        - sql:
+            sql: |
+              UPDATE service_provider SET address = 'PUERTO_LA_CRUZ' WHERE address = 'PROVINCE_NAME_2';
+        - sql:
+            sql: |
+              UPDATE service_provider SET address = 'LECHERIA' WHERE address = 'PROVINCE_NAME_3';
+        - sql:
+            sql: |
+              UPDATE service_provider SET address = 'NUEVA_BARCELONA' WHERE address = 'PROVINCE_NAME_4';
+
+        - sql:
+            sql: |
+              UPDATE service_request SET address = 'BARCELONA' WHERE address = 'PROVINCE_NAME_1';
+        - sql:
+            sql: |
+              UPDATE service_request SET address = 'PUERTO_LA_CRUZ' WHERE address = 'PROVINCE_NAME_2';
+        - sql:
+            sql: |
+              UPDATE service_request SET address = 'LECHERIA' WHERE address = 'PROVINCE_NAME_3';
+        - sql:
+            sql: |
+              UPDATE service_request SET address = 'NUEVA_BARCELONA' WHERE address = 'PROVINCE_NAME_4';
+
