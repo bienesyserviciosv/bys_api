@@ -1,6 +1,5 @@
 package app.bys.bys_api.model.dto;
 
-import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -24,8 +23,8 @@ public class ServiceRequestSummary {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty("address")
-    private Province address;
+//    @JsonProperty("address")
+//    private Province address;
 
     @JsonProperty("date")
     private LocalDate date;
@@ -67,7 +66,7 @@ public class ServiceRequestSummary {
     private Long serviceProviderId;
 
 
-    public ServiceRequestSummary(Long id, String description, Province address,
+    public ServiceRequestSummary(Long id, String description,
                                  LocalDate date, LocalTime time, String latitude, String longitude,
                                  RequestStatus requestStatus, LocalDateTime creationDate, LocalDateTime acceptanceDate,
                                  String specialization, Long finalUserId, Integer offerQuantity,
@@ -75,7 +74,6 @@ public class ServiceRequestSummary {
 
         this.id = id;
         this.description = description;
-        this.address = address;
         this.date = date;
         this.time = time;
         this.latitude = latitude;

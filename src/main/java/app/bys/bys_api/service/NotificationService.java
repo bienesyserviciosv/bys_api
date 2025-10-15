@@ -5,9 +5,8 @@ import app.bys.bys_api.mapper.NotificationMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.NotificationDto;
 import app.bys.bys_api.model.dto.PageDto;
-//import app.bys.bys_api.model.dto.PaymentNotificationDto;
+import app.bys.bys_api.model.dto.PaymentNotificationDto;
 import app.bys.bys_api.model.entity.*;
-import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -16,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-//import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,17 +33,17 @@ public class NotificationService {
     private final FinalUserRepository finalUserRepository;
     private final ServiceRequestRepository serviceRequestRepository;
     private final PaymentRepository paymentRepository;
-    //private final SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public void notifyProvidersOfNewRequest(Long specializationId, Province address, ServiceRequest serviceRequest) {
+    public void notifyProvidersOfNewRequest(Long specializationId, ServiceRequest serviceRequest) {
 
-        List<ServiceProvider> providers = serviceProviderRepository.findByAddressAndSpecializations_Id(address, specializationId);
+        List<ServiceProvider> providers = serviceProviderRepository.findBySpecializations_Id(specializationId);
 
         if (providers != null && !providers.isEmpty()) {
             List<Notification> notifications = providers.stream()
                     .map(provider -> Notification.builder()
                             .serviceProvider(provider)
-                            .message("Nueva solicitud disponible en tu zona")
+                            .message("Nueva solicitud disponible")
                             .read(false)
                             .timestamp(LocalDateTime.now())
                             .serviceRequest(serviceRequest)
@@ -185,15 +184,15 @@ public class NotificationService {
 
     }
 
-//    public void notifyAdminOfNewPayment(Payment payment) {
-//        PaymentNotificationDto dto = new PaymentNotificationDto(
-//                payment.getId(),
-//                payment.getFinalUser().getName(),
-//                payment.getOffer().getPrice(),
-//                payment.getPaymentDate()
-//        );
-//        messagingTemplate.convertAndSend("/topic/admin/payments", dto);
-//    }
+    public void notifyAdminOfNewPayment(Payment payment) {
+        PaymentNotificationDto dto = new PaymentNotificationDto(
+                payment.getId(),
+                payment.getFinalUser().getName(),
+                payment.getOffer().getPrice(),
+                payment.getPaymentDate()
+        );
+        messagingTemplate.convertAndSend("/topic/admin/payments", dto);
+    }
 
 
 }

@@ -92,7 +92,6 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             SELECT new app.bys.bys_api.model.dto.ServiceRequestSummary(
                 sr.id,
                 sr.description,
-                sr.address,
                 sr.date,
                 sr.time,
                 sr.latitude,

@@ -1,13 +1,10 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
-import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -30,9 +27,9 @@ public class ServiceRequestDto {
     @Size(min = 5, groups = {OnCreate.class, OnUpdate.class}, message = "The length must be greater than 5 char")
     private String description;
 
-    @JsonProperty("address")
-    @Enumerated(EnumType.STRING)
-    private Province address;
+//    @JsonProperty("address")
+//    @Enumerated(EnumType.STRING)
+//    private Province address;
 
     @Future(groups = {OnCreate.class, OnUpdate.class}, message = "Must be in the future")
     @JsonProperty("date")

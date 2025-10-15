@@ -55,7 +55,7 @@ public class ServiceRequestController {
         ServiceRequest serviceRequest = serviceRequestService.create(auth.getName(), serviceRequestDto, files);
 
         Long specializationId = serviceRequestDto.getSpecialization().getId();
-        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequestDto.getAddress(), serviceRequest);
+        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequest);
 
         return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
     }
