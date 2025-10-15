@@ -161,38 +161,6 @@ public class AuthService {
 
     }
 
-    //TODO DELETE METHOD
-    public FinalUserDto registerAdmin(FinalUserDto dto) {
-
-        if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
-            if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
-                throw new DuplicatePhoneException("The phone number is already registered");
-            }
-            //handlePhoneOtp(dto.getPhoneNumber());
-        }
-
-        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-            if (finalUserRepo.existsByEmail(dto.getEmail()) || serviceProviderRepo.existsByEmail(dto.getEmail())) {
-                throw new DuplicateEmailException("The email is already registered");
-            }
-            handleEmailOtp(dto.getEmail());
-        }
-
-        FinalUser user = FinalUser.builder()
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .phoneNumber(dto.getPhoneNumber())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .phoneVerified(false)
-                .emailVerified(false)
-                .status(UserStatus.ACTIVE)
-                .roles(Set.of(roleService.getRoleOrThrow("ROLE_ADMIN")))
-                .registrationDate(LocalDateTime.now())
-                .build();
-
-        return userMapper.entityToDto(finalUserRepo.save(user));
-    }
-
     private void handleEmailOtp(String email) {
         String otp = otpService.generateOTP();
         otpService.sendOTP(email, otp);
