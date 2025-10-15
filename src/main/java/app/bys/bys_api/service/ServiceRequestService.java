@@ -1,5 +1,7 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.ErrorMessage;
+import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
@@ -10,6 +12,7 @@ import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
+import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
@@ -209,6 +212,9 @@ public class ServiceRequestService {
         FinalUser finalUser = finalUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
+        if (finalUser.getStatus().equals(UserStatus.INACTIVE)){
+            throw new ForbiddenActionException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
+        }
         return saveServiceRequest(serviceRequestDto, files, finalUser);
     }
 

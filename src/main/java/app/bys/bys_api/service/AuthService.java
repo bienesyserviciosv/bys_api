@@ -80,9 +80,10 @@ public class AuthService {
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .phoneVerified(false)
                 .emailVerified(false)
-                .status(UserStatus.ACTIVE)
+                .status(UserStatus.INACTIVE)
                 .roles(new HashSet<>(Set.of(roleService.getRoleOrThrow("ROLE_USER"))))
                 .registrationDate(LocalDateTime.now())
+                .lastLoginDate(LocalDateTime.now())
                 .build();
 
 
@@ -90,7 +91,12 @@ public class AuthService {
             FinalUser savedUser = finalUserRepo.save(user);
             pictureService.uploadProfilePictureForFinalUser(profilePicture, savedUser);
 
-            return userMapper.entityToDto(savedUser);
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
+
+            FinalUserDto finalUserDto = userMapper.entityToDto(savedUser);
+            finalUserDto.setToken(jwtUtil.generateToken(auth));
+            return finalUserDto;
 
         } catch (Exception e) {
             finalUserRepo.delete(user);
@@ -121,7 +127,7 @@ public class AuthService {
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())
                 .password(passwordEncoder.encode(dto.getPassword()))
-                .status(UserStatus.ACTIVE)
+                .status(UserStatus.INACTIVE)
                 .experience(dto.getExperience())
                 .specializations(specializationMapper.setDtoToEntitySet(dto.getSpecializations()))
                 .emailVerified(false)
@@ -132,6 +138,7 @@ public class AuthService {
                 .address(dto.getAddress())
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
                 .registrationDate(LocalDateTime.now())
+                .lastLoginDate(LocalDateTime.now())
                 .build();
 
         try {
@@ -139,7 +146,12 @@ public class AuthService {
             pictureService.uploadProfilePictureForProvider(profilePicture, savedProvider);
             pictureService.uploadWorkPictures(workPictureSet, savedProvider);
 
-            return serviceProviderMapper.entityToDtoWithPicture(savedProvider);
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
+
+            ServiceProviderWithPictureDto providerWithPictureDto = serviceProviderMapper.entityToDtoWithPicture(savedProvider);
+            providerWithPictureDto.setToken(jwtUtil.generateToken(auth));
+            return providerWithPictureDto;
 
         } catch (Exception e) {
             serviceProviderRepo.delete(provider);
@@ -197,6 +209,7 @@ public class AuthService {
         boolean userFound = finalUserRepo.findByEmail(email)
                 .map(user -> {
                     user.setEmailVerified(true);
+                    user.setStatus(UserStatus.ACTIVE);
                     finalUserRepo.save(user);
                     return true;
                 }).orElse(false);
@@ -204,6 +217,7 @@ public class AuthService {
         boolean providerFound = serviceProviderRepo.findByEmail(email)
                 .map(provider -> {
                     provider.setEmailVerified(true);
+                    provider.setStatus(UserStatus.ACTIVE);
                     serviceProviderRepo.save(provider);
                     return true;
                 }).orElse(false);

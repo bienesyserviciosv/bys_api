@@ -5,6 +5,7 @@ import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,50 +25,50 @@ import java.util.Set;
 @Setter
 public class ServiceProviderDto {
 
-    //@JsonProperty("id")
+    @JsonProperty("id")
     private Long id;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 3, max = 20, message = "The length must be between 3 and 20 char", groups = {OnCreate.class, OnUpdate.class})
-    //@JsonProperty("name")
+    @JsonProperty("name")
     private String name;
 
     @Email(message = ErrorMessage.EM_WRONG_EMAIL, groups = {OnCreate.class, OnUpdate.class})
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    //@JsonProperty("email")
+    @JsonProperty("email")
     private String email;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 7, groups = {OnCreate.class, OnUpdate.class})
-    //@JsonProperty("phone_number")
+    @JsonProperty("phoneNumber")
     private String phoneNumber;
 
-    //@JsonProperty("address")
+    @JsonProperty("address")
     @Enumerated(EnumType.STRING)
     private Province address;
 
-    //@JsonProperty("specializations")
+    @JsonProperty("specializations")
     private Set<SpecializationDto> specializations;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 8, max = 1000, message = "The length must be between 8 and 1000 char", groups = {OnCreate.class, OnUpdate.class})
-    //@JsonProperty("experience")
+    @JsonProperty("experience")
     private String experience;
 
-    //@JsonProperty("verified")
+    @JsonProperty("verified")
     private Boolean verified;
 
-    //@JsonProperty("membership_type")
+    @JsonProperty("membershipType")
     @Enumerated(EnumType.STRING)
     private MembershipType membershipType;
 
-    //@JsonProperty("registration_date")
+    @JsonProperty("registrationDate")
     private LocalDateTime registrationDate;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime lastLoginDate;
 
-    //@JsonProperty("completed_services")
+    @JsonProperty("completedServices")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private int completedServices;
 
@@ -76,13 +77,17 @@ public class ServiceProviderDto {
     @Size(min = 8)
     private String password;
 
-    //@JsonProperty("qualification")
+    @JsonProperty("qualification")
     private double qualification;
 
-    //@JsonProperty("profile_picture")
+    @JsonProperty("profilePicture")
     private String profilePicture;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String role;
+
+    @JsonProperty("token")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String token;
 
 }

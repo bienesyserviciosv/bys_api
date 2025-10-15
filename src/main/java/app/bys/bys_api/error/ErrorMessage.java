@@ -15,4 +15,5 @@ public class ErrorMessage {
     public static final String EM_EMPTY_FIELD = "Shouldn't be empty";
     public static final String EM_ENTITY_NOT_FOUND = "Entity was not found";
     public static final String EM_WRONG_EMAIL = "The email address is incorrect";
+    public static final String EM_EMAIL_NOT_VERIFIED = "The email address is not verified";
 }

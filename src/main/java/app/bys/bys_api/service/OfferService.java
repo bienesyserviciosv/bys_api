@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.OfferMapper;
 import app.bys.bys_api.mapper.PageMapper;
@@ -11,6 +12,7 @@ import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.RequestStatus;
+import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.OfferRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
@@ -135,6 +137,9 @@ public class OfferService {
         Long requestId = offerDto.getServiceRequestId();
         ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
+        if (provider.getStatus().equals(UserStatus.INACTIVE)){
+            throw new ForbiddenActionException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
+        }
 
         if (!serviceRequest.getRequestStatus().equals(RequestStatus.CREATED) && !serviceRequest.getRequestStatus().equals(RequestStatus.IN_PROGRESS)) {
             throw new ForbiddenActionException("Cannot create offers for requests with payments created");
