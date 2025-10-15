@@ -5,6 +5,7 @@ import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,19 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+@JsonPropertyOrder({
+        "id",
+        "name",
+        "email",
+        "phoneNumber",
+        "registrationDate",
+        "lastLoginDate",
+        "password",
+        "profilePicture",
+        "role",
+        "token"
+})
 
 @NoArgsConstructor
 @AllArgsConstructor

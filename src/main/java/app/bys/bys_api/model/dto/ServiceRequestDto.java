@@ -39,9 +39,11 @@ public class ServiceRequestDto {
     private LocalTime time;
 
     @JsonProperty("latitude")
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String latitude;
 
     @JsonProperty("longitude")
+    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String longitude;
 
     @JsonProperty("status")
