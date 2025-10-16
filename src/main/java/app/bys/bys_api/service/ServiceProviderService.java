@@ -10,7 +10,9 @@ import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.Specialization;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
-import app.bys.bys_api.repository.*;
+import app.bys.bys_api.repository.PictureRepository;
+import app.bys.bys_api.repository.ServiceProviderRepository;
+import app.bys.bys_api.repository.SpecializationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ public class ServiceProviderService {
     private final PictureService pictureService;
     private final SpecializationRepository specializationRepository;
     private final PictureRepository pictureRepository;
+
     @Value("${media.url}")
     public String mediaUrl;
 
@@ -101,6 +103,7 @@ public class ServiceProviderService {
         if (serviceProviderRepository.existsByPhoneNumber(serviceProviderDto.getPhoneNumber())) {
             throw new DuplicatePhoneException("The phone is already registered");
         }
+
 
         ServiceProvider provider = ServiceProvider.builder()
                 .name(serviceProviderDto.getName())

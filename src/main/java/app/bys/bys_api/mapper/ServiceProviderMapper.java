@@ -93,7 +93,9 @@ public abstract class ServiceProviderMapper {
                 .lastLoginDate(flatDto.getLastLoginDate())
                 .completedServices(flatDto.getCompletedServices())
                 .qualification(flatDto.getQualification())
-                .profilePicture(mediaUrl + flatDto.getProfilePicture())
+                .profilePicture(flatDto.getProfilePicture() != null
+                        ? mediaUrl + flatDto.getProfilePicture()
+                        : null)
                 .role(flatDto.getRole())
                 .specializations(specs)
                 .workPictureSet(pictures)
