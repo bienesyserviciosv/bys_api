@@ -28,7 +28,7 @@ public class OfferDto {
     private Double price;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    @Size(min = 3, max = 30, message = "The length must be between 3 and 30", groups = {OnCreate.class, OnUpdate.class})
+    @Size(min = 1, max = 20, message = "The length must be between 1 and 20", groups = {OnCreate.class, OnUpdate.class})
     @JsonProperty("duration")
     private String duration;
 
