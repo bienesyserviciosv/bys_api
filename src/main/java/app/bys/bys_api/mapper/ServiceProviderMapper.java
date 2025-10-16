@@ -2,6 +2,8 @@ package app.bys.bys_api.mapper;
 
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
+import app.bys.bys_api.model.dto.ServiceProviderWithPictureFlatDto;
+import app.bys.bys_api.model.dto.SpecializationDto;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.Role;
 import app.bys.bys_api.model.entity.ServiceProvider;
@@ -75,5 +77,26 @@ public abstract class ServiceProviderMapper {
     protected Set<Role> mapRoleName(String roleName) {
         if (roleName == null) return null;
         return Set.of(roleService.getRoleOrThrow(roleName));
+    }
+
+    public ServiceProviderWithPictureDto enrichDto(ServiceProviderWithPictureFlatDto flatDto, Set<SpecializationDto> specs, Set<String> pictures) {
+        return ServiceProviderWithPictureDto.builder()
+                .id(flatDto.getId())
+                .name(flatDto.getName())
+                .email(flatDto.getEmail())
+                .phoneNumber(flatDto.getPhoneNumber())
+                .address(flatDto.getAddress())
+                .experience(flatDto.getExperience())
+                .verified(flatDto.getVerified())
+                .membershipType(flatDto.getMembershipType())
+                .registrationDate(flatDto.getRegistrationDate())
+                .lastLoginDate(flatDto.getLastLoginDate())
+                .completedServices(flatDto.getCompletedServices())
+                .qualification(flatDto.getQualification())
+                .profilePicture(mediaUrl + flatDto.getProfilePicture())
+                .role(flatDto.getRole())
+                .specializations(specs)
+                .workPictureSet(pictures)
+                .build();
     }
 }

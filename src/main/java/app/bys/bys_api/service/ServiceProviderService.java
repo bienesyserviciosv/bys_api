@@ -5,27 +5,26 @@ import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.mapper.SpecializationMapper;
-import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.dto.ServiceProviderDto;
-import app.bys.bys_api.model.dto.ServiceProviderSummary;
-import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.Specialization;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
-import app.bys.bys_api.repository.ServiceProviderRepository;
-import app.bys.bys_api.repository.SpecializationRepository;
+import app.bys.bys_api.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,15 +39,31 @@ public class ServiceProviderService {
     private final SpecializationMapper specializationMapper;
     private final PictureService pictureService;
     private final SpecializationRepository specializationRepository;
+    private final PictureRepository pictureRepository;
+    @Value("${media.url}")
+    public String mediaUrl;
 
     public ServiceProviderWithPictureDto get(Long id) {
-        return mapper.entityToDtoWithPicture(serviceProviderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found")));
+        return getServiceProviderWithPictureDto(id);
+    }
+
+    private ServiceProviderWithPictureDto getServiceProviderWithPictureDto(Long id) {
+        ServiceProviderWithPictureFlatDto providerFlatDto = serviceProviderRepository.findFlatDtoById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found"));
+        Set<SpecializationDto> specializationDto = specializationMapper.setEntityToDtoSet(specializationRepository.findByServiceProviderId(id));
+        Set<String> rawPictures = pictureRepository.findWorkPictureUrlsByProviderId(id);
+        Set<String> workPictures = rawPictures.stream()
+                .filter(Objects::nonNull)
+                .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
+                .collect(Collectors.toSet());
+        return mapper.enrichDto(providerFlatDto, specializationDto, workPictures);
     }
 
     public ServiceProviderWithPictureDto getWithEmail(String email) {
-        return mapper.entityToDtoWithPicture(serviceProviderRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Service provider with email " + email + " not found")));
+        ServiceProvider provider = serviceProviderRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with email " + email + " not found"));
+        Long id = provider.getId();
+        return getServiceProviderWithPictureDto(id);
     }
 
     public PageDto<ServiceProviderSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, MembershipType membershipType, Boolean verified) throws BadRequestException {
@@ -86,7 +101,6 @@ public class ServiceProviderService {
         if (serviceProviderRepository.existsByPhoneNumber(serviceProviderDto.getPhoneNumber())) {
             throw new DuplicatePhoneException("The phone is already registered");
         }
-
 
         ServiceProvider provider = ServiceProvider.builder()
                 .name(serviceProviderDto.getName())

@@ -1,6 +1,7 @@
 package app.bys.bys_api.repository;
 
 import app.bys.bys_api.model.dto.ServiceProviderSummary;
+import app.bys.bys_api.model.dto.ServiceProviderWithPictureFlatDto;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
@@ -28,6 +29,30 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     List<ServiceProvider> findBySpecializations_Id(Long specializationId);
 
     void deleteByEmail(String email);
+
+    @Query("""
+    SELECT new app.bys.bys_api.model.dto.ServiceProviderWithPictureFlatDto(
+        sp.id,
+        sp.name,
+        sp.email,
+        sp.phoneNumber,
+        sp.address,
+        sp.experience,
+        sp.verified,
+        sp.membershipType,
+        sp.registrationDate,
+        sp.lastLoginDate,
+        sp.completedServices,
+        sp.qualification,
+        sp.profilePicture,
+        r.name
+    )
+    FROM ServiceProvider sp
+    JOIN sp.roles r
+    WHERE sp.id = :id
+      AND r.name = 'ROLE_PROVIDER'
+    """)
+    Optional<ServiceProviderWithPictureFlatDto> findFlatDtoById(@Param("id") Long id);
 
     @Query("""
             SELECT new app.bys.bys_api.model.dto.ServiceProviderSummary(

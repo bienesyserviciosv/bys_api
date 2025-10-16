@@ -57,6 +57,7 @@ public class AuthService {
     private final FinalUserService finalUserService;
     private final ServiceProviderService serviceProviderService;
 
+    @Transactional
     public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
 
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {

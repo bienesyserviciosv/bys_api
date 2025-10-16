@@ -32,4 +32,14 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
     void deleteByServiceProviderAndUrl(ServiceProvider serviceProvider, String url);
 
     List<Picture> findByServiceProviderAndPictureType(ServiceProvider serviceProvider, PictureType pictureType);
+    @Query("""
+    SELECT p.url
+    FROM Picture p
+    WHERE p.serviceProvider.id = :id
+      AND p.pictureType = app.bys.bys_api.model.enums.PictureType.WORK
+    """)
+    Set<String> findWorkPictureUrlsByProviderId(@Param("id") Long id);
+
+
+
 }
