@@ -15,11 +15,13 @@ import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.OfferRepository;
+import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
 import app.bys.bys_api.service.specification.OfferSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +46,7 @@ public class OfferService {
     private final ServiceRequestRepository serviceRequestRepo;
     private final FinalUserRepository finalUserRepo;
     private final OfferRepository offerRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
 
     public OfferDto get(Long id) {
         return offerMapper.entityToDto(offerRepo.findById(id)
@@ -170,18 +173,33 @@ public class OfferService {
         return offerMapper.entityToDto(offerRepo.save(storedOffer));
     }
 
-    public void delete(Long id) {
+    @Transactional
+    public void delete(Long id) throws BadRequestException {
         Offer offer = offerRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found"));
-        Long requestId = offer.getServiceRequest().getId();
-        ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
-        Integer offerQuantity = serviceRequest.getOfferQuantity();
-        offerQuantity--;
-        serviceRequest.setOfferQuantity(offerQuantity);
+        if (offer.getPayment() != null) {
+            throw new BadRequestException("The offer has a payment associated");
+        }
+
+        ServiceProvider provider = offer.getProvider();
+        provider.getOfferSet().remove(offer);
+        serviceProviderRepository.save(provider);
+
+        ServiceRequest serviceRequest = offer.getServiceRequest();
+        serviceRequest.setOfferQuantity(Math.max(0, serviceRequest.getOfferQuantity() - 1));
+
+        if (serviceRequest.getAcceptedOffer().equals(offer)) {
+            FinalUser finalUser = offer.getFinalUser();
+            finalUser.getOfferSet().remove(offer);
+            finalUserRepo.save(finalUser);
+
+            serviceRequest.setAcceptedOffer(null);
+            serviceRequest.setRequestStatus(RequestStatus.CREATED);
+        }
+        serviceRequest.getOfferSet().remove(offer);
         serviceRequestRepo.save(serviceRequest);
 
-        offerRepo.deleteById(id);
+        offerRepo.delete(offer);
     }
 
     @Transactional

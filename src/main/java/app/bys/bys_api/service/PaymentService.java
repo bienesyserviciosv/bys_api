@@ -18,6 +18,7 @@ import app.bys.bys_api.utils.MediaConstants;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -113,9 +115,9 @@ public class PaymentService {
         Offer offer = offerRepository.findById(mobilePaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + mobilePaymentDto.getOfferId() + " not found"));
         ServiceRequest request = serviceRequestRepository.findById(offer.getServiceRequest().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " +  offer.getServiceRequest().getId() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + offer.getServiceRequest().getId() + " not found"));
 
-        if (offer.getPayment() != null){
+        if (offer.getPayment() != null) {
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
         }
 
@@ -155,9 +157,9 @@ public class PaymentService {
         Offer offer = offerRepository.findById(transferPaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + transferPaymentDto.getOfferId() + " not found"));
         ServiceRequest request = serviceRequestRepository.findById(offer.getServiceRequest().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " +  offer.getServiceRequest().getId() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + offer.getServiceRequest().getId() + " not found"));
 
-        if (offer.getPayment() != null){
+        if (offer.getPayment() != null) {
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
         }
 
@@ -203,14 +205,46 @@ public class PaymentService {
         return paymentMapper.entityToTransferDto(paymentRepository.save(transferPaymentFound));
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (!paymentRepository.existsById(id)) {
-            throw new EntityNotFoundException("Payment with id: " + id + " not found");
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Payment with id: " + id + " not found"));
+
+        try {
+            pictureRepository.findByPaymentId(id).ifPresent(picture -> {
+                try {
+                    mediaRepository.deleteImage(picture.getUrl());
+                } catch (Exception e) {
+                    log.warn("Failed to delete image from S3: {}", picture.getUrl(), e);
+                }
+                pictureRepository.delete(picture);
+            });
+            Offer offer = payment.getOffer();
+            offer.setPayment(null);
+            offerRepository.save(offer);
+
+            ServiceRequest serviceRequest = offer.getServiceRequest();
+            serviceRequest.setRequestStatus(RequestStatus.IN_PROGRESS);
+            if (payment.getPaymentStatus() == PaymentStatus.ACCEPTED) {
+                serviceRequest.setAcceptanceDate(null);
+                serviceRequest.setServiceProvider(null);
+            }
+            serviceRequestRepository.save(serviceRequest);
+
+            FinalUser finalUser = payment.getFinalUser();
+            finalUser.getPaymentSet().remove(payment);
+            finalUserRepository.save(finalUser);
+
+            ServiceProvider serviceProvider = payment.getServiceProvider();
+            serviceProvider.getPaymentSet().remove(payment);
+            serviceProviderRepository.save(serviceProvider);
+
+            paymentRepository.delete(payment);
+
+        } catch (Exception e) {
+            log.error("Error deleting payment with id {}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete payment", e);
         }
-
-        pictureRepository.findByPaymentId(id).ifPresent(pictureRepository::delete);
-
-        paymentRepository.deleteById(id);
     }
 
     @Transactional
@@ -222,11 +256,11 @@ public class PaymentService {
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
-        if (serviceRequest.getRequestStatus()==RequestStatus.ACCEPTED) {
+        if (serviceRequest.getRequestStatus() == RequestStatus.ACCEPTED) {
             throw new ServiceRequestAlreadyAcceptedException("Service Request with id: " + requestId + " already accepted");
         }
 
-        if (serviceRequest.getAcceptedOffer() == null){
+        if (serviceRequest.getAcceptedOffer() == null) {
             throw new ForbiddenActionException("Service Request with id: " + requestId + " doesn't have an accepted offer");
         }
 
@@ -250,7 +284,7 @@ public class PaymentService {
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
-        if (serviceRequest.getAcceptedOffer() == null){
+        if (serviceRequest.getAcceptedOffer() == null) {
             throw new ForbiddenActionException("Service Request with id: " + requestId + " doesn't have an accepted offer");
         }
 
@@ -264,7 +298,7 @@ public class PaymentService {
 
     }
 
-        public void attachScreenshotToPayment(MultipartFile screenshot, Payment payment) {
+    public void attachScreenshotToPayment(MultipartFile screenshot, Payment payment) {
         if (screenshot != null) {
             Picture picture = new Picture();
             picture.setPayment(payment);

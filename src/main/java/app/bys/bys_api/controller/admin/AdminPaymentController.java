@@ -62,4 +62,10 @@ public class AdminPaymentController {
 
         return ResponseEntity.ok(serviceRequestMapper.entityToDto(serviceRequest));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
+        paymentService.delete(id);
+        return ResponseEntity.ok().build();
+    }
 }

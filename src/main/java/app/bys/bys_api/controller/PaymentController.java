@@ -61,12 +61,6 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.updateTransferPayment(id, transferPaymentDto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
-        paymentService.delete(id);
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/banks")
     public ResponseEntity<List<String>> getAvailableBanks() {
         List<String> banks = Arrays.stream(BankName.values())
