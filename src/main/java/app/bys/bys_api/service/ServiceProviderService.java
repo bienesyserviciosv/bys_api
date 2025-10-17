@@ -6,10 +6,12 @@ import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
 import app.bys.bys_api.mapper.SpecializationMapper;
 import app.bys.bys_api.model.dto.*;
+import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.Specialization;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
+import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.repository.SpecializationRepository;
@@ -21,11 +23,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,6 +45,7 @@ public class ServiceProviderService {
     private final PictureService pictureService;
     private final SpecializationRepository specializationRepository;
     private final PictureRepository pictureRepository;
+    private final MediaRepository mediaRepository;
 
     @Value("${media.url}")
     public String mediaUrl;
@@ -143,11 +148,24 @@ public class ServiceProviderService {
         return mapper.entityToDto(serviceProviderRepository.save(serviceProviderFound));
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (!serviceProviderRepository.existsById(id)) {
-            throw new EntityNotFoundException("Service provider with id " + id + " not found");
-        }
-        serviceProviderRepository.deleteById(id);
+        ServiceProvider provider = serviceProviderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found"));
+
+        pictureService.deleteAllWorkPictures(provider);
+        Optional<Picture> optionalPicture = pictureRepository.findProfilePictureByServiceProviderId(id);
+        optionalPicture.ifPresent(picture -> {
+            try {
+                mediaRepository.deleteImage(picture.getUrl());
+                pictureRepository.delete(picture);
+            } catch (Exception e) {
+                log.error("Error deleting profile image from media repository: {}", e.getMessage(), e);
+                throw new RuntimeException("Failed to delete profile image", e);
+            }
+        });
+
+        serviceProviderRepository.delete(provider);
     }
 
     public void deleteByEmail(String email) {

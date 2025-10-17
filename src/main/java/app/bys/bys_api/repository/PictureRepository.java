@@ -19,9 +19,6 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
 
     List<Picture> findByServiceRequestId(Long serviceRequestId);
 
-    @Query("SELECT p FROM Picture p WHERE p.serviceProvider.id = :providerId AND p.pictureType = 'PROFILE'")
-    Optional<Picture> findProfilePictureByServiceProviderId(@Param("providerId") Long providerId);
-
     Optional<Picture> findByFinalUserId(Long finalUserId);
 
     @Modifying
@@ -33,6 +30,10 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
     void deleteByServiceProviderAndUrl(ServiceProvider serviceProvider, String url);
 
     List<Picture> findByServiceProviderAndPictureType(ServiceProvider serviceProvider, PictureType pictureType);
+
+    @Query("SELECT p FROM Picture p WHERE p.serviceProvider.id = :providerId AND p.pictureType = 'PROFILE'")
+    Optional<Picture> findProfilePictureByServiceProviderId(@Param("providerId") Long providerId);
+
     @Query("""
     SELECT p.url
     FROM Picture p
