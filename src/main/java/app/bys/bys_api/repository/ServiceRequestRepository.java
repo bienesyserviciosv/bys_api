@@ -88,6 +88,7 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             """)
     Optional<ServiceRequestMetricsDto> findRequestMetricsById(@Param("requestId") Long requestId);
 
+
     @Query("""
             SELECT new app.bys.bys_api.model.dto.ServiceRequestSummary(
                 sr.id,
@@ -103,12 +104,41 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
                 fu.id,
                 sr.offerQuantity,
                 sr.newOffer,
-                sr.serviceProvider.id
+                sr.serviceProvider.id,
+                p.url
             )
             FROM ServiceRequest sr
             JOIN sr.specialization s
             JOIN sr.finalUser fu
             LEFT JOIN sr.serviceProvider sp
+            LEFT JOIN Picture p ON p.serviceRequest.id = sr.id
+            WHERE sr.id = :id
+            """)
+    Optional<ServiceRequestSummary> findRequestById(@Param("id") Long id);
+
+    @Query("""
+            SELECT new app.bys.bys_api.model.dto.ServiceRequestSummary(
+                sr.id,
+                sr.description,
+                sr.date,
+                sr.time,
+                sr.latitude,
+                sr.longitude,
+                sr.requestStatus,
+                sr.creationDate,
+                sr.acceptanceDate,
+                s.specializationType,
+                fu.id,
+                sr.offerQuantity,
+                sr.newOffer,
+                sr.serviceProvider.id,
+                p.url
+            )
+            FROM ServiceRequest sr
+            JOIN sr.specialization s
+            JOIN sr.finalUser fu
+            LEFT JOIN sr.serviceProvider sp
+            LEFT JOIN Picture p ON p.serviceRequest.id = sr.id
             WHERE LOWER(sr.description) LIKE LOWER(CONCAT('%', :search, '%'))
               AND (:address IS NULL OR sr.address = :address)
               AND (:specializationList IS NULL OR s.id IN :specializationList)

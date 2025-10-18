@@ -32,8 +32,8 @@ public class ServiceRequestController {
     private final ServiceRequestMapper serviceRequestMapper;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceRequestWithPictureDto> get(@PathVariable Long id, Authentication auth) {
-        return new ResponseEntity<>(serviceRequestService.get(id, auth), HttpStatus.OK);
+    public ResponseEntity<ServiceRequestSummary> get(@PathVariable Long id) {
+        return new ResponseEntity<>(serviceRequestService.get(id), HttpStatus.OK);
     }
 
     @GetMapping

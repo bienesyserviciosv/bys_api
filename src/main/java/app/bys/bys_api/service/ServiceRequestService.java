@@ -25,10 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -72,7 +69,7 @@ public class ServiceRequestService {
         return requestMapper.entityToDtoWithPicture(request);
     }
 
-    public PageDto<ServiceRequestSummary> getAll (Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList) throws BadRequestException {
+    public PageDto<ServiceRequestSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList) throws BadRequestException {
         Province province = null;
         if (address != null) {
             try {
@@ -88,20 +85,33 @@ public class ServiceRequestService {
 
         Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(search, specializationList, province, userList, providerIdList, pageable);
 
-        page.forEach(summary -> {
-            Set<String> pictures = pictureRepository.findByServiceRequestId(summary.getId())
-                    .stream()
-                    .map(Picture::getUrl)
+        Map<Long, ServiceRequestSummary> grouped = new LinkedHashMap<>();
+
+        for (ServiceRequestSummary dto : page.getContent()) {
+            grouped.computeIfAbsent(dto.getId(), id -> dto)
+                    .getPictureSet().addAll(dto.getPictureSet());
+        }
+
+        for (ServiceRequestSummary dto : grouped.values()) {
+            Set<String> normalized = dto.getPictureSet().stream()
                     .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
                     .collect(Collectors.toSet());
+            dto.setPictureSet(normalized);
+        }
 
-            summary.setPictureSet(pictures);
-        });
-        return PageMapper.pageToDto(page);
+        List<ServiceRequestSummary> finalList = new ArrayList<>(grouped.values());
+
+        Page<ServiceRequestSummary> groupedPage = new PageImpl<>(
+                finalList,
+                pageable,
+                page.getTotalElements()
+        );
+
+        return PageMapper.pageToDto(groupedPage);
 
     }
 
-    private List<Specification<ServiceRequest>> getSpecificationsList(String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList){
+    private List<Specification<ServiceRequest>> getSpecificationsList(String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {
         Specification<ServiceRequest> specializationSpec =
                 specializationList != null ? ServiceRequestSpecification.hasSpecialization(specializationList)
                         : null;

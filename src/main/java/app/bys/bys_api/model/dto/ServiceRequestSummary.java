@@ -70,7 +70,7 @@ public class ServiceRequestSummary {
                                  LocalDate date, LocalTime time, String latitude, String longitude,
                                  RequestStatus requestStatus, LocalDateTime creationDate, LocalDateTime acceptanceDate,
                                  String specialization, Long finalUserId, Integer offerQuantity,
-                                 Boolean newOffer, Long serviceProviderId) {
+                                 Boolean newOffer, Long serviceProviderId, String pictureUrl) {
 
         this.id = id;
         this.description = description;
@@ -87,5 +87,8 @@ public class ServiceRequestSummary {
         this.serviceProviderId = serviceProviderId;
         this.newOffer = newOffer;
         this.pictureSet = new HashSet<>();
+        if (pictureUrl != null) {
+            this.pictureSet.add(pictureUrl);
+        }
     }
 }
