@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecificationExecutor<Offer> {
@@ -43,15 +44,35 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
             JOIN o.serviceRequest sr
             JOIN o.provider sp
             LEFT JOIN o.finalUser fu
+            WHERE o.id = :id
+            """)
+    Optional<OfferDto> findOfferById(@Param("id") Long id);
+
+    @Query("""
+            SELECT new app.bys.bys_api.model.dto.OfferDto(
+                o.id,
+                o.price,
+                o.duration,
+                o.description,
+                sr.id,
+                sp.id,
+                o.accepted,
+                o.createdAt,
+                o.acceptedAt
+            )
+            FROM Offer o
+            JOIN o.serviceRequest sr
+            JOIN o.provider sp
+            LEFT JOIN o.finalUser fu
             WHERE (:search IS NULL OR LOWER(o.description) LIKE LOWER(CONCAT('%', :search, '%')))
-              AND (:serviceRequestIds IS NULL OR sr.id IN :serviceRequestIds)
+              AND (:serviceRequestId IS NULL OR sr.id = :serviceRequestId)
               AND (:providerIds IS NULL OR sp.id IN :providerIds)
               AND (:userIds IS NULL OR fu.id IN :userIds)
               AND (:accepted IS NULL OR o.accepted = :accepted)
             """)
     Page<OfferDto> findAllOffersFiltered(
             @Param("search") String search,
-            @Param("serviceRequestIds") List<Long> serviceRequestIds,
+            @Param("serviceRequestId") Long serviceRequestId,
             @Param("providerIds") List<Long> providerIds,
             @Param("accepted") Boolean accepted,
             @Param("userIds") List<Long> userIds,

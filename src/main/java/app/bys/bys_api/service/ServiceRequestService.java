@@ -5,7 +5,10 @@ import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
-import app.bys.bys_api.model.dto.*;
+import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.dto.ServiceRequestDto;
+import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
+import app.bys.bys_api.model.dto.ServiceRequestSummary;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
@@ -27,7 +30,6 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,22 +53,18 @@ public class ServiceRequestService {
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
 
-    public ServiceRequestWithPictureDto get(Long id, Authentication auth) {
-        ServiceRequest request = serviceRequestRepository.findById(id)
+    public ServiceRequestSummary get(Long id) {
+        ServiceRequestSummary serviceRequestSummary = serviceRequestRepository.findRequestById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found"));
 
-        boolean hasUserRole = auth.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"));
+        Set<String> pictures = serviceRequestSummary.getPictureSet().stream()
+                .filter(Objects::nonNull)
+                .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
+                .collect(Collectors.toSet());
 
-        if (hasUserRole) {
-            FinalUser authenticatedUser = finalUserRepository.findByEmail(auth.getName()).orElseThrow();
-            FinalUser userMadeRequest = request.getFinalUser();
-            if (Objects.equals(authenticatedUser.getId(), userMadeRequest.getId())) {
-                request.setNewOffer(false);
-                serviceRequestRepository.save(request);
-            }
-        }
-        return requestMapper.entityToDtoWithPicture(request);
+        serviceRequestSummary.setPictureSet(pictures);
+        return serviceRequestSummary;
+
     }
 
     public PageDto<ServiceRequestSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList) throws BadRequestException {
@@ -145,12 +143,12 @@ public class ServiceRequestService {
                         : null;
 
         return new ArrayList<>(Arrays.asList(
-               specializationSpec,
-               searchSpec,
-               addressSpec,
-               userSpec,
-               providerSpec
-       ));
+                specializationSpec,
+                searchSpec,
+                addressSpec,
+                userSpec,
+                providerSpec
+        ));
     }
 
     public PageDto<ServiceRequestMetricsDto> getAllRequestMetrics(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList) throws BadRequestException {
@@ -222,7 +220,7 @@ public class ServiceRequestService {
         FinalUser finalUser = finalUserRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
-        if (finalUser.getStatus().equals(UserStatus.INACTIVE)){
+        if (finalUser.getStatus().equals(UserStatus.INACTIVE)) {
             throw new ForbiddenActionException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
         }
         return saveServiceRequest(serviceRequestDto, files, finalUser);

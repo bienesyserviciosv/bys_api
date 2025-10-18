@@ -27,14 +27,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,8 +47,8 @@ public class OfferService {
     private final ServiceProviderRepository serviceProviderRepository;
 
     public OfferDto get(Long id) {
-        return offerMapper.entityToDto(offerRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found")));
+        return offerRepo.findOfferById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found"));
     }
 
     public OfferMetricsDto getMetrics(Long id) {
@@ -58,15 +56,28 @@ public class OfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found")));
     }
 
-    public PageDto<OfferDto> getAll(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList) {
+    public PageDto<OfferDto> getAll(Authentication auth, Pageable pageable, String search, List<Long> providerIdList, Long serviceRequestId, Boolean accepted, List<Long> userIdList) {
 
         if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
-        if (serviceRequestIdList != null && serviceRequestIdList.isEmpty()) serviceRequestIdList = null;
         if (userIdList != null && userIdList.isEmpty()) userIdList = null;
         if (search == null) search = "";
 
-        Page<OfferDto> page = offerRepository.findAllOffersFiltered(search, serviceRequestIdList, providerIdList, accepted, userIdList, pageable);
+        Page<OfferDto> page = offerRepository.findAllOffersFiltered(search, serviceRequestId, providerIdList, accepted, userIdList, pageable);
 
+        boolean hasUserRole = auth.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"));
+
+        if (hasUserRole && serviceRequestId != null) {
+            FinalUser authenticatedUser = finalUserRepo.findByEmail(auth.getName())
+                    .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
+
+            ServiceRequest serviceRequest = serviceRequestRepo.findById(serviceRequestId)
+                    .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + serviceRequestId + " not found"));
+            if (Objects.equals(serviceRequest.getFinalUser().getId(), authenticatedUser.getId())) {
+                serviceRequest.setNewOffer(false);
+                serviceRequestRepo.save(serviceRequest);
+            }
+        }
         return PageMapper.pageToDto(page);
     }
 
