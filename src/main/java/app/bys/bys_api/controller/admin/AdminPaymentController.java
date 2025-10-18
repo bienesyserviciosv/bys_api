@@ -10,6 +10,7 @@ import app.bys.bys_api.service.NotificationService;
 import app.bys.bys_api.service.PaymentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,9 +31,9 @@ public class AdminPaymentController {
 
     @GetMapping
     public ResponseEntity<PageDto<Object>> getAll(Pageable pageable,
-                                                  @RequestParam(name = "search", required = false) String search,
-                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
-                                                  @RequestParam(name = "provider", required = false) List<Long> providerIdList) {
+                                                      @RequestParam(name = "search", required = false) String search,
+                                                      @RequestParam(name = "user", required = false) List<Long> userIdList,
+                                                      @RequestParam(name = "provider", required = false) List<Long> providerIdList) throws BadRequestException {
         return ResponseEntity.ok(paymentService.getAllPayments(pageable, search, userIdList, providerIdList));
     }
 

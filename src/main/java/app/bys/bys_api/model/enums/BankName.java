@@ -3,6 +3,8 @@ package app.bys.bys_api.model.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 public enum BankName {
     BANK_100_PORCIENTO("100% Banco"),
@@ -34,5 +36,13 @@ public enum BankName {
     BankName(String displayName) {
         this.displayName = displayName;
     }
+
+    public static BankName fromDisplayName(String input) {
+        return Arrays.stream(BankName.values())
+                .filter(b -> b.displayName.equalsIgnoreCase(input))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid bank name: " + input));
+    }
+
 
 }

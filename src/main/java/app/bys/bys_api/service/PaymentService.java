@@ -8,29 +8,26 @@ import app.bys.bys_api.model.dto.MobilePaymentDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.*;
-import app.bys.bys_api.model.enums.PaymentStatus;
-import app.bys.bys_api.model.enums.PaymentType;
-import app.bys.bys_api.model.enums.PictureType;
-import app.bys.bys_api.model.enums.RequestStatus;
+import app.bys.bys_api.model.enums.*;
 import app.bys.bys_api.repository.*;
-import app.bys.bys_api.service.specification.PaymentSpecification;
 import app.bys.bys_api.utils.MediaConstants;
-import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -47,6 +44,9 @@ public class PaymentService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final NotificationService notificationService;
 
+    @Value("${media.url}")
+    public String mediaUrl;
+
     public Object getPayment(Long id) {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment with id: " + id + " not found"));
@@ -56,54 +56,33 @@ public class PaymentService {
         };
     }
 
-    public PageDto<Object> getAllPayments(Pageable pageable, String search, List<Long> userIdList, List<Long> providerIdList) {
+    public PageDto<Object> getAllPayments(Pageable pageable, String search, List<Long> userIdList, List<Long> providerIdList) throws BadRequestException {
 
-        PaymentSpecification searchSpec =
-                search != null ? new PaymentSpecification(
-                        new SearchCriteria(
-                                "bank",
-                                "s",
-                                search
-                        )
-                )
-                        : null;
+        BankName bankFilter = null;
+        if (search != null && !search.isBlank()) {
+            try {
+                bankFilter = BankName.fromDisplayName(search);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid bank: " + search);
+            }
+        }
 
-        Specification<Payment> userSpec =
-                userIdList != null ? PaymentSpecification.hasUser(userIdList)
-                        : null;
+        Page<TransferPaymentDto> transfers = paymentRepository.findTransferPayments(bankFilter, userIdList, providerIdList, pageable);
+        Page<MobilePaymentDto> mobiles = paymentRepository.findMobilePayments(bankFilter, userIdList, providerIdList, pageable);
 
-        Specification<Payment> providerSpec =
-                providerIdList != null ? PaymentSpecification.hasProvider(providerIdList)
-                        : null;
+        List<Object> combined = Stream.concat(
+                        transfers.getContent().stream(),
+                        mobiles.getContent().stream()
+                ).peek(dto -> {
+            if (dto instanceof TransferPaymentDto transfer) {
+                transfer.setScreenshot(mediaUrl + transfer.getScreenshot());
+            } else if (dto instanceof MobilePaymentDto mobile) {
+                mobile.setScreenshot(mediaUrl + mobile.getScreenshot());
+            }
+        }).toList();
 
-
-        List<Specification<Payment>> specList = new ArrayList<>(Arrays.asList(
-                searchSpec,
-                userSpec,
-                providerSpec
-        ));
-
-        Page<Payment> payments = paymentRepository.findAll(
-                Specification.allOf(specList.stream()
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())),
-                pageable);
-
-        List<Object> mappedPayments = payments.stream()
-                .map(payment -> {
-                    if (payment.getPaymentType() == PaymentType.MOBILE) {
-                        return paymentMapper.entityToMobileDto(payment);
-                    } else if (payment.getPaymentType() == PaymentType.TRANSFER) {
-                        return paymentMapper.entityToTransferDto(payment);
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .toList();
-
-        Page<Object> mappedPage = new PageImpl<>(mappedPayments, pageable, payments.getTotalElements());
-        return PageMapper.pageToDto(mappedPage);
+        Page<Object> resultPage = new PageImpl<>(combined, pageable, transfers.getTotalElements() + mobiles.getTotalElements());
+        return PageMapper.pageToDto(resultPage);
     }
 
 
