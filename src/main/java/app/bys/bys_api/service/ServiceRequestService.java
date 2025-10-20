@@ -11,6 +11,7 @@ import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
 import app.bys.bys_api.model.dto.ServiceRequestSummary;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
+import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.model.enums.Province;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ServiceRequestService {
+
+    private final ServiceProviderRepository serviceProviderRepository;
 
     @Value("${media.url}")
     public String mediaUrl;
@@ -248,5 +252,31 @@ public class ServiceRequestService {
             }
         }
         return null;
+    }
+
+    @Transactional
+    public void markAsCompleted(String email, Long requestId) {
+        FinalUser finalUser = finalUserRepository.findByEmail(email)
+                .orElseThrow(() ->  new EntityNotFoundException("Final User with email: " + email + " not found"));
+
+        ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + requestId + " not found"));
+
+        if (!serviceRequest.getFinalUser().getId().equals(finalUser.getId())) {
+            throw new ForbiddenActionException("The service request with id: " + requestId + " does not belong to this user");
+        }
+
+        if (serviceRequest.getRequestStatus() != RequestStatus.ACCEPTED) {
+            throw new ForbiddenActionException("The service request with id: " + requestId + " hasn't been accepted");
+        }
+        serviceRequest.setRequestStatus(RequestStatus.COMPLETED);
+        ServiceProvider serviceProvider = serviceRequest.getServiceProvider();
+        if (serviceProvider == null) {
+            throw new RuntimeException("Service Request without a Service Provider associated");
+        }
+        serviceProvider.setCompletedServices(serviceProvider.getCompletedServices() + 1);
+        serviceProviderRepository.save(serviceProvider);
+
+        serviceRequestRepository.save(serviceRequest);
     }
 }

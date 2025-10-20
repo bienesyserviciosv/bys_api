@@ -15,6 +15,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,7 @@ public class ServiceRequestController {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ServiceRequestWithPictureDto> create(Authentication auth,
                                                                @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
@@ -68,6 +70,13 @@ public class ServiceRequestController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         serviceRequestService.delete(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/completed/{id}")
+    public ResponseEntity<Void> markAsCompleted(Authentication authentication, @PathVariable Long id) {
+        String email = authentication.getName();
+        serviceRequestService.markAsCompleted(email, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
