@@ -53,10 +53,12 @@ public class Payment {
     @Column(name = "account_holder_name")
     private String accountHolderName;
 
-    @Builder.Default
     @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "amount_in_bolivars")
+    private Double amountInBolivars;
 
     @ManyToOne
     @JoinColumn(name = "final_user_id")

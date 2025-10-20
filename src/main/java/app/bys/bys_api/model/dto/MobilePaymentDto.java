@@ -57,6 +57,10 @@ public class MobilePaymentDto {
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private Long offerId;
 
+    @JsonProperty("amount_in_bolivars")
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    private Double amountInBolivars;
+
     @JsonProperty ("payment_type")
     private PaymentType paymentType;
 
