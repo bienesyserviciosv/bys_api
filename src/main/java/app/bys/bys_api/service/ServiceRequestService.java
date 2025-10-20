@@ -16,10 +16,7 @@ import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.model.enums.UserStatus;
-import app.bys.bys_api.repository.FinalUserRepository;
-import app.bys.bys_api.repository.MediaRepository;
-import app.bys.bys_api.repository.PictureRepository;
-import app.bys.bys_api.repository.ServiceRequestRepository;
+import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.ServiceRequestSpecification;
 import app.bys.bys_api.utils.MediaConstants;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -57,8 +54,7 @@ public class ServiceRequestService {
         ServiceRequestSummary serviceRequestSummary = serviceRequestRepository.findRequestById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found"));
 
-        Set<String> pictures = serviceRequestSummary.getPictureSet().stream()
-                .filter(Objects::nonNull)
+        Set<String> pictures = pictureRepository.findPictureUrlByServiceRequestId(id).stream()
                 .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
                 .collect(Collectors.toSet());
 
@@ -76,37 +72,25 @@ public class ServiceRequestService {
                 throw new BadRequestException("Invalid province: " + address);
             }
         }
-        if (search == null) {
-            search = "";
-        }
+        if (search == null) search = "";
         if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
 
         Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(search, specializationList, province, userList, providerIdList, pageable);
 
-        Map<Long, ServiceRequestSummary> grouped = new LinkedHashMap<>();
+        List<ServiceRequestSummary> enrichedList = page.getContent().stream()
+                .peek(dto -> {
+                    Set<String> rawPictures = pictureRepository.findPictureUrlByServiceRequestId(dto.getId());
+                    Set<String> normalizedPictures = rawPictures.stream()
+                            .filter(Objects::nonNull)
+                            .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
+                            .collect(Collectors.toSet());
+                    dto.setPictureSet(normalizedPictures);
+                })
+                .toList();
 
-        for (ServiceRequestSummary dto : page.getContent()) {
-            grouped.computeIfAbsent(dto.getId(), id -> dto)
-                    .getPictureSet().addAll(dto.getPictureSet());
-        }
+        Page<ServiceRequestSummary> enrichedPage = new PageImpl<>(enrichedList, pageable, page.getTotalElements());
 
-        for (ServiceRequestSummary dto : grouped.values()) {
-            Set<String> normalized = dto.getPictureSet().stream()
-                    .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
-                    .collect(Collectors.toSet());
-            dto.setPictureSet(normalized);
-        }
-
-        List<ServiceRequestSummary> finalList = new ArrayList<>(grouped.values());
-
-        Page<ServiceRequestSummary> groupedPage = new PageImpl<>(
-                finalList,
-                pageable,
-                page.getTotalElements()
-        );
-
-        return PageMapper.pageToDto(groupedPage);
-
+        return PageMapper.pageToDto(enrichedPage);
     }
 
     private List<Specification<ServiceRequest>> getSpecificationsList(String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerList) {

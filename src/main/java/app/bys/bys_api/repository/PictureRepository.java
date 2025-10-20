@@ -17,7 +17,13 @@ import java.util.Set;
 @Repository
 public interface PictureRepository extends JpaRepository<Picture, Long> {
 
-    List<Picture> findByServiceRequestId(Long serviceRequestId);
+    @Query("""
+    SELECT p.url
+    FROM Picture p
+    WHERE p.serviceRequest.id = :id
+      AND p.pictureType = app.bys.bys_api.model.enums.PictureType.SERVICE_REQUEST
+    """)
+    Set<String> findPictureUrlByServiceRequestId(@Param("id") Long serviceRequestId);
 
     Optional<Picture> findByFinalUserId(Long finalUserId);
 

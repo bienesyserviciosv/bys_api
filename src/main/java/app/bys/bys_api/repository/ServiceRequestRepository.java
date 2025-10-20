@@ -104,14 +104,12 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
                 fu.id,
                 sr.offerQuantity,
                 sr.newOffer,
-                sr.serviceProvider.id,
-                p.url
+                sr.serviceProvider.id
             )
             FROM ServiceRequest sr
             JOIN sr.specialization s
             JOIN sr.finalUser fu
             LEFT JOIN sr.serviceProvider sp
-            LEFT JOIN Picture p ON p.serviceRequest.id = sr.id
             WHERE sr.id = :id
             """)
     Optional<ServiceRequestSummary> findRequestById(@Param("id") Long id);
@@ -131,14 +129,12 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
                 fu.id,
                 sr.offerQuantity,
                 sr.newOffer,
-                sr.serviceProvider.id,
-                p.url
+                sr.serviceProvider.id
             )
             FROM ServiceRequest sr
             JOIN sr.specialization s
             JOIN sr.finalUser fu
             LEFT JOIN sr.serviceProvider sp
-            LEFT JOIN Picture p ON p.serviceRequest.id = sr.id
             WHERE LOWER(sr.description) LIKE LOWER(CONCAT('%', :search, '%'))
               AND (:address IS NULL OR sr.address = :address)
               AND (:specializationList IS NULL OR s.id IN :specializationList)

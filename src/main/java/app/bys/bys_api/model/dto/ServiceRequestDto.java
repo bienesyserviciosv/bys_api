@@ -31,7 +31,6 @@ public class ServiceRequestDto {
 //    @Enumerated(EnumType.STRING)
 //    private Province address;
 
-    @Future(groups = {OnCreate.class, OnUpdate.class}, message = "Must be in the future")
     @JsonProperty("date")
     private LocalDate date;
 
