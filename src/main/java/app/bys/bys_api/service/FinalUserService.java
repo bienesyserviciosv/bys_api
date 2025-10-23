@@ -10,6 +10,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.Role;
+import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
@@ -94,6 +95,7 @@ public class FinalUserService {
                 .phoneNumber(finalUserDto.getPhoneNumber())
                 .phoneVerified(false)
                 .emailVerified(false)
+                .status(UserStatus.INACTIVE)
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_USER")))
                 .registrationDate(LocalDateTime.now())
                 .lastLoginDate(LocalDateTime.now())

@@ -33,13 +33,11 @@ public class FinalUser {
     @Column(name = "password")
     private String password;
 
-    @Builder.Default
     @Column(name = "email_verified")
-    private boolean emailVerified = false;
+    private boolean emailVerified;
 
-    @Builder.Default
     @Column(name = "phone_verified")
-    private boolean phoneVerified = false;
+    private boolean phoneVerified;
 
     @Column(name = "registration_time")
     private LocalDateTime registrationDate;

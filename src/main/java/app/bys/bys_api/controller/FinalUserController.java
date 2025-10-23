@@ -18,7 +18,7 @@ public class FinalUserController {
 
     private final FinalUserService finalUserService;
 
-    @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_USER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<FinalUserDto> get(@PathVariable Long id) {
         return ResponseEntity.ok(finalUserService.get(id));

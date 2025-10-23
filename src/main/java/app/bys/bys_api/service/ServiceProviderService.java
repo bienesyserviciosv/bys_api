@@ -11,6 +11,7 @@ import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.Specialization;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
+import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
@@ -118,12 +119,14 @@ public class ServiceProviderService {
                 .specializations(specializationMapper.setDtoToEntitySet(serviceProviderDto.getSpecializations()))
                 .emailVerified(false)
                 .phoneVerified(false)
+                .status(UserStatus.INACTIVE)
                 .membershipType(MembershipType.NOT_VERIFIED)
                 .verified(false)
                 .completedServices(0)
                 .address(serviceProviderDto.getAddress())
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
                 .registrationDate(LocalDateTime.now())
+                .lastLoginDate(LocalDateTime.now())
                 .build();
 
         ServiceProvider providerSaved = serviceProviderRepository.save(provider);

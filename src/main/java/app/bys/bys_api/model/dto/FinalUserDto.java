@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
+import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -69,6 +70,9 @@ public class FinalUserDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String role;
+
+    @JsonProperty("status")
+    private UserStatus status;
 
     @JsonProperty("totalRequest")
     private Long totalRequests;
