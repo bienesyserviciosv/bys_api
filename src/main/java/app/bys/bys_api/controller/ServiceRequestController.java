@@ -48,7 +48,7 @@ public class ServiceRequestController {
         return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     @PostMapping
     public ResponseEntity<ServiceRequestWithPictureDto> create(Authentication auth,
                                                                @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,

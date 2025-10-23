@@ -42,14 +42,14 @@ public class AdminServiceRequestController {
                                                                                   @RequestParam(name = "specialization", required = false) List<Long> specializationList,
                                                                                   @RequestParam(name = "address", required = false) String address,
                                                                                   @RequestParam(name = "user", required = false) List<Long> userIdList
-                                                                                  ) throws BadRequestException {
+    ) throws BadRequestException {
         return new ResponseEntity<>(serviceRequestService.getAllRequestMetrics(pageable, search, specializationList, address, userIdList), HttpStatus.OK);
     }
 
     @PostMapping("/user/{id}")
     public ResponseEntity<ServiceRequestWithPictureDto> create(@PathVariable Long id,
-                                                                      @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
-                                                                      @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
+                                                               @Validated(OnCreate.class) @RequestPart(name = "request") ServiceRequestDto serviceRequestDto,
+                                                               @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
 
         ServiceRequest serviceRequest = serviceRequestService.createWithUserId(id, serviceRequestDto, files);
 

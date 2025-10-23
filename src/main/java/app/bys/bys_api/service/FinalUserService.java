@@ -96,6 +96,12 @@ public class FinalUserService {
                 .emailVerified(false)
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_USER")))
                 .registrationDate(LocalDateTime.now())
+                .lastLoginDate(LocalDateTime.now())
+                .totalRequests(0L)
+                //.acceptedRequests(0L)
+                //.rejectedRequests(0L)
+                //.pendingRequests(0L)
+                .completedRequests(0L)
                 .build();
 
         return mapper.entityToDto(finalUserRepository.save(user));

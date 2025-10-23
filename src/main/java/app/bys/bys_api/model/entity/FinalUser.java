@@ -54,6 +54,21 @@ public class FinalUser {
     @Column(name = "profile_picture")
     private String profilePicture;
 
+    @Column(name = "total_request")
+    private Long totalRequests;
+
+//    @Column(name = "accepted_requests")
+//    private Long acceptedRequests;
+//
+//    @Column(name = "rejected_requests")
+//    private Long rejectedRequests;
+//
+//    @Column(name = "pending_requests")
+//    private Long pendingRequests;
+
+    @Column(name = "completed_requests")
+    private Long completedRequests;
+
     @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<ServiceRequest> serviceRequestSet;
 

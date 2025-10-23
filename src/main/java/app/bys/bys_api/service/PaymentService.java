@@ -235,6 +235,10 @@ public class PaymentService {
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
+//        FinalUser finalUser = payment.getFinalUser();
+//        finalUser.setAcceptedRequests(finalUser.getAcceptedRequests() + 1);
+//        finalUserRepository.save(finalUser);
+
         if (serviceRequest.getRequestStatus() == RequestStatus.ACCEPTED) {
             throw new ServiceRequestAlreadyAcceptedException("Service Request with id: " + requestId + " already accepted");
         }

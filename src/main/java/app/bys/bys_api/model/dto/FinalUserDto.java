@@ -70,6 +70,21 @@ public class FinalUserDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String role;
 
+    @JsonProperty("totalRequest")
+    private Long totalRequests;
+
+//    @JsonProperty("acceptedRequests")
+//    private Long acceptedRequests;
+//
+//    @JsonProperty("rejectedRequests")
+//    private Long rejectedRequests;
+//
+//    @JsonProperty("pendingRequests")
+//    private Long pendingRequests;
+
+    @JsonProperty("completedRequests")
+    private Long completedRequests;
+
     @JsonProperty("token")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;

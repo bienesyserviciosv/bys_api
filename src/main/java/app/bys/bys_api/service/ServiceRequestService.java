@@ -200,6 +200,11 @@ public class ServiceRequestService {
             throw new IllegalStateException("pictureSet no fue inicializado");
         }
         uploadPictureSet(files, serviceRequest);
+
+        //finalUser.setPendingRequests(finalUser.getPendingRequests() + 1);
+        finalUser.setTotalRequests(finalUser.getTotalRequests() + 1);
+        finalUserRepository.save(finalUser);
+
         return serviceRequest;
     }
 
@@ -269,6 +274,10 @@ public class ServiceRequestService {
         if (serviceRequest.getRequestStatus() != RequestStatus.ACCEPTED) {
             throw new ForbiddenActionException("The service request with id: " + requestId + " hasn't been accepted");
         }
+
+        finalUser.setCompletedRequests(finalUser.getCompletedRequests() + 1);
+        finalUserRepository.save(finalUser);
+
         serviceRequest.setRequestStatus(RequestStatus.COMPLETED);
         ServiceProvider serviceProvider = serviceRequest.getServiceProvider();
         if (serviceProvider == null) {

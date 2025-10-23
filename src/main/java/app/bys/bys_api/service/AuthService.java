@@ -85,6 +85,11 @@ public class AuthService {
                 .roles(new HashSet<>(Set.of(roleService.getRoleOrThrow("ROLE_USER"))))
                 .registrationDate(LocalDateTime.now())
                 .lastLoginDate(LocalDateTime.now())
+                .totalRequests(0L)
+//                .acceptedRequests(0L)
+//                .rejectedRequests(0L)
+//                .pendingRequests(0L)
+                .completedRequests(0L)
                 .build();
 
 
