@@ -95,7 +95,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:63342",
                 "http://localhost:8080",
-                "https://api-dev.bienesyservicios.app"
+                "https://api-dev.bienesyservicios.app",
+                "https://admin.bienesyservicios.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
