@@ -45,6 +45,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
         sp.completedServices,
         sp.qualification,
         sp.profilePicture,
+        sp.status,
         r.name
     )
     FROM ServiceProvider sp
@@ -68,6 +69,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
                 sp.lastLoginDate,
                 sp.completedServices,
                 sp.qualification,
+                sp.status,
                 r.name
             )
             FROM ServiceProvider sp

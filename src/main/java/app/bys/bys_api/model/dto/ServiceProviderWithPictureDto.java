@@ -3,6 +3,7 @@ package app.bys.bys_api.model.dto;
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
+import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -38,6 +39,7 @@ import java.util.Set;
         "profilePicture",
         "workPictureSet",
         "role",
+        "status",
         "token"
 })
 
@@ -111,6 +113,9 @@ public class ServiceProviderWithPictureDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String role;
+
+    @JsonProperty("status")
+    private UserStatus status;
 
     @JsonProperty("token")
     @JsonInclude(JsonInclude.Include.NON_NULL)

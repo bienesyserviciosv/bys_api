@@ -2,6 +2,7 @@ package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
+import app.bys.bys_api.model.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,6 @@ public class ServiceProviderWithPictureFlatDto {
     private int completedServices;
     private double qualification;
     private String profilePicture;
+    private UserStatus status;
     private String role;
 }

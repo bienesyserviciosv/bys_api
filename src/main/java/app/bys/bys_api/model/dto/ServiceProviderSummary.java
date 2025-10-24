@@ -2,6 +2,7 @@ package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.model.enums.MembershipType;
 import app.bys.bys_api.model.enums.Province;
+import app.bys.bys_api.model.enums.UserStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -28,12 +29,13 @@ public class ServiceProviderSummary {
     private LocalDateTime lastLoginDate;
     private Integer completedServices;
     private Double qualification;
+    private UserStatus status;
     private String role;
 
     public ServiceProviderSummary(Long id, String name, String email, String phoneNumber,
                                   Province address, String experience, Boolean verified, MembershipType membershipType,
                                   LocalDateTime registrationDate, LocalDateTime lastLoginDate, Integer completedServices,
-                                  Double qualification, String role) {
+                                  Double qualification, UserStatus status, String role) {
 
         this.id = id;
         this.name = name;
@@ -47,6 +49,7 @@ public class ServiceProviderSummary {
         this.lastLoginDate = lastLoginDate;
         this.completedServices = completedServices;
         this.qualification = qualification;
+        this.status = status;
         this.role = role;
         this.specializations = new HashSet<>();
     }

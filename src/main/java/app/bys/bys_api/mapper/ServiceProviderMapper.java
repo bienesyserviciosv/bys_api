@@ -97,6 +97,7 @@ public abstract class ServiceProviderMapper {
                         ? mediaUrl + flatDto.getProfilePicture()
                         : null)
                 .role(flatDto.getRole())
+                .status(flatDto.getStatus())
                 .specializations(specs)
                 .workPictureSet(pictures)
                 .build();
