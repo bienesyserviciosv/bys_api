@@ -2,7 +2,6 @@ package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.error.DuplicatePhoneException;
-import app.bys.bys_api.error.EmailNotVerifiedException;
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.ServiceProviderMapper;
@@ -206,7 +205,6 @@ public class AuthService {
 
         if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
             FinalUser user = getUser(identifier);
-            if (!user.isEmailVerified()) throw new EmailNotVerifiedException("The email is not verified");
 
             return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword(), user.getRoles());
         }
@@ -225,7 +223,6 @@ public class AuthService {
         FinalUser user;
         if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
             user = getUser(identifier);
-            if (!user.isEmailVerified()) throw new EmailNotVerifiedException("The email is not verified");
 
             boolean isAdmin = user.getRoles().stream()
                     .anyMatch(role -> role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_SUPER_ADMIN"));

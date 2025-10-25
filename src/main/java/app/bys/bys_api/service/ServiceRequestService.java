@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.EmailNotVerifiedException;
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.FinalUserMapper;
@@ -214,7 +215,7 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
 
         if (finalUser.getStatus().equals(UserStatus.INACTIVE)) {
-            throw new ForbiddenActionException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
+            throw new EmailNotVerifiedException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
         }
         return saveServiceRequest(serviceRequestDto, files, finalUser);
     }

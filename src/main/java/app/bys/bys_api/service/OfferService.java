@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.EmailNotVerifiedException;
 import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.OfferMapper;
@@ -152,7 +153,7 @@ public class OfferService {
         ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
         if (provider.getStatus().equals(UserStatus.INACTIVE)){
-            throw new ForbiddenActionException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
+            throw new EmailNotVerifiedException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
         }
 
         if (!serviceRequest.getRequestStatus().equals(RequestStatus.CREATED) && !serviceRequest.getRequestStatus().equals(RequestStatus.IN_PROGRESS)) {
