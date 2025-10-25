@@ -181,6 +181,15 @@ public class FinalUserService {
         newUser.setRoles(Set.of(userRole));
         newUser.setPassword("oauth2_dummy");
         newUser.setRegistrationDate(LocalDateTime.now());
+        newUser.setLastLoginDate(LocalDateTime.now());
+        newUser.setEmailVerified(true);
+        newUser.setStatus(UserStatus.ACTIVE);
+        newUser.setTotalRequests(0L);
+        newUser.setCompletedRequests(0L);
+//                .acceptedRequests(0L)
+//                .rejectedRequests(0L)
+//                .pendingRequests(0L)
+
 //        newUser.setPictureUrl((String) payload.get("picture"));
 //        newUser.setProvider(AuthProvider.GOOGLE);
         return finalUserRepository.save(newUser);
