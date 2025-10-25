@@ -234,16 +234,16 @@ public class OfferService {
             throw new ForbiddenActionException("The user can only accept offers from requests they made");
         }
 
-        if (offer.equals(request.getAcceptedOffer())) {
-            throw new ForbiddenActionException("This offer is already the accepted one");
-        }
-
         if (!request.getOfferSet().contains(offer)) {
             throw new IllegalArgumentException("This offer does not belong to the service request");
         }
 
         Offer previousAccepted = request.getAcceptedOffer();
-        if (previousAccepted != null) {
+
+        if (previousAccepted != null){
+            if (offer.equals(previousAccepted)) {
+                return offerMapper.entityToDto(offer);
+            }
             previousAccepted.setAccepted(false);
             previousAccepted.setAcceptedAt(null);
             previousAccepted.setFinalUser(null);
