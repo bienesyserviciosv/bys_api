@@ -43,7 +43,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
                 sr.offerQuantity,
                 CASE WHEN p IS NOT NULL THEN ao.price ELSE NULL END,
                 p.paymentType,
-                p.paymentDate
+                p.paymentDate,
+                p.id
             )
             FROM ServiceRequest sr
             JOIN sr.finalUser fu
@@ -78,7 +79,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
                 sr.offerQuantity,
                 CASE WHEN p IS NOT NULL THEN ao.price ELSE NULL END,
                 p.paymentType,
-                p.paymentDate
+                p.paymentDate,
+                p.id
             )
             FROM ServiceRequest sr
             JOIN sr.finalUser fu

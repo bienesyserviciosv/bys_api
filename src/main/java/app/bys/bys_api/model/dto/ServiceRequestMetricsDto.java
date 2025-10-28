@@ -55,5 +55,7 @@ public class ServiceRequestMetricsDto {
 //    @JsonProperty("payment_date")
     private LocalDateTime paymentDate;
 
+    private Long paymentId;
+
 
 }
