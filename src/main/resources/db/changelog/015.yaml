@@ -1,0 +1,19 @@
+databaseChangeLog:
+- changeSet:
+    id: 20251029-1
+    author: Carlos
+    changes:
+      - sql:
+          sql: |
+            UPDATE picture
+            SET url = CONCAT('bys/', url)
+            WHERE url NOT LIKE 'bys/%';
+- changeSet:
+    id: 20251029-2
+    author: Carlos
+    changes:
+      - sql:
+          sql: |
+            UPDATE picture
+            SET url = SUBSTRING(url FROM 5)
+            WHERE url LIKE 'bys/%';
