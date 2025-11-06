@@ -39,4 +39,10 @@ public class SuperAdminServiceProviderController {
         serviceProviderService.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/verify/{id}")
+    public ResponseEntity<ServiceProviderDto> verify(@PathVariable Long id) {
+        return ResponseEntity.ok(serviceProviderService.verifyProvider(id));
+    }
+
 }

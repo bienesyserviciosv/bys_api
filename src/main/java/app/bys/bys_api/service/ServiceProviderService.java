@@ -196,4 +196,15 @@ public class ServiceProviderService {
         serviceProviderRepository.save(provider);
     }
 
+    public ServiceProviderDto verifyProvider(Long id) {
+        ServiceProvider provider = serviceProviderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found"));
+
+        provider.setVerified(true);
+        provider.setMembershipType(MembershipType.BRONZE);
+        serviceProviderRepository.save(provider);
+
+        return mapper.entityToDto(provider);
+    }
+
 }
