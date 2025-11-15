@@ -44,7 +44,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
     @Query("""
                 SELECT new app.bys.bys_api.model.dto.MobilePaymentDto(
                     p.id, p.bank, p.screenshot, p.idNumber, p.referenceNumber,
-                    p.phoneCode, p.phoneNumber,
+                    p.paymentDate, p.phoneCode, p.phoneNumber,
                     p.finalUser.id, p.serviceProvider.id, p.offer.id,
                     p.amountInBolivars, p.paymentType, p.paymentStatus
                 )
