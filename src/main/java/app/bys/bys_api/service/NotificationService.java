@@ -7,6 +7,7 @@ import app.bys.bys_api.model.dto.NotificationDto;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.PaymentNotificationDto;
 import app.bys.bys_api.model.entity.*;
+import app.bys.bys_api.model.enums.NotificationType;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -34,28 +35,6 @@ public class NotificationService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final PaymentRepository paymentRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
-    public void notifyProvidersOfNewRequest(Long specializationId, ServiceRequest serviceRequest) {
-
-        List<ServiceProvider> providers = serviceProviderRepository.findBySpecializations_Id(specializationId);
-
-        if (providers != null && !providers.isEmpty()) {
-            List<Notification> notifications = providers.stream()
-                    .map(provider -> Notification.builder()
-                            .serviceProvider(provider)
-                            .message("Nueva solicitud disponible")
-                            .read(false)
-                            .timestamp(LocalDateTime.now())
-                            .serviceRequest(serviceRequest)
-                            .build())
-                    .collect(Collectors.toList());
-
-            notificationRepository.saveAll(notifications);
-            log.info("{} notification created", notifications.size());
-        } else {
-            log.warn("No providers found with this conditions");
-        }
-    }
 
     public PageDto<NotificationDto> getAllNotifications(Pageable pageable, String search, List<Long> providerIdList, List<Long> finalUserIdList) {
 
@@ -124,6 +103,27 @@ public class NotificationService {
         throw new ForbiddenActionException("The user can't read this notification");
     }
 
+    public void notifyProvidersOfNewRequest(Long specializationId, ServiceRequest serviceRequest) {
+
+        List<ServiceProvider> providers = serviceProviderRepository.findBySpecializations_Id(specializationId);
+
+        if (providers != null && !providers.isEmpty()) {
+            List<Notification> notifications = providers.stream()
+                    .map(provider -> Notification.builder()
+                            .serviceProvider(provider)
+                            .read(false)
+                            .timestamp(LocalDateTime.now())
+                            .serviceRequest(serviceRequest)
+                            .notificationType(NotificationType.NEW_REQUEST)
+                            .build())
+                    .collect(Collectors.toList());
+
+            notificationRepository.saveAll(notifications);
+            log.info("{} notification created", notifications.size());
+        } else {
+            log.warn("No providers found with this conditions");
+        }
+    }
 
     public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId) {
         FinalUser finalUser = finalUserRepository.findById(userId)
@@ -137,19 +137,19 @@ public class NotificationService {
 
         Notification providerNotification = Notification.builder()
                 .serviceProvider(serviceProvider)
-                .message("Su oferta a la solicitud fue aceptada")
                 .read(false)
                 .serviceRequest(serviceRequest)
                 .timestamp(LocalDateTime.now())
+                .notificationType(NotificationType.PAID_OFFER)
                 .build();
 
 
         Notification userNotification = Notification.builder()
                 .finalUser(finalUser)
-                .message("Su solicitud fue aceptada")
                 .read(false)
                 .serviceRequest(serviceRequest)
                 .timestamp(LocalDateTime.now())
+                .notificationType(NotificationType.PAYMENT_ACCEPTED)
                 .build();
 
         notificationRepository.save(providerNotification);
@@ -168,12 +168,9 @@ public class NotificationService {
             return;
         }
 
-        String message = "New payment created";
-
         List<Notification> notifications = admins.stream()
                 .map(admin -> Notification.builder()
                         .finalUser(admin)
-                        .message(message)
                         .read(false)
                         .timestamp(LocalDateTime.now())
                         .payment(payment)
@@ -193,6 +190,5 @@ public class NotificationService {
         );
         messagingTemplate.convertAndSend("/topic/admin/payments", dto);
     }
-
 
 }

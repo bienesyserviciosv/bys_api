@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.entity;
 
+import app.bys.bys_api.model.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,14 +19,15 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "message")
-    private String message;
-
     @Column(name = "read")
     private boolean read;
 
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
+
+    @Column(name = "notification_type")
+    @Enumerated(EnumType.STRING)
+    private NotificationType notificationType;
 
     @ManyToOne
     @JoinColumn(name = "service_provider_id")
@@ -42,5 +44,10 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
     private Payment payment;
+
+    @Transient
+    public String getMessage() {
+        return notificationType != null ? notificationType.getMessage() : null;
+    }
 
 }
