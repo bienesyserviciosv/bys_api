@@ -43,9 +43,10 @@ public class ServiceRequestController {
                                                                  @RequestParam(name = "specialization", required = false) List<Long> specializationList,
                                                                  @RequestParam(name = "address", required = false) String address,
                                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
-                                                                 @RequestParam(name = "provider", required = false) List<Long> providerIdList
+                                                                 @RequestParam(name = "provider", required = false) List<Long> providerIdList,
+                                                                 Authentication authentication
     ) throws BadRequestException {
-        return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList), HttpStatus.OK);
+        return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList, authentication), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_USER')")
