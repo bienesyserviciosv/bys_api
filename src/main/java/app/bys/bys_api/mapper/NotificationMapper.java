@@ -15,6 +15,7 @@ public interface NotificationMapper {
     @Mapping(source = "finalUser.id", target = "finalUserId")
     @Mapping(source = "payment.id", target = "paymentId")
     @Mapping(source = "notificationType.message", target = "message")
+    @Mapping(source = "offer.id", target = "offerId")
     NotificationDto toDto(Notification notification);
 
     List<NotificationDto> toDtoList(List<Notification> notifications);

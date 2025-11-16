@@ -38,6 +38,10 @@ public class Notification {
     private ServiceRequest serviceRequest;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "offer_id")
+    private Offer offer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
 

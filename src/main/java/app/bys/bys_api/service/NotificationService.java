@@ -35,6 +35,7 @@ public class NotificationService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final PaymentRepository paymentRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final OfferRepository offerRepository;
 
     public PageDto<NotificationDto> getAllNotifications(Pageable pageable, String search, List<Long> providerIdList, List<Long> finalUserIdList) {
 
@@ -125,7 +126,7 @@ public class NotificationService {
         }
     }
 
-    public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId) {
+    public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId, Long offerId) {
         FinalUser finalUser = finalUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
@@ -135,10 +136,14 @@ public class NotificationService {
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("ServiceRequest with id: " + requestId + " not found"));
 
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + offerId + " not found"));
+
         Notification providerNotification = Notification.builder()
                 .serviceProvider(serviceProvider)
                 .read(false)
                 .serviceRequest(serviceRequest)
+                .offer(offer)
                 .timestamp(LocalDateTime.now())
                 .notificationType(NotificationType.PAID_OFFER)
                 .build();

@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.model.enums.NotificationType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationDto {
 
     @JsonProperty("id")
@@ -30,6 +32,9 @@ public class NotificationDto {
 
     @JsonProperty("service_request_id")
     private Long serviceRequestId;
+
+    @JsonProperty("offer_id")
+    private Long offerId;
 
     @JsonProperty("final_user_id")
     private Long finalUserId;
