@@ -6,9 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -77,4 +79,9 @@ public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, Jpa
             GROUP BY u.id, u.name, u.email, u.phoneNumber, u.registrationDate, u.lastLoginDate
             """)
     Optional<FinalUserMetricsDto> findUserMetricsById(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE FinalUser u SET u.fcmToken = :token WHERE u.id = :userId")
+    void updateFcmToken(@Param("userId") Long userId, @Param("token") String token);
 }

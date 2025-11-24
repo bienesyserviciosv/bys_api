@@ -67,6 +67,9 @@ public class FinalUser {
     @Column(name = "completed_requests")
     private Long completedRequests;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     @OneToMany(mappedBy = "finalUser", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<ServiceRequest> serviceRequestSet;
 
