@@ -37,7 +37,6 @@ public class PaymentController {
             @RequestPart(name = "screenshot") MultipartFile picture) {
 
         MobilePaymentDto paymentDto = paymentService.createMobilePayment(mobilePaymentDto, picture);
-        //notificationService.notifyAdminsOfNewPayment(paymentDto.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentDto);
     }
 
@@ -46,8 +45,8 @@ public class PaymentController {
     public ResponseEntity<TransferPaymentDto> createTransferPayment(
             @Validated(OnCreate.class) @RequestPart(name = "payment") TransferPaymentDto transferPaymentDto,
             @RequestPart(name = "screenshot") MultipartFile picture) {
+
         TransferPaymentDto paymentDto = paymentService.createTransferPayment(transferPaymentDto, picture);
-        //notificationService.notifyAdminsOfNewPayment(paymentDto.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentDto);
     }
 

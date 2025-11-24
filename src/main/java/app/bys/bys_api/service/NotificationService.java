@@ -5,17 +5,20 @@ import app.bys.bys_api.mapper.NotificationMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.NotificationDto;
 import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.dto.PaymentNotificationDto;
-import app.bys.bys_api.model.entity.*;
+import app.bys.bys_api.model.entity.FinalUser;
+import app.bys.bys_api.model.entity.Notification;
+import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,8 +35,7 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
     private final FinalUserRepository finalUserRepository;
     private final ServiceRequestRepository serviceRequestRepository;
-    private final PaymentRepository paymentRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final FCMService fcmService;
 
     public void notifyProvidersOfNewRequest(Long specializationId, ServiceRequest serviceRequest) {
 
@@ -157,42 +159,30 @@ public class NotificationService {
 
     }
 
-    public void notifyAdminsOfNewPayment(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found with ID: " + paymentId));
+    public void notifyAdminOfNewPayment(Long userId, Long providerId, Long requestId, PaymentType paymentType) {
+        String notificationTitle = "";
+        switch (paymentType) {
+            case MOBILE -> notificationTitle = "Nuevo Pago Móvil PENDIENTE";
+            case TRANSFER -> notificationTitle = "Nuevo Pago por Transferencia PENDIENTE";
+        }
+        String notificationBody = "Solicitud: " + requestId + " Usuario: " + userId + " Proveedor: " + providerId;
 
         List<FinalUser> admins = finalUserRepository.findAdmins();
+        List<String> fcmTokens = admins.stream().map(FinalUser::getFcmToken).toList();
 
-        if (admins.isEmpty()) {
-            log.warn("No admins found to notify about payment ID: {}", paymentId);
-            return;
+        for (String token : fcmTokens) {
+            Map<String, String> dataPayload = Map.of(
+                    "entityType", "payment",
+                    "entityId", String.valueOf(requestId),
+                    "status", "pending"
+            );
+            try {
+                fcmService.sendNotification(token, notificationTitle, notificationBody, dataPayload);
+            } catch (FirebaseMessagingException e) {
+                log.error("Error al enviar FCM al token {}: {}", token, e.getMessage());
+                // Lógica para marcar el token como inválido en la DB.
+            }
         }
-
-        String message = "New payment created";
-
-        List<Notification> notifications = admins.stream()
-                .map(admin -> Notification.builder()
-                        .finalUser(admin)
-                        .message(message)
-                        .read(false)
-                        .timestamp(LocalDateTime.now())
-                        .payment(payment)
-                        .build())
-                .collect(Collectors.toList());
-
-        notificationRepository.saveAll(notifications);
-
     }
-
-    public void notifyAdminOfNewPayment(Payment payment) {
-        PaymentNotificationDto dto = new PaymentNotificationDto(
-                payment.getId(),
-                payment.getFinalUser().getName(),
-                payment.getOffer().getPrice(),
-                payment.getPaymentDate()
-        );
-        messagingTemplate.convertAndSend("/topic/admin/payments", dto);
-    }
-
 
 }

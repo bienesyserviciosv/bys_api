@@ -123,8 +123,7 @@ public class PaymentService {
 
         request.setRequestStatus(RequestStatus.PENDING);
         serviceRequestRepository.save(request);
-        notificationService.notifyAdminOfNewPayment(mobilePayment);
-
+        notificationService.notifyAdminOfNewPayment(finalUser.getId(), serviceProvider.getId(), request.getId(), mobilePayment.getPaymentType());
         return paymentMapper.entityToMobileDto(savedPayment);
     }
 
@@ -165,7 +164,7 @@ public class PaymentService {
 
         request.setRequestStatus(RequestStatus.PENDING);
         serviceRequestRepository.save(request);
-        notificationService.notifyAdminOfNewPayment(transferPayment);
+        notificationService.notifyAdminOfNewPayment(finalUser.getId(), serviceProvider.getId(), request.getId(), transferPayment.getPaymentType());
 
         return paymentMapper.entityToTransferDto(savedPayment);
     }
