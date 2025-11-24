@@ -39,6 +39,14 @@ public abstract class ServiceProviderMapper {
         }
     }
 
+    @AfterMapping
+    @BeanMapping(builder = @Builder(disableBuilder = true))
+    public void addMediaUrlToImage(@MappingTarget ServiceProviderDto providerDto, ServiceProvider provider) {
+        if (providerDto.getProfilePicture() != null) {
+            providerDto.setProfilePicture(mediaUrl + provider.getProfilePicture());
+        }
+    }
+
     @BeforeMapping
     @BeanMapping(builder = @Builder(disableBuilder = true))
     public void pictureToUrl(@MappingTarget ServiceProviderWithPictureDto providerDto, ServiceProvider provider) {

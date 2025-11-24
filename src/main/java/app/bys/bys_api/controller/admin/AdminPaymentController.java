@@ -40,10 +40,11 @@ public class AdminPaymentController {
     @PatchMapping("/accept/{id}")
     public ResponseEntity<ServiceRequestDto> accept(@PathVariable Long id) {
         Payment payment = paymentService.acceptPayment(id);
+        Long offerId = payment.getOffer().getId();
         Long requestId = payment.getOffer().getServiceRequest().getId();
         Long userId = payment.getFinalUser().getId();
         Long providerId = payment.getServiceProvider().getId();
-        notificationService.notifyPaymentAccepted(userId, providerId, requestId);
+        notificationService.notifyPaymentAccepted(userId, providerId, requestId, offerId);
 
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(()-> new EntityNotFoundException("Service request not found"));

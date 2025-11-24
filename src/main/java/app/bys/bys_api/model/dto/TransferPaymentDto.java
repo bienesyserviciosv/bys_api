@@ -43,6 +43,7 @@ public class TransferPaymentDto {
     private String accountHolderName;
 
     @JsonProperty ("payment_date")
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private LocalDateTime paymentDate;
 
     @JsonProperty("final_user_id")

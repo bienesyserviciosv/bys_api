@@ -29,11 +29,13 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,7 +70,15 @@ public class ServiceRequestService {
 
     }
 
-    public PageDto<ServiceRequestSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList) throws BadRequestException {
+    public PageDto<ServiceRequestSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList, Authentication auth) throws BadRequestException {
+        List<RequestStatus> requestStatusList = null;
+        LocalDate today = LocalDate.now();
+        boolean applyDateFilter = false;
+
+        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PROVIDER"))) {
+            requestStatusList = List.of(RequestStatus.CREATED);
+            applyDateFilter = true;
+        }
         Province province = null;
         if (address != null) {
             try {
@@ -80,7 +90,7 @@ public class ServiceRequestService {
         if (search == null) search = "";
         if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
 
-        Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(search, specializationList, province, userList, providerIdList, pageable);
+        Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(search, specializationList, province, userList, providerIdList, requestStatusList, applyDateFilter, today, pageable);
 
         List<ServiceRequestSummary> enrichedList = page.getContent().stream()
                 .peek(dto -> {

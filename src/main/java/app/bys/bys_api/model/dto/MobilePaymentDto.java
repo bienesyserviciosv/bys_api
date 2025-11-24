@@ -13,6 +13,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -37,6 +39,10 @@ public class MobilePaymentDto {
     @JsonProperty("reference_number")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String referenceNumber;
+
+    @JsonProperty ("payment_date")
+    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    private LocalDateTime paymentDate;
 
     @JsonProperty("phone_code")
     private PhoneCode phoneCode;

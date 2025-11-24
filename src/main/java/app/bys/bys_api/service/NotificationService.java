@@ -5,11 +5,9 @@ import app.bys.bys_api.mapper.NotificationMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.NotificationDto;
 import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.entity.FinalUser;
-import app.bys.bys_api.model.entity.Notification;
-import app.bys.bys_api.model.entity.ServiceProvider;
-import app.bys.bys_api.model.entity.ServiceRequest;
-import app.bys.bys_api.model.enums.PaymentType;
+import app.bys.bys_api.model.dto.PaymentNotificationDto;
+import app.bys.bys_api.model.entity.*;
+import app.bys.bys_api.model.enums.NotificationType;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -35,6 +33,9 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
     private final FinalUserRepository finalUserRepository;
     private final ServiceRequestRepository serviceRequestRepository;
+    private final PaymentRepository paymentRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final OfferRepository offerRepository;
     private final FCMService fcmService;
 
     public void notifyProvidersOfNewRequest(Long specializationId, ServiceRequest serviceRequest) {
@@ -137,21 +138,25 @@ public class NotificationService {
         ServiceRequest serviceRequest = serviceRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("ServiceRequest with id: " + requestId + " not found"));
 
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + offerId + " not found"));
+
         Notification providerNotification = Notification.builder()
                 .serviceProvider(serviceProvider)
-                .message("Su oferta a la solicitud fue aceptada")
                 .read(false)
                 .serviceRequest(serviceRequest)
+                .offer(offer)
                 .timestamp(LocalDateTime.now())
+                .notificationType(NotificationType.PAID_OFFER)
                 .build();
 
 
         Notification userNotification = Notification.builder()
                 .finalUser(finalUser)
-                .message("Su solicitud fue aceptada")
                 .read(false)
                 .serviceRequest(serviceRequest)
                 .timestamp(LocalDateTime.now())
+                .notificationType(NotificationType.PAYMENT_ACCEPTED)
                 .build();
 
         notificationRepository.save(providerNotification);

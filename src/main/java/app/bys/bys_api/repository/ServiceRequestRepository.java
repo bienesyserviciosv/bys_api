@@ -4,6 +4,7 @@ import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
 import app.bys.bys_api.model.dto.ServiceRequestSummary;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.Province;
+import app.bys.bys_api.model.enums.RequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -142,6 +144,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
               AND (:specializationList IS NULL OR s.id IN :specializationList)
               AND (:userList IS NULL OR fu.id IN :userList)
               AND (:providerList IS NULL OR sp.id IN :providerList)
+              AND (:requestStatusList IS NULL OR sr.requestStatus IN :requestStatusList)
+              AND (:applyDateFilter = false OR sr.date >= :today)
             """)
     Page<ServiceRequestSummary> findAllRequestSummariesFiltered(
             @Param("search") String search,
@@ -149,6 +153,9 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             @Param("address") Province address,
             @Param("userList") List<Long> userList,
             @Param("providerList") List<Long> providerList,
+            @Param("requestStatusList") List<RequestStatus> requestStatusList,
+            @Param("applyDateFilter") boolean applyDateFilter,
+            @Param("today") LocalDate today,
             Pageable pageable
     );
 

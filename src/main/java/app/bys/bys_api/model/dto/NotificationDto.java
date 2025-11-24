@@ -1,9 +1,8 @@
 package app.bys.bys_api.model.dto;
 
-import app.bys.bys_api.error.ErrorMessage;
-import app.bys.bys_api.validation.OnCreate;
+import app.bys.bys_api.model.enums.NotificationType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,12 +12,12 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationDto {
 
     @JsonProperty("id")
     private Long id;
 
-    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @JsonProperty("message")
     private String message;
 
@@ -34,10 +33,16 @@ public class NotificationDto {
     @JsonProperty("service_request_id")
     private Long serviceRequestId;
 
+    @JsonProperty("offer_id")
+    private Long offerId;
+
     @JsonProperty("final_user_id")
     private Long finalUserId;
 
     @JsonProperty("payment_id")
     private Long paymentId;
+
+    @JsonProperty("notification_type")
+    private NotificationType notificationType;
 
 }

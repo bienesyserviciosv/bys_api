@@ -155,6 +155,9 @@ public class OfferService {
         if (provider.getStatus().equals(UserStatus.INACTIVE)){
             throw new EmailNotVerifiedException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
         }
+        if (!provider.getVerified()){
+            throw new ForbiddenActionException("Service provider is not verified");
+        }
 
         if (!serviceRequest.getRequestStatus().equals(RequestStatus.CREATED) && !serviceRequest.getRequestStatus().equals(RequestStatus.IN_PROGRESS)) {
             throw new ForbiddenActionException("Cannot create offers for requests with payments created");

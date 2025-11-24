@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20251115-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - sql:
+            sql: |
+              UPDATE payment
+              SET payment_date = CURRENT_TIMESTAMP
+              WHERE payment_type = 'MOBILE' AND payment_date IS NULL;
