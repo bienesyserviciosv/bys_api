@@ -5,9 +5,9 @@ import app.bys.bys_api.mapper.NotificationMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.NotificationDto;
 import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.dto.PaymentNotificationDto;
 import app.bys.bys_api.model.entity.*;
 import app.bys.bys_api.model.enums.NotificationType;
+import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -33,8 +33,6 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
     private final FinalUserRepository finalUserRepository;
     private final ServiceRequestRepository serviceRequestRepository;
-    private final PaymentRepository paymentRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final OfferRepository offerRepository;
     private final FCMService fcmService;
 
@@ -46,10 +44,10 @@ public class NotificationService {
             List<Notification> notifications = providers.stream()
                     .map(provider -> Notification.builder()
                             .serviceProvider(provider)
-                            .message("Nueva solicitud disponible")
                             .read(false)
                             .timestamp(LocalDateTime.now())
                             .serviceRequest(serviceRequest)
+                            .notificationType(NotificationType.NEW_REQUEST)
                             .build())
                     .collect(Collectors.toList());
 
@@ -127,8 +125,7 @@ public class NotificationService {
         throw new ForbiddenActionException("The user can't read this notification");
     }
 
-
-    public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId) {
+    public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId, Long offerId) {
         FinalUser finalUser = finalUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
 
@@ -149,7 +146,6 @@ public class NotificationService {
                 .timestamp(LocalDateTime.now())
                 .notificationType(NotificationType.PAID_OFFER)
                 .build();
-
 
         Notification userNotification = Notification.builder()
                 .finalUser(finalUser)
