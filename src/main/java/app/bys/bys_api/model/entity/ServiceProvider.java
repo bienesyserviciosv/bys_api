@@ -77,6 +77,9 @@ public class ServiceProvider {
     @Column(name = "last_login_date")
     private LocalDateTime lastLoginDate;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "provider_specialization",
             joinColumns = {@JoinColumn(name = "provider_id")},
