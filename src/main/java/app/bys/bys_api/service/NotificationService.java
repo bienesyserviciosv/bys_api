@@ -12,6 +12,7 @@ import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.MessagingErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -138,6 +139,48 @@ public class NotificationService {
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + offerId + " not found"));
 
+        notifyProvider(serviceProvider, serviceRequest, offer);
+        notifyUser(finalUser, serviceRequest);
+
+    }
+
+    private void notifyUser(FinalUser finalUser, ServiceRequest serviceRequest) {
+        Notification userNotification = Notification.builder()
+                .finalUser(finalUser)
+                .read(false)
+                .serviceRequest(serviceRequest)
+                .timestamp(LocalDateTime.now())
+                .notificationType(NotificationType.PAYMENT_ACCEPTED)
+                .build();
+
+        notificationRepository.save(userNotification);
+
+        String notificationTitle = "Pago aceptado";
+        String notificationBody = " Usuario: " + finalUser.getId();
+
+        String fcmToken = finalUser.getFcmToken();
+
+        Map<String, String> dataPayload = Map.of(
+                "entityType", "request",
+                "entityId", String.valueOf(serviceRequest.getId()),
+                "status", "accepted"
+        );
+
+        try {
+            fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
+        } catch (FirebaseMessagingException e) {
+            log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, finalUser.getId(), e.getMessage());
+
+            // Si el token es inválido o no registrado, limpiar el token en la DB
+            if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                finalUserRepository.updateFcmToken(finalUser.getId(), null);
+                log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", finalUser.getId());
+            }
+        }
+    }
+
+    private void notifyProvider(ServiceProvider serviceProvider, ServiceRequest serviceRequest, Offer offer) {
+
         Notification providerNotification = Notification.builder()
                 .serviceProvider(serviceProvider)
                 .read(false)
@@ -147,17 +190,29 @@ public class NotificationService {
                 .notificationType(NotificationType.PAID_OFFER)
                 .build();
 
-        Notification userNotification = Notification.builder()
-                .finalUser(finalUser)
-                .read(false)
-                .serviceRequest(serviceRequest)
-                .timestamp(LocalDateTime.now())
-                .notificationType(NotificationType.PAYMENT_ACCEPTED)
-                .build();
-
         notificationRepository.save(providerNotification);
-        notificationRepository.save(userNotification);
 
+        String notificationTitle = "Su oferta ha sido pagada";
+        String notificationBody = " Prestador de Servicios: " + serviceProvider.getId();
+
+        String fcmToken = serviceProvider.getFcmToken();
+
+        Map<String, String> dataPayload = Map.of(
+                "entityType", "request",
+                "entityId", String.valueOf(serviceRequest.getId()),
+                "status", "accepted"
+        );
+        try {
+            fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
+        } catch (FirebaseMessagingException e) {
+            log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, serviceProvider.getId(), e.getMessage());
+
+            // Si el token es inválido o no registrado, limpiar el token en la DB
+            if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                serviceProviderRepository.updateFcmToken(serviceProvider.getId(), null);
+                log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", serviceProvider.getId());
+            }
+        }
     }
 
     public void notifyAdminOfNewPayment(Long userId, Long providerId, Long requestId, PaymentType paymentType) {
@@ -173,17 +228,22 @@ public class NotificationService {
 
         for (String token : fcmTokens) {
             Map<String, String> dataPayload = Map.of(
-                    "entityType", "payment",
+                    "entityType", "request",
                     "entityId", String.valueOf(requestId),
                     "status", "pending"
             );
-            try {
-                fcmService.sendNotification(token, notificationTitle, notificationBody, dataPayload);
-            } catch (FirebaseMessagingException e) {
-                log.error("Error al enviar FCM al token {}: {}", token, e.getMessage());
-                // Lógica para marcar el token como inválido en la DB.
-            }
+            sendFcmNotification(token, notificationTitle, notificationBody, dataPayload);
         }
     }
 
+    private void sendFcmNotification(String token, String notificationTitle, String notificationBody, Map<String, String> dataPayload){
+        try {
+            fcmService.sendNotification(token, notificationTitle, notificationBody, dataPayload);
+        } catch (FirebaseMessagingException e) {
+            log.error("Error al enviar FCM al token {}: {}", token, e.getMessage());
+            // Lógica para marcar el token como inválido en la DB.
+        }
+    }
 }
+
+

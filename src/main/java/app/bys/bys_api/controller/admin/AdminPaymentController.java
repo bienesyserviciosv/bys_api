@@ -14,6 +14,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class AdminPaymentController {
         return ResponseEntity.ok(paymentService.getAllPayments(pageable, search, userIdList, providerIdList));
     }
 
+    @Transactional
     @PatchMapping("/accept/{id}")
     public ResponseEntity<ServiceRequestDto> accept(@PathVariable Long id) {
         Payment payment = paymentService.acceptPayment(id);
