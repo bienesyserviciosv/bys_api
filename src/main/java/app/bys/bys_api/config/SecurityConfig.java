@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPER_ADMIN")
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs*/**").permitAll()
-                                .requestMatchers("/specialization", "/province").permitAll()
+                                .requestMatchers("/specialization", "/province", "/fcm-test", "/fcm/**").permitAll()
+                                .requestMatchers("/firebase-messaging-sw.js", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .with(new ExceptionHandlingConfigurer<>(), exceptionHandling ->

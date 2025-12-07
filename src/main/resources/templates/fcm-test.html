@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCM Notification Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .notifications {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        .notification {
+            background-color: #f8f9fa;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .notification h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .notification p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .notification small {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 FCM Notification Test Page</h1>
+
+        <div class="section">
+            <h3>📱 Firebase Setup</h3>
+            <div id="firebase-status" class="status info">Initializing Firebase...</div>
+            <div id="token-status" class="status info">Waiting for token...</div>
+        </div>
+
+        <div class="section">
+            <h3>👤 User Registration</h3>
+            <label for="userId">User ID:</label>
+            <input type="number" id="userId" placeholder="Enter user ID" min="1">
+            <button onclick="registerUser()">Register User for Notifications</button>
+            <div id="registration-status" class="status info">Not registered</div>
+        </div>
+
+        <div class="section">
+            <h3>📨 Received Notifications</h3>
+            <button onclick="clearNotifications()">Clear Notifications</button>
+            <div id="notifications" class="notifications">
+                <p>No notifications received yet.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🧪 Test Actions</h3>
+            <button onclick="testNotification()">Send Test Notification</button>
+            <div id="test-status" class="status info">Ready to test</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging.js";
+
+        let firebaseConfig = null;
+        let messaging = null;
+        let currentToken = null;
+        let registeredUserId = null;
+
+        // Initialize Firebase configuration
+        async function initializeFirebase() {
+            try {
+                // Fetch Firebase config from backend
+                const response = await fetch('/api/v1/fcm/config');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Firebase config');
+                }
+
+                firebaseConfig = await response.json();
+                console.log('Firebase config loaded:', firebaseConfig);
+
+                const app = initializeApp(firebaseConfig);
+                messaging = getMessaging(app);
+
+                document.getElementById('firebase-status').className = 'status success';
+                document.getElementById('firebase-status').textContent = 'Firebase initialized successfully';
+
+                // Set up message listener for foreground messages
+                onMessage(messaging, (payload) => {
+                    console.log('Foreground message received:', payload);
+                    displayNotification(payload);
+                });
+
+                // Request permission and get token
+                requestPermissionAndGetToken();
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                document.getElementById('firebase-status').className = 'status error';
+                document.getElementById('firebase-status').textContent = 'Firebase initialization failed: ' + error.message;
+            }
+        }
+
+        // Start initialization
+        initializeFirebase();
+
+        async function requestPermissionAndGetToken() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    try {
+                        const token = await getToken(messaging, {
+                            vapidKey: 'BAAVACNNIv-SbJGYy7t-Noklx3B3eE3emaveqmbB5cL2F1HbqdI4dmlpxioqxunMVmzrFJf3wJ4zedb89AK3Xmw'
+                        });
+
+                        if (token) {
+                            currentToken = token;
+                            document.getElementById('token-status').className = 'status success';
+                            document.getElementById('token-status').textContent = 'FCM Token obtained: ' + token.substring(0, 50) + '...';
+                            console.log('FCM Token:', token);
+                            return;
+                        } else {
+                            document.getElementById('token-status').className = 'status error';
+                            document.getElementById('token-status').textContent = 'Failed to get FCM token';
+                        }
+                    } catch (swError) {
+                        console.error('Service worker error:', swError);
+                        document.getElementById('token-status').className = 'status error';
+                        document.getElementById('token-status').textContent = 'Service worker error: ' + swError.message + '. Please check browser console for details.';
+                    }
+                } else {
+                    document.getElementById('token-status').className = 'status error';
+                    document.getElementById('token-status').textContent = 'Notification permission denied';
+                }
+            } catch (error) {
+                console.error('Token request error:', error);
+                document.getElementById('token-status').className = 'status error';
+                document.getElementById('token-status').textContent = 'Token request failed: ' + error.message;
+            }
+        }
+
+
+        // Register user function
+        window.registerUser = async function() {
+            const userId = document.getElementById('userId').value;
+            if (!userId || !currentToken) {
+                alert('Please enter a user ID and ensure FCM token is available');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/v1/fcm/token', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: parseInt(userId),
+                        token: currentToken
+                    })
+                });
+
+                if (response.ok) {
+                    registeredUserId = userId;
+                    document.getElementById('registration-status').className = 'status success';
+                    document.getElementById('registration-status').textContent = 'User ' + userId + ' registered successfully';
+                } else {
+                    throw new Error('Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                document.getElementById('registration-status').className = 'status error';
+                document.getElementById('registration-status').textContent = 'Registration failed: ' + error.message;
+            }
+        };
+
+        // Display notification function
+        function displayNotification(payload) {
+            const notificationsDiv = document.getElementById('notifications');
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'notification';
+
+            const title = payload.notification?.title || 'Notification';
+            const body = payload.notification?.body || '';
+            const data = payload.data || {};
+
+            notificationDiv.innerHTML = `
+                <h4>${title}</h4>
+                <p>${body}</p>
+                <p><strong>Data:</strong> ${JSON.stringify(data)}</p>
+                <small>Received at: ${new Date().toLocaleString()}</small>
+            `;
+
+            // Remove "No notifications" message if present
+            if (notificationsDiv.querySelector('p') && notificationsDiv.querySelector('p').textContent === 'No notifications received yet.') {
+                notificationsDiv.innerHTML = '';
+            }
+
+            notificationsDiv.insertBefore(notificationDiv, notificationsDiv.firstChild);
+        }
+
+        // Clear notifications function
+        window.clearNotifications = function() {
+            document.getElementById('notifications').innerHTML = '<p>No notifications received yet.</p>';
+        };
+
+        // Test notification function (you'll need to implement this endpoint in your backend)
+        window.testNotification = async function() {
+            if (!registeredUserId) {
+                alert('Please register a user first');
+                return;
+            }
+
+            document.getElementById('test-status').className = 'status info';
+            document.getElementById('test-status').textContent = 'Sending test notification...';
+
+            try {
+                const response = await fetch(`/api/v1/fcm/test-notification/${registeredUserId}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    document.getElementById('test-status').className = 'status success';
+                    document.getElementById('test-status').textContent = 'Test notification sent successfully';
+                } else {
+                    throw new Error('Failed to send test notification');
+                }
+            } catch (error) {
+                console.error('Test notification error:', error);
+                document.getElementById('test-status').className = 'status error';
+                document.getElementById('test-status').textContent = 'Test failed: ' + error.message;
+            }
+        };
+    </script>
+</body>
+</html>
