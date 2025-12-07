@@ -54,8 +54,38 @@ public class NotificationService {
 
             notificationRepository.saveAll(notifications);
             log.info("{} notification created", notifications.size());
+
+            // Send FCM notifications only to providers with valid tokens
+            for (ServiceProvider provider : providers) {
+                String fcmToken = provider.getFcmToken();
+
+                if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+                    Map<String, String> dataPayload = Map.of(
+                            "entityType", "request",
+                            "entityId", String.valueOf(serviceRequest.getId()),
+                            "status", "pending"
+                    );
+
+                    String notificationTitle = "Nueva solicitud disponible";
+                    String notificationBody = "Hay una nueva solicitud disponible para tu especialización";
+
+                    try {
+                        fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
+                    } catch (FirebaseMessagingException e) {
+                        log.error("Error when sending FCM Token {} to provider {}: {}", fcmToken, provider.getId(), e.getMessage());
+
+                        // Si el token es inválido o no registrado, limpiar el token en la DB
+                        if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                            serviceProviderRepository.updateFcmToken(provider.getId(), null);
+                            log.warn("FCM Token cleared for provider ID {} due to UNREGISTERED.", provider.getId());
+                        }
+                    }
+                } else {
+                    log.debug("Provider {} does not have an FCM token registered, skipping notification.", provider.getId());
+                }
+            }
         } else {
-            log.warn("No providers found with this conditions");
+            log.debug("No providers to notify for specialization {}", specializationId);
         }
     }
 
@@ -160,22 +190,26 @@ public class NotificationService {
 
         String fcmToken = finalUser.getFcmToken();
 
-        Map<String, String> dataPayload = Map.of(
-                "entityType", "request",
-                "entityId", String.valueOf(serviceRequest.getId()),
-                "status", "accepted"
-        );
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            Map<String, String> dataPayload = Map.of(
+                    "entityType", "request",
+                    "entityId", String.valueOf(serviceRequest.getId()),
+                    "status", "accepted"
+            );
 
-        try {
-            fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
-        } catch (FirebaseMessagingException e) {
-            log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, finalUser.getId(), e.getMessage());
+            try {
+                fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
+            } catch (FirebaseMessagingException e) {
+                log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, finalUser.getId(), e.getMessage());
 
-            // Si el token es inválido o no registrado, limpiar el token en la DB
-            if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-                finalUserRepository.updateFcmToken(finalUser.getId(), null);
-                log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", finalUser.getId());
+                // Si el token es inválido o no registrado, limpiar el token en la DB
+                if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                    finalUserRepository.updateFcmToken(finalUser.getId(), null);
+                    log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", finalUser.getId());
+                }
             }
+        } else {
+            log.warn("Usuario {} no tiene token FCM registrado, no se puede enviar notificación", finalUser.getId());
         }
     }
 
@@ -197,21 +231,25 @@ public class NotificationService {
 
         String fcmToken = serviceProvider.getFcmToken();
 
-        Map<String, String> dataPayload = Map.of(
-                "entityType", "request",
-                "entityId", String.valueOf(serviceRequest.getId()),
-                "status", "accepted"
-        );
-        try {
-            fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
-        } catch (FirebaseMessagingException e) {
-            log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, serviceProvider.getId(), e.getMessage());
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            Map<String, String> dataPayload = Map.of(
+                    "entityType", "request",
+                    "entityId", String.valueOf(serviceRequest.getId()),
+                    "status", "accepted"
+            );
+            try {
+                fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
+            } catch (FirebaseMessagingException e) {
+                log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, serviceProvider.getId(), e.getMessage());
 
-            // Si el token es inválido o no registrado, limpiar el token en la DB
-            if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-                serviceProviderRepository.updateFcmToken(serviceProvider.getId(), null);
-                log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", serviceProvider.getId());
+                // Si el token es inválido o no registrado, limpiar el token en la DB
+                if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                    serviceProviderRepository.updateFcmToken(serviceProvider.getId(), null);
+                    log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", serviceProvider.getId());
+                }
             }
+        } else {
+            log.warn("Proveedor {} no tiene token FCM registrado, no se puede enviar notificación", serviceProvider.getId());
         }
     }
 
@@ -224,7 +262,10 @@ public class NotificationService {
         String notificationBody = "Solicitud: " + requestId + " Usuario: " + userId + " Proveedor: " + providerId;
 
         List<FinalUser> admins = finalUserRepository.findAdmins();
-        List<String> fcmTokens = admins.stream().map(FinalUser::getFcmToken).toList();
+        List<String> fcmTokens = admins.stream()
+                .map(FinalUser::getFcmToken)
+                .filter(token -> token != null && !token.trim().isEmpty())
+                .toList();
 
         for (String token : fcmTokens) {
             Map<String, String> dataPayload = Map.of(
@@ -237,6 +278,11 @@ public class NotificationService {
     }
 
     private void sendFcmNotification(String token, String notificationTitle, String notificationBody, Map<String, String> dataPayload){
+        if (token == null || token.trim().isEmpty()) {
+            log.warn("Token FCM es null o vacío, no se puede enviar notificación");
+            return;
+        }
+
         try {
             fcmService.sendNotification(token, notificationTitle, notificationBody, dataPayload);
         } catch (FirebaseMessagingException e) {
