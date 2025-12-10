@@ -56,6 +56,7 @@ public class ServiceRequestService {
     private final FinalUserMapper userMapper;
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
+    private final NotificationService notificationService;
 
     public ServiceRequestSummary get(Long id) {
         ServiceRequestSummary serviceRequestSummary = serviceRequestRepository.findRequestById(id)
@@ -215,6 +216,10 @@ public class ServiceRequestService {
         //finalUser.setPendingRequests(finalUser.getPendingRequests() + 1);
         finalUser.setTotalRequests(finalUser.getTotalRequests() + 1);
         finalUserRepository.save(finalUser);
+
+        // Notify providers of new request
+        Long specializationId = serviceRequestDto.getSpecialization().getId();
+        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequest);
 
         return serviceRequest;
     }

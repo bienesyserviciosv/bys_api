@@ -28,7 +28,6 @@ import java.util.List;
 public class AdminServiceRequestController {
 
     private final ServiceRequestService serviceRequestService;
-    private final NotificationService notificationService;
     private final ServiceRequestMapper serviceRequestMapper;
 
     @GetMapping("/metrics/{id}")
@@ -52,9 +51,6 @@ public class AdminServiceRequestController {
                                                                @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
 
         ServiceRequest serviceRequest = serviceRequestService.createWithUserId(id, serviceRequestDto, files);
-
-        Long specializationId = serviceRequestDto.getSpecialization().getId();
-        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequest);
 
         return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
     }

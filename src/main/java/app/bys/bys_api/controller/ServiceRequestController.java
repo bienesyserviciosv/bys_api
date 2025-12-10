@@ -29,7 +29,6 @@ import java.util.List;
 public class ServiceRequestController {
 
     private final ServiceRequestService serviceRequestService;
-    private final NotificationService notificationService;
     private final ServiceRequestMapper serviceRequestMapper;
 
     @GetMapping("/{id}")
@@ -56,9 +55,6 @@ public class ServiceRequestController {
                                                                @RequestPart(name = "pictures", required = false) MultipartFile[] files) {
 
         ServiceRequest serviceRequest = serviceRequestService.create(auth.getName(), serviceRequestDto, files);
-
-        Long specializationId = serviceRequestDto.getSpecialization().getId();
-        notificationService.notifyProvidersOfNewRequest(specializationId, serviceRequest);
 
         return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
     }

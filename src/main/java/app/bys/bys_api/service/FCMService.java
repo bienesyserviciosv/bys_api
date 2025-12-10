@@ -1,14 +1,16 @@
 package app.bys.bys_api.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import app.bys.bys_api.model.dto.NotificationRequest;
+import com.google.firebase.messaging.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class FCMService {
 
     private final FirebaseMessaging firebaseMessaging;
@@ -33,4 +35,55 @@ public class FCMService {
 
         firebaseMessaging.send(message.build());
     }
-}
+
+    /**
+     * Enviar múltiples notificaciones en batch.
+     */
+    public BatchResponse sendBatchNotifications(List<NotificationRequest> requests) throws FirebaseMessagingException {
+        List<Message> messages = new ArrayList<>();
+
+        for (NotificationRequest req : requests) {
+            Message.Builder builder = Message.builder()
+                    .setToken(req.token())
+                    .setNotification(Notification.builder()
+                            .setTitle(req.title())
+                            .setBody(req.body())
+                            .build());
+
+            if (req.dataPayload() != null) {
+                builder.putAllData(req.dataPayload());
+            }
+
+            messages.add(builder.build());
+        }
+
+        return firebaseMessaging.sendEach(messages);
+    }
+
+        /**
+         * Envía una notificación a un Tópico específico de FCM.
+         */
+        public void sendTopicNotification(String topic, String title, String body, Map<String, String> data)
+                throws FirebaseMessagingException {
+
+            // 1. Construir la Notificación (lo que ve el usuario)
+            com.google.firebase.messaging.Notification notification =
+                    com.google.firebase.messaging.Notification.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build();
+
+            // 2. Construir el Mensaje FCM
+            Message message = Message.builder()
+                    .setNotification(notification)
+                    .putAllData(data)
+                    .setTopic(topic)
+                    .build();
+
+            // 3. Enviar el mensaje
+           firebaseMessaging.send(message);
+
+            log.info("Notificación enviada con éxito al tópico {}.", topic);
+        }
+    }
+

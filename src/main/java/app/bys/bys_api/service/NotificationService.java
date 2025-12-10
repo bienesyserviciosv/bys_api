@@ -4,15 +4,16 @@ import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.NotificationMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.NotificationDto;
+import app.bys.bys_api.model.dto.NotificationRequest;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.entity.*;
+import app.bys.bys_api.model.entity.Notification;
 import app.bys.bys_api.model.enums.NotificationType;
 import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.NotificationSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.MessagingErrorCode;
+import com.google.firebase.messaging.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,51 +42,80 @@ public class NotificationService {
 
         List<ServiceProvider> providers = serviceProviderRepository.findBySpecializations_Id(specializationId);
 
-        if (providers != null && !providers.isEmpty()) {
-            List<Notification> notifications = providers.stream()
-                    .map(provider -> Notification.builder()
-                            .serviceProvider(provider)
-                            .read(false)
-                            .timestamp(LocalDateTime.now())
-                            .serviceRequest(serviceRequest)
-                            .notificationType(NotificationType.NEW_REQUEST)
-                            .build())
-                    .collect(Collectors.toList());
+        if (providers == null || providers.isEmpty()) {
+            log.debug("No providers to notify for specialization {}", specializationId);
+            return;
+        }
 
-            notificationRepository.saveAll(notifications);
-            log.info("{} notification created", notifications.size());
+        List<Notification> notificationsToSend = new ArrayList<>();
 
-            // Send FCM notifications only to providers with valid tokens
-            for (ServiceProvider provider : providers) {
-                String fcmToken = provider.getFcmToken();
+        for (ServiceProvider provider : providers) {
+            if (!notificationRepository.existsByServiceProviderAndServiceRequestAndNotificationType(
+                    provider, serviceRequest, NotificationType.NEW_REQUEST)) {
 
-                if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-                    Map<String, String> dataPayload = Map.of(
-                            "entityType", "request",
-                            "entityId", String.valueOf(serviceRequest.getId()),
-                            "status", "pending"
-                    );
+                Notification notification = Notification.builder()
+                        .serviceProvider(provider)
+                        .read(false)
+                        .timestamp(LocalDateTime.now())
+                        .serviceRequest(serviceRequest)
+                        .notificationType(NotificationType.NEW_REQUEST)
+                        .build();
 
-                    String notificationTitle = "Nueva solicitud disponible";
-                    String notificationBody = "Hay una nueva solicitud disponible para tu especialización";
+                try {
+                    Notification savedNotification = notificationRepository.save(notification);
+                    notificationsToSend.add(savedNotification);
+                    log.debug("Notification created for provider {}", provider.getId());
+                } catch (Exception e) {
+                    // Unique constraint violation or other database error
+                    log.debug("Notification already exists or error saving for provider {}: {}", provider.getId(), e.getMessage());
+                }
+            } else {
+                log.debug("Notification already exists for provider {}", provider.getId());
+            }
+        }
 
-                    try {
-                        fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
-                    } catch (FirebaseMessagingException e) {
-                        log.error("Error when sending FCM Token {} to provider {}: {}", fcmToken, provider.getId(), e.getMessage());
+        log.info("{} notification(s) created", notificationsToSend.size());
 
-                        // Si el token es inválido o no registrado, limpiar el token en la DB
-                        if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+        List<NotificationRequest> requests = new ArrayList<>();
+
+        for (Notification notification : notificationsToSend) {
+            ServiceProvider provider = notification.getServiceProvider();
+            String fcmToken = provider.getFcmToken();
+
+            if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+                Map<String, String> dataPayload = Map.of(
+                        "entityType", "request",
+                        "entityId", String.valueOf(serviceRequest.getId()),
+                        "notificationId", String.valueOf(notification.getId()),
+                        "status", "pending"
+                );
+
+                requests.add(new NotificationRequest(
+                        fcmToken,
+                        "Nueva solicitud disponible",
+                        "Hay una nueva solicitud disponible para tu especialización",
+                        dataPayload
+                ));
+            }
+        }
+
+        if (!requests.isEmpty()) {
+            try {
+                BatchResponse response = fcmService.sendBatchNotifications(requests);
+                for (int i = 0; i < response.getResponses().size(); i++) {
+                    SendResponse resp = response.getResponses().get(i);
+                    if (!resp.isSuccessful()) {
+                        MessagingErrorCode errorCode = resp.getException().getMessagingErrorCode();
+                        if (errorCode == MessagingErrorCode.UNREGISTERED) {
+                            ServiceProvider provider = notificationsToSend.get(i).getServiceProvider();
                             serviceProviderRepository.updateFcmToken(provider.getId(), null);
                             log.warn("FCM Token cleared for provider ID {} due to UNREGISTERED.", provider.getId());
                         }
                     }
-                } else {
-                    log.debug("Provider {} does not have an FCM token registered, skipping notification.", provider.getId());
                 }
+            } catch (FirebaseMessagingException e) {
+                log.error("Error sending batch FCM notifications: {}", e.getMessage());
             }
-        } else {
-            log.debug("No providers to notify for specialization {}", specializationId);
         }
     }
 
@@ -175,83 +205,89 @@ public class NotificationService {
     }
 
     private void notifyUser(FinalUser finalUser, ServiceRequest serviceRequest) {
-        Notification userNotification = Notification.builder()
-                .finalUser(finalUser)
-                .read(false)
-                .serviceRequest(serviceRequest)
-                .timestamp(LocalDateTime.now())
-                .notificationType(NotificationType.PAYMENT_ACCEPTED)
-                .build();
-
-        notificationRepository.save(userNotification);
-
-        String notificationTitle = "Pago aceptado";
-        String notificationBody = " Usuario: " + finalUser.getId();
-
-        String fcmToken = finalUser.getFcmToken();
-
-        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-            Map<String, String> dataPayload = Map.of(
-                    "entityType", "request",
-                    "entityId", String.valueOf(serviceRequest.getId()),
-                    "status", "accepted"
-            );
-
-            try {
-                fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
-            } catch (FirebaseMessagingException e) {
-                log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, finalUser.getId(), e.getMessage());
-
-                // Si el token es inválido o no registrado, limpiar el token en la DB
-                if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-                    finalUserRepository.updateFcmToken(finalUser.getId(), null);
-                    log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", finalUser.getId());
-                }
+        try {
+            if (notificationRepository.existsByFinalUserAndServiceRequestAndNotificationType(
+                    finalUser, serviceRequest, NotificationType.PAYMENT_ACCEPTED)) {
+                log.debug("User {} already has PAYMENT_ACCEPTED notification for request {}", finalUser.getId(), serviceRequest.getId());
+                return;
             }
-        } else {
-            log.warn("Usuario {} no tiene token FCM registrado, no se puede enviar notificación", finalUser.getId());
+
+            Notification userNotification = Notification.builder()
+                    .finalUser(finalUser)
+                    .read(false)
+                    .serviceRequest(serviceRequest)
+                    .timestamp(LocalDateTime.now())
+                    .notificationType(NotificationType.PAYMENT_ACCEPTED)
+                    .build();
+
+            Notification savedNotification = notificationRepository.save(userNotification);
+
+            String fcmToken = finalUser.getFcmToken();
+
+            if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+                String notificationTitle = "Pago aceptado";
+                String notificationBody = " Tu pago ha sido aceptado para la solicitud: " + serviceRequest.getId();
+
+                Map<String, String> dataPayload = Map.of(
+                        "entityType", "user",
+                        "entityId", String.valueOf(finalUser.getId()),
+                        "requestId", String.valueOf(serviceRequest.getId()),
+                        "notificationId", String.valueOf(savedNotification.getId()),
+                        "status", "accepted"
+                );
+                sendFcmNotification(fcmToken, notificationTitle, notificationBody, dataPayload, "user", finalUser.getId());
+            } else {
+                log.warn("Usuario {} no tiene token FCM registrado, no se puede enviar notificación", finalUser.getId());
+            }
+        } catch (Exception e) {
+            // Unique constraint violation or other database error
+            log.debug("PAYMENT_ACCEPTED notification already exists or error saving for user {}: {}", finalUser.getId(), e.getMessage());
         }
     }
 
     private void notifyProvider(ServiceProvider serviceProvider, ServiceRequest serviceRequest, Offer offer) {
-
-        Notification providerNotification = Notification.builder()
-                .serviceProvider(serviceProvider)
-                .read(false)
-                .serviceRequest(serviceRequest)
-                .offer(offer)
-                .timestamp(LocalDateTime.now())
-                .notificationType(NotificationType.PAID_OFFER)
-                .build();
-
-        notificationRepository.save(providerNotification);
-
-        String notificationTitle = "Su oferta ha sido pagada";
-        String notificationBody = " Prestador de Servicios: " + serviceProvider.getId();
-
-        String fcmToken = serviceProvider.getFcmToken();
-
-        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-            Map<String, String> dataPayload = Map.of(
-                    "entityType", "request",
-                    "entityId", String.valueOf(serviceRequest.getId()),
-                    "status", "accepted"
-            );
-            try {
-                fcmService.sendNotification(fcmToken, notificationTitle, notificationBody, dataPayload);
-            } catch (FirebaseMessagingException e) {
-                log.error("Error al enviar FCM al token {} del usuario {}: {}", fcmToken, serviceProvider.getId(), e.getMessage());
-
-                // Si el token es inválido o no registrado, limpiar el token en la DB
-                if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-                    serviceProviderRepository.updateFcmToken(serviceProvider.getId(), null);
-                    log.warn("Token FCM limpiado para el FinalUser ID {} debido a UNREGISTERED.", serviceProvider.getId());
-                }
+        // Try to create notification only if it doesn't exist
+        try {
+            if (notificationRepository.existsByServiceProviderAndServiceRequestAndNotificationType(
+                    serviceProvider, serviceRequest, NotificationType.PAID_OFFER)) {
+                log.debug("Provider {} already has PAID_OFFER notification for request {}", serviceProvider.getId(), serviceRequest.getId());
+                return; // Salir si ya existe
             }
-        } else {
-            log.warn("Proveedor {} no tiene token FCM registrado, no se puede enviar notificación", serviceProvider.getId());
+
+            Notification providerNotification = Notification.builder()
+                    .serviceProvider(serviceProvider)
+                    .read(false)
+                    .serviceRequest(serviceRequest)
+                    .offer(offer)
+                    .timestamp(LocalDateTime.now())
+                    .notificationType(NotificationType.PAID_OFFER)
+                    .build();
+
+            Notification savedNotification = notificationRepository.save(providerNotification);
+
+            String fcmToken = serviceProvider.getFcmToken();
+
+            if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+                String notificationTitle = "Su oferta ha sido pagada";
+                String notificationBody = " Prestador de Servicios: " + serviceProvider.getId();
+
+                Map<String, String> dataPayload = Map.of(
+                        "entityType", "provider",
+                        "entityId", String.valueOf(serviceProvider.getId()),
+                        "requestId", String.valueOf(serviceRequest.getId()),
+                        "notificationId", String.valueOf(savedNotification.getId()),
+                        "status", "accepted"
+                );
+                sendFcmNotification(fcmToken, notificationTitle, notificationBody, dataPayload, "provider", serviceProvider.getId());
+            } else {
+                log.warn("Proveedor {} no tiene token FCM registrado, no se puede enviar notificación", serviceProvider.getId());
+            }
+        } catch (Exception e) {
+            // Unique constraint violation or other database error
+            log.debug("PAID_OFFER notification already exists or error saving for provider {}: {}", serviceProvider.getId(), e.getMessage());
         }
     }
+
 
     public void notifyAdminOfNewPayment(Long userId, Long providerId, Long requestId, PaymentType paymentType) {
         String notificationTitle = "";
@@ -261,35 +297,39 @@ public class NotificationService {
         }
         String notificationBody = "Solicitud: " + requestId + " Usuario: " + userId + " Proveedor: " + providerId;
 
-        List<FinalUser> admins = finalUserRepository.findAdmins();
-        List<String> fcmTokens = admins.stream()
-                .map(FinalUser::getFcmToken)
-                .filter(token -> token != null && !token.trim().isEmpty())
-                .toList();
+        Map<String, String> dataPayload = Map.of(
+                "entityType", "admin",
+                "requestId", String.valueOf(requestId),
+                "status", "pending"
+        );
 
-        for (String token : fcmTokens) {
-            Map<String, String> dataPayload = Map.of(
-                    "entityType", "request",
-                    "entityId", String.valueOf(requestId),
-                    "status", "pending"
-            );
-            sendFcmNotification(token, notificationTitle, notificationBody, dataPayload);
+        final String topicName = "ADMIN_NEW_PAYMENTS";
+
+        try {
+            fcmService.sendTopicNotification(topicName, notificationTitle, notificationBody, dataPayload);
+        } catch (FirebaseMessagingException e) {
+            log.error("Error al enviar notificación al Tópico {}: {}", topicName, e.getMessage());
         }
     }
 
-    private void sendFcmNotification(String token, String notificationTitle, String notificationBody, Map<String, String> dataPayload){
+    private void sendFcmNotification(String token, String notificationTitle, String notificationBody, Map<String, String> dataPayload, String entityType, Long entityId) {
         if (token == null || token.trim().isEmpty()) {
-            log.warn("Token FCM es null o vacío, no se puede enviar notificación");
+            log.warn("Token FCM es null o vacío para la entidad {}, no se puede enviar notificación", entityType + " ID " + entityId);
             return;
         }
 
         try {
             fcmService.sendNotification(token, notificationTitle, notificationBody, dataPayload);
         } catch (FirebaseMessagingException e) {
-            log.error("Error al enviar FCM al token {}: {}", token, e.getMessage());
-            // Lógica para marcar el token como inválido en la DB.
+            log.error("Error al enviar FCM al token {} del {}: {}", token, entityType + " ID " + entityId, e.getMessage());
+            if (entityType.equals("provider")) {
+                serviceProviderRepository.updateFcmToken(entityId, null);
+                log.warn("Token FCM limpiado para ServiceProvider ID {} debido a UNREGISTERED.", entityId);
+
+            } else if (entityType.equals("user")) {
+                finalUserRepository.updateFcmToken(entityId, null);
+                log.warn("Token FCM limpiado para FinalUser ID {} debido a UNREGISTERED.", entityId);
+            }
         }
     }
 }
-
-
