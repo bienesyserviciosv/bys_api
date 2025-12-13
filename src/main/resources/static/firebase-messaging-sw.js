@@ -4,12 +4,13 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-comp
 
 // Your Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAO58DciUD4yfT4KijeugE-lCD01NCTAhk",
-    authDomain: "bienes-y-servicios-fc46f.firebaseapp.com",
-    projectId: "bienes-y-servicios-fc46f",
-    storageBucket: "bienes-y-servicios-fc46f.firebasestorage.app",
-    messagingSenderId: "862650667877",
-    appId: "1:862650667877:web:94d78c782f9936de39c78c"
+    apiKey: "AIzaSyDMgJxExMPyzN2eqXR5p3k6lvigGWd5InQ",
+    authDomain: "bys-frontend-and-backend.firebaseapp.com",
+    projectId: "bys-frontend-and-backend",
+    storageBucket: "bys-frontend-and-backend.firebasestorage.app",
+    messagingSenderId: "790972913133",
+    appId: "1:790972913133:web:7a78d0a3da02c9b9ab83e4",
+    measurementId: "G-WVPFDQ15MR"
 };
 
 // Initialize Firebase

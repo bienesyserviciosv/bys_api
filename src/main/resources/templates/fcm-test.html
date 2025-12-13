@@ -108,11 +108,21 @@
         </div>
 
         <div class="section">
+            <h3>🔐 Authentication</h3>
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter password" required>
+            <button onclick="login()">Login</button>
+            <div id="login-status" class="status info">Not logged in</div>
+        </div>
+
+        <div class="section">
             <h3>👤 User Registration</h3>
             <label for="userId">User ID:</label>
             <input type="number" id="userId" placeholder="Enter user ID" min="1">
-            <button onclick="registerUser()">Register User for Notifications</button>
-            <div id="registration-status" class="status info">Not registered</div>
+            <button onclick="registerUser()" id="registerBtn" disabled>Register User for Notifications</button>
+            <div id="registration-status" class="status info">Login first to register</div>
         </div>
 
         <div class="section">
@@ -140,6 +150,7 @@
         let messaging = null;
         let currentToken = null;
         let registeredUserId = null;
+        let authToken = null;
 
         // Initialize Firebase configuration
         async function initializeFirebase() {
@@ -183,7 +194,7 @@
                 if (permission === 'granted') {
                     try {
                         const token = await getToken(messaging, {
-                            vapidKey: 'BAAVACNNIv-SbJGYy7t-Noklx3B3eE3emaveqmbB5cL2F1HbqdI4dmlpxioqxunMVmzrFJf3wJ4zedb89AK3Xmw'
+                            vapidKey: 'BAC9AfQXU-1pxgrylt12dvJfS3t-j8aKEYDMSCy4dcF88Owvqczsc5_MfnVsuvYgD24uJwBCFQzVtkRCp0WTNDk'
                         });
 
                         if (token) {
@@ -213,11 +224,55 @@
         }
 
 
+        // Login function
+        window.login = async function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+
+            document.getElementById('login-status').className = 'status info';
+            document.getElementById('login-status').textContent = 'Logging in...';
+
+            try {
+                const response = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        identifier: email,
+                        password: password
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    document.getElementById('login-status').className = 'status success';
+                    document.getElementById('login-status').textContent = 'Logged in as ' + data.name;
+                    document.getElementById('registerBtn').disabled = false;
+                    document.getElementById('registration-status').className = 'status info';
+                    document.getElementById('registration-status').textContent = 'Ready to register for notifications';
+                } else {
+                    throw new Error('Login failed: ' + response.statusText);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('login-status').className = 'status error';
+                document.getElementById('login-status').textContent = 'Login failed: ' + error.message;
+                document.getElementById('registerBtn').disabled = true;
+            }
+        };
+
         // Register user function
         window.registerUser = async function() {
             const userId = document.getElementById('userId').value;
-            if (!userId || !currentToken) {
-                alert('Please enter a user ID and ensure FCM token is available');
+            if (!userId || !currentToken || !authToken) {
+                alert('Please login, enter a user ID and ensure FCM token is available');
                 return;
             }
 
@@ -226,6 +281,7 @@
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
                     },
                     body: JSON.stringify({
                         userId: parseInt(userId),
@@ -238,7 +294,7 @@
                     document.getElementById('registration-status').className = 'status success';
                     document.getElementById('registration-status').textContent = 'User ' + userId + ' registered successfully';
                 } else {
-                    throw new Error('Registration failed');
+                    throw new Error('Registration failed: ' + response.statusText);
                 }
             } catch (error) {
                 console.error('Registration error:', error);
@@ -277,7 +333,7 @@
             document.getElementById('notifications').innerHTML = '<p>No notifications received yet.</p>';
         };
 
-        // Test notification function (you'll need to implement this endpoint in your backend)
+        // Test notification function
         window.testNotification = async function() {
             if (!registeredUserId) {
                 alert('Please register a user first');
@@ -288,15 +344,23 @@
             document.getElementById('test-status').textContent = 'Sending test notification...';
 
             try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (authToken) {
+                    headers['Authorization'] = 'Bearer ' + authToken;
+                }
+
                 const response = await fetch(`/api/v1/fcm/test-notification/${registeredUserId}`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: headers
                 });
 
                 if (response.ok) {
                     document.getElementById('test-status').className = 'status success';
                     document.getElementById('test-status').textContent = 'Test notification sent successfully';
                 } else {
-                    throw new Error('Failed to send test notification');
+                    throw new Error('Failed to send test notification: ' + response.statusText);
                 }
             } catch (error) {
                 console.error('Test notification error:', error);

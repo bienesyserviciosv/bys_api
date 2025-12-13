@@ -84,10 +84,13 @@ public class NotificationService {
 
             if (fcmToken != null && !fcmToken.trim().isEmpty()) {
                 Map<String, String> dataPayload = Map.of(
-                        "entityType", "request",
-                        "entityId", String.valueOf(serviceRequest.getId()),
+                        "notificationType", "NEW_REQUEST",
+                        "targetEntityType", "provider",
+                        "targetEntityId", String.valueOf(provider.getId()),
+                        "relatedEntityType", "request",
+                        "relatedEntityId", String.valueOf(serviceRequest.getId()),
                         "notificationId", String.valueOf(notification.getId()),
-                        "status", "pending"
+                        "action", "view_request"
                 );
 
                 requests.add(new NotificationRequest(
@@ -106,10 +109,16 @@ public class NotificationService {
                     SendResponse resp = response.getResponses().get(i);
                     if (!resp.isSuccessful()) {
                         MessagingErrorCode errorCode = resp.getException().getMessagingErrorCode();
-                        if (errorCode == MessagingErrorCode.UNREGISTERED) {
+                        // Handle multiple error codes that indicate invalid tokens
+                        if (errorCode == MessagingErrorCode.UNREGISTERED ||
+                            errorCode == MessagingErrorCode.INVALID_ARGUMENT) {
                             ServiceProvider provider = notificationsToSend.get(i).getServiceProvider();
                             serviceProviderRepository.updateFcmToken(provider.getId(), null);
-                            log.warn("FCM Token cleared for provider ID {} due to UNREGISTERED.", provider.getId());
+                            log.warn("FCM Token cleared for provider ID {} due to {}.", provider.getId(), errorCode);
+                        } else {
+                            log.error("FCM send failed for provider ID {} with error: {}",
+                                    notificationsToSend.get(i).getServiceProvider().getId(),
+                                    resp.getException().getMessage());
                         }
                     }
                 }
@@ -229,11 +238,13 @@ public class NotificationService {
                 String notificationBody = " Tu pago ha sido aceptado para la solicitud: " + serviceRequest.getId();
 
                 Map<String, String> dataPayload = Map.of(
-                        "entityType", "user",
-                        "entityId", String.valueOf(finalUser.getId()),
-                        "requestId", String.valueOf(serviceRequest.getId()),
+                        "notificationType", "PAYMENT_ACCEPTED",
+                        "targetEntityType", "user",
+                        "targetEntityId", String.valueOf(finalUser.getId()),
+                        "relatedEntityType", "request",
+                        "relatedEntityId", String.valueOf(serviceRequest.getId()),
                         "notificationId", String.valueOf(savedNotification.getId()),
-                        "status", "accepted"
+                        "action", "view_payment_status"
                 );
                 sendFcmNotification(fcmToken, notificationTitle, notificationBody, dataPayload, "user", finalUser.getId());
             } else {
@@ -272,11 +283,15 @@ public class NotificationService {
                 String notificationBody = " Prestador de Servicios: " + serviceProvider.getId();
 
                 Map<String, String> dataPayload = Map.of(
-                        "entityType", "provider",
-                        "entityId", String.valueOf(serviceProvider.getId()),
-                        "requestId", String.valueOf(serviceRequest.getId()),
+                        "notificationType", "PAID_OFFER",
+                        "targetEntityType", "provider",
+                        "targetEntityId", String.valueOf(serviceProvider.getId()),
+                        "relatedEntityType", "request",
+                        "relatedEntityId", String.valueOf(serviceRequest.getId()),
+                        "relatedEntityType2", "offer",
+                        "relatedEntityId2", String.valueOf(offer.getId()),
                         "notificationId", String.valueOf(savedNotification.getId()),
-                        "status", "accepted"
+                        "action", "view_paid_offer"
                 );
                 sendFcmNotification(fcmToken, notificationTitle, notificationBody, dataPayload, "provider", serviceProvider.getId());
             } else {
@@ -298,9 +313,16 @@ public class NotificationService {
         String notificationBody = "Solicitud: " + requestId + " Usuario: " + userId + " Proveedor: " + providerId;
 
         Map<String, String> dataPayload = Map.of(
-                "entityType", "admin",
-                "requestId", String.valueOf(requestId),
-                "status", "pending"
+                "notificationType", "NEW_PAYMENT",
+                "targetEntityType", "admin",
+                "relatedEntityType", "request",
+                "relatedEntityId", String.valueOf(requestId),
+                "relatedEntityType2", "user",
+                "relatedEntityId2", String.valueOf(userId),
+                "relatedEntityType3", "provider",
+                "relatedEntityId3", String.valueOf(providerId),
+                "paymentType", paymentType.toString(),
+                "action", "review_payment"
         );
 
         final String topicName = "ADMIN_NEW_PAYMENTS";
@@ -320,15 +342,21 @@ public class NotificationService {
 
         try {
             fcmService.sendNotification(token, notificationTitle, notificationBody, dataPayload);
+            log.debug("FCM notification sent successfully to {} ID {}", entityType, entityId);
         } catch (FirebaseMessagingException e) {
-            log.error("Error al enviar FCM al token {} del {}: {}", token, entityType + " ID " + entityId, e.getMessage());
-            if (entityType.equals("provider")) {
-                serviceProviderRepository.updateFcmToken(entityId, null);
-                log.warn("Token FCM limpiado para ServiceProvider ID {} debido a UNREGISTERED.", entityId);
+            MessagingErrorCode errorCode = e.getMessagingErrorCode();
+            log.error("Error al enviar FCM al token {} del {}: {} (Error Code: {})", token, entityType + " ID " + entityId, e.getMessage(), errorCode);
 
-            } else if (entityType.equals("user")) {
-                finalUserRepository.updateFcmToken(entityId, null);
-                log.warn("Token FCM limpiado para FinalUser ID {} debido a UNREGISTERED.", entityId);
+            // Clear token for various invalid token errors
+            if (errorCode == MessagingErrorCode.UNREGISTERED ||
+                errorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+                if (entityType.equals("provider")) {
+                    serviceProviderRepository.updateFcmToken(entityId, null);
+                    log.warn("Token FCM limpiado para ServiceProvider ID {} debido a {}.", entityId, errorCode);
+                } else if (entityType.equals("user")) {
+                    finalUserRepository.updateFcmToken(entityId, null);
+                    log.warn("Token FCM limpiado para FinalUser ID {} debido a {}.", entityId, errorCode);
+                }
             }
         }
     }
