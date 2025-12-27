@@ -103,19 +103,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-
-        // Create a separate, more permissive configuration for FCM endpoints
-        CorsConfiguration fcmConfiguration = new CorsConfiguration();
-        fcmConfiguration.addAllowedOrigin("*"); // Allow all origins for FCM endpoints
-        fcmConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"));
-        fcmConfiguration.setAllowedHeaders(List.of("*"));
-        fcmConfiguration.setAllowCredentials(false); // Must be false when using *
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Apply permissive CORS to FCM endpoints
-        source.registerCorsConfiguration("/api/v1/fcm/**", fcmConfiguration);
-        source.registerCorsConfiguration("/fcm/**", fcmConfiguration);
-        // Apply standard CORS to all other endpoints
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
