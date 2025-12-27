@@ -18,7 +18,7 @@ public class FcmTestApiController {
 
     @GetMapping("/config")
     public ResponseEntity<Map<String, String>> getFirebaseConfig() {
-        // Firebase configuration for web app
+        // Firebase configuration for dev environment
         Map<String, String> config = Map.of(
             "apiKey", "AIzaSyDMgJxExMPyzN2eqXR5p3k6lvigGWd5InQ",
             "authDomain", "bys-frontend-and-backend.firebaseapp.com",
