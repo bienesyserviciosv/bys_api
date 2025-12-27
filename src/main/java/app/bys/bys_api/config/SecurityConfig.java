@@ -106,10 +106,10 @@ public class SecurityConfig {
 
         // Create a separate, more permissive configuration for FCM endpoints
         CorsConfiguration fcmConfiguration = new CorsConfiguration();
-        fcmConfiguration.setAllowedOriginPatterns(List.of("*")); // Allow all origins for FCM endpoints
+        fcmConfiguration.addAllowedOrigin("*"); // Allow all origins for FCM endpoints
         fcmConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"));
         fcmConfiguration.setAllowedHeaders(List.of("*"));
-        fcmConfiguration.setAllowCredentials(true);
+        fcmConfiguration.setAllowCredentials(false); // Must be false when using *
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         // Apply permissive CORS to FCM endpoints

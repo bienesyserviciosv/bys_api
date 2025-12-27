@@ -17,6 +17,7 @@ public class FcmTestApiController {
     private final FinalUserRepository finalUserRepository;
 
     @GetMapping("/config")
+    @CrossOrigin(origins = "*")
     public ResponseEntity<Map<String, String>> getFirebaseConfig() {
         // Firebase configuration for dev environment
         Map<String, String> config = Map.of(
@@ -31,6 +32,7 @@ public class FcmTestApiController {
     }
 
     @PostMapping("/test-notification/{userId}")
+    @CrossOrigin(origins = "*")
     public ResponseEntity<String> sendTestNotification(@PathVariable Long userId) {
         try {
             var user = finalUserRepository.findById(userId)
