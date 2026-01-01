@@ -111,6 +111,9 @@ public class ServiceProvider {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceProvider")
     private Set<Payment> paymentSet;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "provider")
+    private Set<Comment> commentSet;
+
 }
 
 

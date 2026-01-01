@@ -85,4 +85,7 @@ public class ServiceRequest {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "serviceRequest", cascade = CascadeType.REMOVE)
     private List<Notification> notificationList;
+
+    @OneToOne(mappedBy = "request")
+    private Comment comment;
 }

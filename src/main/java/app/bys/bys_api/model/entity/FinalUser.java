@@ -88,5 +88,7 @@ public class FinalUser {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "finalUser", cascade = CascadeType.REMOVE)
     private List<Notification> notificationList;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "author")
+    private Set<Comment> commentSet;
 
 }
