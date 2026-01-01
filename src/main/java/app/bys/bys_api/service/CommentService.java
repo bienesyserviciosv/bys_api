@@ -8,6 +8,7 @@ import app.bys.bys_api.model.entity.Comment;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.CommentRepository;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
@@ -86,6 +87,10 @@ public class CommentService {
 
         if (request.getComment() != null) {
             throw new ForbiddenActionException("This request already has a comment");
+        }
+
+        if (!request.getRequestStatus().equals(RequestStatus.COMPLETED)){
+            throw new ForbiddenActionException("The request has not been completed");
         }
 
         Comment comment = Comment.builder()
