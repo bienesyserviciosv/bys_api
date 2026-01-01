@@ -4,6 +4,7 @@ import app.bys.bys_api.error.ErrorMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class CommentDto {
 
     @JsonProperty("text")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
+    @Size(min = 10, max = 1000, message = "The comment must be between 10 and 1000 characters long.")
     private String text;
 
     @JsonProperty(value = "comment_date", access = JsonProperty.Access.READ_ONLY)

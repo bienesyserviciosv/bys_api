@@ -26,32 +26,19 @@ public class CommentSpecification extends ASpecification<Comment> {
     }
 
     public static Specification<Comment> hasProvider(List<Long> providerIdList) {
-        return (root, query, criteriaBuilder) -> {
-            if (query != null) {
-                query.distinct(true);
-            }
-            Join<Comment, ServiceProvider> courses = root.join("provider");
-            return criteriaBuilder.in(courses.get("id")).value(providerIdList);
-        };
+        return (root, query, cb) ->
+                cb.in(root.get("provider").get("id")).value(providerIdList);
     }
 
     public static Specification<Comment> hasUser(List<Long> userIdList) {
-        return (root, query, criteriaBuilder) -> {
-            if (query != null) {
-                query.distinct(true);
-            }
-            Join<Comment, FinalUser> courses = root.join("author");
-            return criteriaBuilder.in(courses.get("id")).value(userIdList);
-        };
+        return (root, query, cb) ->
+                cb.in(root.get("author").get("id")).value(userIdList);
     }
 
-    public static Specification<Comment> hasServiceRequest(List<Long> serviceRequestIdList) {
-        return (root, query, criteriaBuilder) -> {
-            if (query != null) {
-                query.distinct(true);
-            }
-            Join<Comment, ServiceRequest> courses = root.join("request");
-            return criteriaBuilder.in(courses.get("id")).value(serviceRequestIdList);
-        };
+
+    public static Specification<Comment> hasServiceRequest(List<Long> requestIdList) {
+        return (root, query, cb) ->
+                cb.in(root.get("request").get("id")).value(requestIdList);
     }
+
 }

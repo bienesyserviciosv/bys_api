@@ -3,9 +3,7 @@ package app.bys.bys_api.service;
 import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.CommentMapper;
 import app.bys.bys_api.mapper.PageMapper;
-import app.bys.bys_api.model.dto.CommentDto;
-import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.dto.UpdateCommentDto;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.Comment;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.ServiceProvider;
@@ -13,21 +11,14 @@ import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.repository.CommentRepository;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
-import app.bys.bys_api.service.specification.CommentSpecification;
-import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,53 +30,43 @@ public class CommentService {
     private final CommentMapper commentMapper;
 
     public CommentDto get(Long id) {
-        return commentMapper.entityToDto(commentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Comment with id: " + id + " not found")));
+        CommentQueryDto commentQueryDto = commentRepository.findCommentById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Comment with id: " + id + " not found"));
+
+        return CommentDto.builder()
+                .id(commentQueryDto.getId())
+                .text(commentQueryDto.getText())
+                .commentDate(commentQueryDto.getCommentDate())
+                .author(commentQueryDto.getAuthorId())
+                .provider(commentQueryDto.getProviderId())
+                .request(commentQueryDto.getRequestId())
+                .build();
     }
 
     public PageDto<CommentDto> getAll(Pageable pageable, String search, List<Long> authorIdList,
-                                      List<Long> requestIdList, List<Long> providerIdList) {
-        List<Specification<Comment>> specificationList = getSpecificationList(search, authorIdList, requestIdList, providerIdList);
-        Page<Comment> page = commentRepository.findAll(
-                Specification.allOf(specificationList.stream()
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())
-                ),
-                pageable);
-        Page<CommentDto> dtoPage = page.map(commentMapper::entityToDto);
+                                      List<Long> providerIdList, List<Long> requestIdList) {
+
+        if (search == null || search.isBlank()) search = "";
+
+        Page<CommentQueryDto> page = commentRepository.searchComments(
+                authorIdList,
+                providerIdList,
+                requestIdList,
+                search,
+                pageable
+        );
+
+        Page<CommentDto> dtoPage = page.map(c -> CommentDto.builder()
+                .id(c.getId())
+                .text(c.getText())
+                .commentDate(c.getCommentDate())
+                .author(c.getAuthorId())
+                .provider(c.getProviderId())
+                .request(c.getRequestId())
+                .build()
+        );
+
         return PageMapper.pageToDto(dtoPage);
-    }
-
-    private List<Specification<Comment>> getSpecificationList(String search, List<Long> authorIdList, List<Long> requestIdList, List<Long> providerIdList) {
-        Specification<Comment> providerSpec =
-                providerIdList != null ? CommentSpecification.hasProvider(providerIdList)
-                        : null;
-
-        Specification<Comment> userSpec =
-                authorIdList != null ? CommentSpecification.hasUser(authorIdList)
-                        : null;
-
-        Specification<Comment> serviceRequestSpec =
-                requestIdList != null ? CommentSpecification.hasServiceRequest(requestIdList)
-                        : null;
-
-        CommentSpecification searchSpec =
-                search != null ? new CommentSpecification(
-                        new SearchCriteria(
-                                "text",
-                                "s",
-                                search
-                        )
-                )
-                        : null;
-
-        return new ArrayList<>(Arrays.asList(
-                providerSpec,
-                userSpec,
-                serviceRequestSpec,
-                searchSpec
-        ));
-
     }
 
     public CommentDto create(CommentDto commentDto, String email) {
@@ -95,7 +76,7 @@ public class CommentService {
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + commentDto.getRequest() + " not found"));
         ServiceProvider provider = request.getServiceProvider();
 
-        if (provider==null) {
+        if (provider == null) {
             throw new RuntimeException("The service request doesn't have a provider assigned");
         }
 
@@ -155,22 +136,4 @@ public class CommentService {
 
         commentRepository.delete(comment);
     }
-
-
-
-
-    /*Set<Comment>commentUserSet = user.getCommentSet();
-        commentUserSet.add(comment);
-        user.setCommentSet(commentUserSet);
-        finalUserRepository.save(user);
-
-        Set<Comment>commentProviderSet = provider.getCommentSet();
-        commentProviderSet.add(comment);
-        provider.setCommentSet(commentProviderSet);
-        serviceProviderRepository.save(provider);
-
-        request.setComment(comment);
-        serviceRequestRepository.save(request);*/
-
-
 }
