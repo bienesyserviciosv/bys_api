@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260101-01-drop-comment-id-column
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: service_request
+            columnName: comment_id
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: service_request
+            constraintName: FK_SERVICE_REQUEST_ON_COMMENT
+        - dropColumn:
+            tableName: service_request
+            columnName: comment_id
+      rollback:
+        - addColumn:
+            tableName: service_request
+            columns:
+              - column:
+                  name: comment_id
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseColumnNames: comment_id
+            baseTableName: service_request
+            constraintName: FK_SERVICE_REQUEST_ON_COMMENT
+            referencedColumnNames: id
+            referencedTableName: comment
