@@ -23,8 +23,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
     @Query("""
                 SELECT new app.bys.bys_api.model.dto.TransferPaymentDto(
                     p.id, p.bank, p.screenshot, p.idNumber, p.referenceNumber,
-                    p.accountHolderName, p.paymentDate,
-                    p.finalUser.id, p.serviceProvider.id, p.offer.id,
+                    p.accountHolderName, p.paymentDate, p.offer.id,
                     p.amountInBolivars, p.paymentType, p.paymentStatus
                 )
                 FROM Payment p
@@ -44,8 +43,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
     @Query("""
                 SELECT new app.bys.bys_api.model.dto.MobilePaymentDto(
                     p.id, p.bank, p.screenshot, p.idNumber, p.referenceNumber,
-                    p.paymentDate, p.phoneCode, p.phoneNumber,
-                    p.finalUser.id, p.serviceProvider.id, p.offer.id,
+                    p.paymentDate, p.phoneCode, p.phoneNumber, p.offer.id,
                     p.amountInBolivars, p.paymentType, p.paymentStatus
                 )
                 FROM Payment p

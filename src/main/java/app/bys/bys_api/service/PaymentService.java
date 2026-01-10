@@ -87,34 +87,26 @@ public class PaymentService {
 
 
     public MobilePaymentDto createMobilePayment(MobilePaymentDto mobilePaymentDto, MultipartFile picture) {
-        FinalUser finalUser = finalUserRepository.findById(mobilePaymentDto.getFinalUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + mobilePaymentDto.getFinalUserId() + " not found"));
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(mobilePaymentDto.getServiceProviderId())
-                .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + mobilePaymentDto.getServiceProviderId() + " not found"));
         Offer offer = offerRepository.findById(mobilePaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + mobilePaymentDto.getOfferId() + " not found"));
-        ServiceRequest request = serviceRequestRepository.findById(offer.getServiceRequest().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + offer.getServiceRequest().getId() + " not found"));
+
+        ServiceProvider serviceProvider = offer.getProvider();
+        ServiceRequest request = offer.getServiceRequest();
+        FinalUser finalUser = request.getFinalUser();
 
         if (offer.getPayment() != null) {
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
         }
 
-        if (!offer.equals(request.getAcceptedOffer())) {
+        if (!offer.getId().equals(request.getAcceptedOffer().getId())) {
             throw new ForbiddenActionException("The offer has not been accepted");
         }
 
         Payment mobilePayment = paymentMapper.mobileDtoToEntity(mobilePaymentDto);
 
         mobilePayment.setFinalUser(finalUser);
-        finalUser.getPaymentSet().add(mobilePayment);
-
         mobilePayment.setServiceProvider(serviceProvider);
-        serviceProvider.getPaymentSet().add(mobilePayment);
-
         mobilePayment.setOffer(offer);
-        offer.setPayment(mobilePayment);
-
         mobilePayment.setPaymentType(PaymentType.MOBILE);
         mobilePayment.setPaymentStatus(PaymentStatus.PENDING);
 
@@ -123,39 +115,36 @@ public class PaymentService {
 
         request.setRequestStatus(RequestStatus.PENDING);
         serviceRequestRepository.save(request);
-        notificationService.notifyAdminOfNewPayment(finalUser.getId(), serviceProvider.getId(), request.getId(), mobilePayment.getPaymentType());
+        notificationService.notifyAdminOfNewPayment(
+                finalUser.getId(),
+                serviceProvider.getId(),
+                request.getId(),
+                mobilePayment.getPaymentType()
+        );
         return paymentMapper.entityToMobileDto(savedPayment);
     }
 
     public TransferPaymentDto createTransferPayment(TransferPaymentDto transferPaymentDto, MultipartFile picture) {
-        FinalUser finalUser = finalUserRepository.findById(transferPaymentDto.getFinalUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + transferPaymentDto.getFinalUserId() + " not found"));
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(transferPaymentDto.getServiceProviderId())
-                .orElseThrow(() -> new EntityNotFoundException("Service Provider with id: " + transferPaymentDto.getServiceProviderId() + " not found"));
         Offer offer = offerRepository.findById(transferPaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + transferPaymentDto.getOfferId() + " not found"));
-        ServiceRequest request = serviceRequestRepository.findById(offer.getServiceRequest().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + offer.getServiceRequest().getId() + " not found"));
+
+        ServiceProvider serviceProvider = offer.getProvider();
+        ServiceRequest request = offer.getServiceRequest();
+        FinalUser finalUser = request.getFinalUser();
 
         if (offer.getPayment() != null) {
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
         }
 
-        if (!offer.equals(request.getAcceptedOffer())) {
+        if (!offer.getId().equals(request.getAcceptedOffer().getId())) {
             throw new ForbiddenActionException("The offer has not been accepted");
         }
 
         Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
 
         transferPayment.setFinalUser(finalUser);
-        finalUser.getPaymentSet().add(transferPayment);
-
         transferPayment.setServiceProvider(serviceProvider);
-        serviceProvider.getPaymentSet().add(transferPayment);
-
         transferPayment.setOffer(offer);
-        offer.setPayment(transferPayment);
-
         transferPayment.setPaymentType(PaymentType.TRANSFER);
         transferPayment.setPaymentStatus(PaymentStatus.PENDING);
 
@@ -164,8 +153,11 @@ public class PaymentService {
 
         request.setRequestStatus(RequestStatus.PENDING);
         serviceRequestRepository.save(request);
-        notificationService.notifyAdminOfNewPayment(finalUser.getId(), serviceProvider.getId(), request.getId(), transferPayment.getPaymentType());
-
+        notificationService.notifyAdminOfNewPayment(finalUser.getId(),
+                serviceProvider.getId(),
+                request.getId(),
+                transferPayment.getPaymentType()
+        );
         return paymentMapper.entityToTransferDto(savedPayment);
     }
 

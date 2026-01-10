@@ -51,14 +51,6 @@ public class MobilePaymentDto {
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String phoneNumber;
 
-    @JsonProperty("final_user_id")
-    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    private Long finalUserId;
-
-    @JsonProperty("service_provider_id")
-    @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
-    private Long serviceProviderId;
-
     @JsonProperty("offer_id")
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private Long offerId;
