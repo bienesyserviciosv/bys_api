@@ -85,14 +85,17 @@ public class PaymentService {
         return PageMapper.pageToDto(resultPage);
     }
 
-
-    public MobilePaymentDto createMobilePayment(MobilePaymentDto mobilePaymentDto, MultipartFile picture) {
+    public MobilePaymentDto createMobilePayment(MobilePaymentDto mobilePaymentDto, MultipartFile picture, String authenticatedEmail) {
         Offer offer = offerRepository.findById(mobilePaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + mobilePaymentDto.getOfferId() + " not found"));
 
         ServiceProvider serviceProvider = offer.getProvider();
         ServiceRequest request = offer.getServiceRequest();
         FinalUser finalUser = request.getFinalUser();
+
+        if (!authenticatedEmail.equals(finalUser.getEmail())) {
+            throw new ForbiddenActionException("You cannot create a payment for another user's request");
+        }
 
         if (offer.getPayment() != null) {
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
@@ -124,13 +127,17 @@ public class PaymentService {
         return paymentMapper.entityToMobileDto(savedPayment);
     }
 
-    public TransferPaymentDto createTransferPayment(TransferPaymentDto transferPaymentDto, MultipartFile picture) {
+    public TransferPaymentDto createTransferPayment(TransferPaymentDto transferPaymentDto, MultipartFile picture, String authenticatedEmail) {
         Offer offer = offerRepository.findById(transferPaymentDto.getOfferId())
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + transferPaymentDto.getOfferId() + " not found"));
 
         ServiceProvider serviceProvider = offer.getProvider();
         ServiceRequest request = offer.getServiceRequest();
         FinalUser finalUser = request.getFinalUser();
+
+        if (!authenticatedEmail.equals(finalUser.getEmail())) {
+            throw new ForbiddenActionException("You cannot create a payment for another user's request");
+        }
 
         if (offer.getPayment() != null) {
             throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");

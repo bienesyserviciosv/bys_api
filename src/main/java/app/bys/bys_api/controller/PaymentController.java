@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,9 +35,9 @@ public class PaymentController {
     @PostMapping("/mobile")
     public ResponseEntity<MobilePaymentDto> createMobilePayment(
             @Validated(OnCreate.class) @RequestPart(name = "payment") MobilePaymentDto mobilePaymentDto,
-            @RequestPart(name = "screenshot") MultipartFile picture) {
+            @RequestPart(name = "screenshot") MultipartFile picture, Authentication authentication) {
 
-        MobilePaymentDto paymentDto = paymentService.createMobilePayment(mobilePaymentDto, picture);
+        MobilePaymentDto paymentDto = paymentService.createMobilePayment(mobilePaymentDto, picture, authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentDto);
     }
 
@@ -44,9 +45,9 @@ public class PaymentController {
     @PostMapping("/transfer")
     public ResponseEntity<TransferPaymentDto> createTransferPayment(
             @Validated(OnCreate.class) @RequestPart(name = "payment") TransferPaymentDto transferPaymentDto,
-            @RequestPart(name = "screenshot") MultipartFile picture) {
+            @RequestPart(name = "screenshot") MultipartFile picture, Authentication authentication) {
 
-        TransferPaymentDto paymentDto = paymentService.createTransferPayment(transferPaymentDto, picture);
+        TransferPaymentDto paymentDto = paymentService.createTransferPayment(transferPaymentDto, picture, authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentDto);
     }
 
