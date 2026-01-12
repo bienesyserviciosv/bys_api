@@ -146,6 +146,12 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
               AND (:providerList IS NULL OR sp.id IN :providerList)
               AND (:requestStatusList IS NULL OR sr.requestStatus IN :requestStatusList)
               AND (:applyDateFilter = false OR sr.date >= :today)
+            ORDER BY
+                  CASE WHEN sr.date <= :sevenDaysLater THEN 0 ELSE 1 END ASC,
+                  CASE
+                      WHEN sr.date <= :sevenDaysLater THEN sr.date
+                      ELSE sr.creationDate
+                  END ASC
             """)
     Page<ServiceRequestSummary> findAllRequestSummariesFiltered(
             @Param("search") String search,
@@ -156,6 +162,7 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             @Param("requestStatusList") List<RequestStatus> requestStatusList,
             @Param("applyDateFilter") boolean applyDateFilter,
             @Param("today") LocalDate today,
+            @Param("sevenDaysLater") LocalDate sevenDaysLater,
             Pageable pageable
     );
 

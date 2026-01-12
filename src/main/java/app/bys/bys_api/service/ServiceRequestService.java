@@ -75,6 +75,7 @@ public class ServiceRequestService {
         List<RequestStatus> requestStatusList = null;
         LocalDate today = LocalDate.now();
         boolean applyDateFilter = false;
+        LocalDate sevenDaysLater = today.plusDays(7);
 
         if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PROVIDER"))) {
             requestStatusList = List.of(RequestStatus.CREATED);
@@ -91,7 +92,10 @@ public class ServiceRequestService {
         if (search == null) search = "";
         if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
 
-        Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(search, specializationList, province, userList, providerIdList, requestStatusList, applyDateFilter, today, pageable);
+        Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(
+                search, specializationList, province, userList, providerIdList,
+                requestStatusList, applyDateFilter, today, sevenDaysLater, pageable
+        );
 
         List<ServiceRequestSummary> enrichedList = page.getContent().stream()
                 .peek(dto -> {
@@ -223,7 +227,6 @@ public class ServiceRequestService {
 
         return serviceRequest;
     }
-
 
     public ServiceRequest create(String email, ServiceRequestDto serviceRequestDto, MultipartFile[] files) {
         FinalUser finalUser = finalUserRepository.findByEmail(email)
