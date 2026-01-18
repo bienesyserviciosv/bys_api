@@ -33,6 +33,11 @@ public class FCMService {
             message.putAllData(dataPayload);
         }
 
+        log.info("FCM → token: {}", token);
+        log.info("FCM → title: {}", title);
+        log.info("FCM → body: {}", body);
+        log.info("FCM → data: {}", dataPayload);
+
         firebaseMessaging.send(message.build());
     }
 
@@ -55,6 +60,7 @@ public class FCMService {
             }
 
             messages.add(builder.build());
+            log.info("Notification request: {}", req);
         }
 
         return firebaseMessaging.sendEach(messages);
