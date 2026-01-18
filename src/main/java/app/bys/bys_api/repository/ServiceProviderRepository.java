@@ -48,7 +48,8 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
         sp.qualification,
         sp.profilePicture,
         sp.status,
-        r.name
+        r.name,
+        sp.fcmToken
     )
     FROM ServiceProvider sp
     JOIN sp.roles r

@@ -107,6 +107,7 @@ public abstract class ServiceProviderMapper {
                 .role(flatDto.getRole())
                 .status(flatDto.getStatus())
                 .specializations(specs)
+                .fcmToken(flatDto.getFcmToken())
                 .workPictureSet(pictures)
                 .build();
     }
