@@ -31,4 +31,5 @@ public class ServiceProviderWithPictureFlatDto {
     private String profilePicture;
     private UserStatus status;
     private String role;
+    private String fcmToken;
 }

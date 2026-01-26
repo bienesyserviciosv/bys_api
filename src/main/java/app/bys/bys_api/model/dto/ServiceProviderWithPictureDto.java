@@ -40,7 +40,8 @@ import java.util.Set;
         "workPictureSet",
         "role",
         "status",
-        "token"
+        "token",
+        "fcmToken"
 })
 
 @NoArgsConstructor
@@ -120,5 +121,8 @@ public class ServiceProviderWithPictureDto {
     @JsonProperty("token")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;
+
+    @JsonProperty("fcm_token")
+    private String fcmToken;
 
 }

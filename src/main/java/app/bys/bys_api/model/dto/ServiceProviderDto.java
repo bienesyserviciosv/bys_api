@@ -111,4 +111,7 @@ public class ServiceProviderDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;
 
+    @JsonProperty("fcm_token")
+    private String fcmToken;
+
 }
