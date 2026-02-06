@@ -201,10 +201,27 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found"));
 
         provider.setVerified(true);
-        provider.setMembershipType(MembershipType.BRONZE);
+        provider.setMembershipType(MembershipType.BASIC);
         serviceProviderRepository.save(provider);
 
         return mapper.entityToDto(provider);
     }
+
+    public MembershipType calculateMembershipType(ServiceProvider provider) {
+        double rating = provider.getQualification();
+        int services = provider.getCompletedServices();
+
+        if (rating < 4.5) {
+            return MembershipType.BASIC;
+        }
+
+        if (services >= 50) return MembershipType.PLATINUM;
+        if (services >= 30) return MembershipType.GOLD;
+        if (services >= 15) return MembershipType.SILVER;
+        if (services >= 5)  return MembershipType.BRONZE;
+
+        return MembershipType.BASIC;
+    }
+
 
 }

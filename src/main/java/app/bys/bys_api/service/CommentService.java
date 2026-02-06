@@ -1,9 +1,13 @@
 package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.ForbiddenActionException;
+import app.bys.bys_api.error.InvalidStarRatingException;
 import app.bys.bys_api.mapper.CommentMapper;
 import app.bys.bys_api.mapper.PageMapper;
-import app.bys.bys_api.model.dto.*;
+import app.bys.bys_api.model.dto.CommentDto;
+import app.bys.bys_api.model.dto.CommentQueryDto;
+import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.dto.UpdateCommentDto;
 import app.bys.bys_api.model.entity.Comment;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.ServiceProvider;
@@ -11,6 +15,7 @@ import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.CommentRepository;
 import app.bys.bys_api.repository.FinalUserRepository;
+import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.repository.ServiceRequestRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +34,8 @@ public class CommentService {
     private final FinalUserRepository finalUserRepository;
     private final ServiceRequestRepository serviceRequestRepository;
     private final CommentMapper commentMapper;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final ServiceProviderService serviceProviderService;
 
     public CommentDto get(Long id) {
         CommentQueryDto commentQueryDto = commentRepository.findCommentById(id)
@@ -38,6 +45,7 @@ public class CommentService {
                 .id(commentQueryDto.getId())
                 .text(commentQueryDto.getText())
                 .commentDate(commentQueryDto.getCommentDate())
+                .starRating(commentQueryDto.getStartRating())
                 .author(commentQueryDto.getAuthorId())
                 .provider(commentQueryDto.getProviderId())
                 .request(commentQueryDto.getRequestId())
@@ -61,6 +69,7 @@ public class CommentService {
                 .id(c.getId())
                 .text(c.getText())
                 .commentDate(c.getCommentDate())
+                .starRating(c.getStartRating())
                 .author(c.getAuthorId())
                 .provider(c.getProviderId())
                 .request(c.getRequestId())
@@ -89,21 +98,34 @@ public class CommentService {
             throw new ForbiddenActionException("This request already has a comment");
         }
 
-        if (!request.getRequestStatus().equals(RequestStatus.COMPLETED)){
+        if (!request.getRequestStatus().equals(RequestStatus.COMPLETED)) {
             throw new ForbiddenActionException("The request has not been completed");
+        }
+
+        double rating = commentDto.getStarRating();
+        if (rating % 1 != 0 && rating % 1 != 0.5) {
+            throw new InvalidStarRatingException();
         }
 
         Comment comment = Comment.builder()
                 .text(commentDto.getText())
+                .starRating(commentDto.getStarRating())
                 .commentDate(LocalDateTime.now())
                 .author(user)
                 .provider(provider)
                 .request(request)
                 .build();
 
-        request.setComment(comment);
+        Comment savedComment = commentRepository.save(comment);
 
-        return commentMapper.entityToDto(commentRepository.save(comment));
+        Double newAvg = commentRepository.calculateAverageRating(provider.getId());
+        provider.setQualification(newAvg);
+        provider.setMembershipType(serviceProviderService.calculateMembershipType(provider));
+        serviceProviderRepository.save(provider);
+
+        request.setComment(savedComment);
+        return commentMapper.entityToDto(savedComment);
+
     }
 
     public CommentDto update(String email, Long id, UpdateCommentDto updateCommentDto) {
@@ -116,28 +138,47 @@ public class CommentService {
             throw new ForbiddenActionException("The request does not belong to this user");
         }
 
+        double rating = updateCommentDto.getStarRating();
+        if (rating % 1 != 0 && rating % 1 != 0.5) {
+            throw new InvalidStarRatingException();
+        }
+
         storedComment.setText(updateCommentDto.getText());
+        storedComment.setStarRating(updateCommentDto.getStarRating());
         storedComment.setCommentDate(LocalDateTime.now());
 
-        return commentMapper.entityToDto(commentRepository.save(storedComment));
+        Comment updated = commentRepository.save(storedComment);
+
+        ServiceProvider provider = storedComment.getProvider();
+        Double newAvg = commentRepository.calculateAverageRating(provider.getId());
+        provider.setQualification(newAvg);
+        provider.setMembershipType(serviceProviderService.calculateMembershipType(provider));
+
+        serviceProviderRepository.save(provider);
+
+        return commentMapper.entityToDto(updated);
     }
 
     public void delete(Long commentId, String email) {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
-        FinalUser user = finalUserRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Final User with email: " + email + " not found"));
 
-        if (!comment.getAuthor().getId().equals(user.getId())) {
+        if (!comment.getAuthor().getEmail().equals(email)) {
             throw new ForbiddenActionException("You cannot delete a comment you did not create");
         }
 
         ServiceRequest request = comment.getRequest();
-        if (request != null) {
-            request.setComment(null);
-            serviceRequestRepository.save(request);
-        }
+        request.setComment(null);
+        serviceRequestRepository.save(request);
+
+        ServiceProvider provider = comment.getProvider();
+        Double newAvg = commentRepository.calculateAverageRating(provider.getId());
+        provider.setQualification(newAvg);
+        provider.setMembershipType(serviceProviderService.calculateMembershipType(provider));
+
+        serviceProviderRepository.save(provider);
+
 
         commentRepository.delete(comment);
     }

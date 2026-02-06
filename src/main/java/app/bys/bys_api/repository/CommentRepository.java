@@ -21,6 +21,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
             c.id,
             c.text,
             c.commentDate,
+            c.starRating,
             c.author.id,
             c.provider.id,
             c.request.id
@@ -35,6 +36,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
             c.id,
             c.text,
             c.commentDate,
+            c.starRating,
             c.author.id,
             c.provider.id,
             c.request.id
@@ -52,4 +54,11 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
                 @Param("search") String search,
                 Pageable pageable
         );
-    }
+
+    @Query("SELECT COUNT(c) FROM Comment c WHERE c.provider.id = :providerId")
+    long countByProviderId(@Param("providerId") Long providerId);
+
+    @Query("SELECT AVG(c.starRating) FROM Comment c WHERE c.provider.id = :providerId")
+    Double calculateAverageRating(@Param("providerId") Long providerId);
+
+}

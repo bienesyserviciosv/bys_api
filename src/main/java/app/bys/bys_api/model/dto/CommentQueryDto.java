@@ -15,6 +15,7 @@ public class CommentQueryDto {
     private Long id;
     private String text;
     private LocalDateTime commentDate;
+    private Double startRating;
     private Long authorId;
     private Long providerId;
     private Long requestId;

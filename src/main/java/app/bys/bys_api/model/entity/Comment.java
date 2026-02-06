@@ -1,6 +1,8 @@
 package app.bys.bys_api.model.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,11 @@ public class Comment {
 
     @Column(name = "comment_date")
     private LocalDateTime commentDate;
+
+    @Column(name = "star_rating", nullable = false)
+    @Min(value = 0)
+    @Max(value = 5)
+    private Double starRating;
 
     @ManyToOne
     @JoinColumn(name = "author_id")

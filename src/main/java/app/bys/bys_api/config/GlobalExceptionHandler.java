@@ -112,6 +112,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
+    @ExceptionHandler(InvalidStarRatingException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidRating(InvalidStarRatingException ex, HttpServletRequest request) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Star Rating")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGeneric(Exception ex, HttpServletRequest request) {
         ErrorResponseDto error = ErrorResponseDto.builder()
