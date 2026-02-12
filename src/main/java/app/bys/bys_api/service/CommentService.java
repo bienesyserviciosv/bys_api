@@ -84,6 +84,7 @@ public class CommentService {
                 .orElseThrow(() -> new EntityNotFoundException("Final User with email: " + email + " not found"));
         ServiceRequest request = serviceRequestRepository.findById(commentDto.getRequest())
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + commentDto.getRequest() + " not found"));
+
         ServiceProvider provider = request.getServiceProvider();
 
         if (provider == null) {

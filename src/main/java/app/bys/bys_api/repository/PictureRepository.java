@@ -18,11 +18,11 @@ import java.util.Set;
 public interface PictureRepository extends JpaRepository<Picture, Long> {
 
     @Query("""
-    SELECT p.url
-    FROM Picture p
-    WHERE p.serviceRequest.id = :id
-      AND p.pictureType = app.bys.bys_api.model.enums.PictureType.SERVICE_REQUEST
-    """)
+            SELECT p.url
+            FROM Picture p
+            WHERE p.serviceRequest.id = :id
+              AND p.pictureType = app.bys.bys_api.model.enums.PictureType.SERVICE_REQUEST
+            """)
     Set<String> findPictureUrlByServiceRequestId(@Param("id") Long serviceRequestId);
 
     Optional<Picture> findByFinalUserId(Long finalUserId);
@@ -41,13 +41,26 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
     Optional<Picture> findProfilePictureByServiceProviderId(@Param("providerId") Long providerId);
 
     @Query("""
-    SELECT p.url
-    FROM Picture p
-    WHERE p.serviceProvider.id = :id
-      AND p.pictureType = app.bys.bys_api.model.enums.PictureType.WORK
-    """)
+            SELECT p.url
+            FROM Picture p
+            WHERE p.serviceProvider.id = :id
+              AND p.pictureType = app.bys.bys_api.model.enums.PictureType.WORK
+            """)
     Set<String> findWorkPictureUrlsByProviderId(@Param("id") Long id);
 
+    @Query("""
+                SELECT p.url
+                FROM Picture p
+                WHERE p.serviceCatalog.id = :id
+            """)
+    List<String> findPicturesByCatalogId(Long id);
+
+    @Query("""
+                SELECT p.serviceCatalog.id, p.url
+                FROM Picture p
+                WHERE p.serviceCatalog IS NOT NULL
+            """)
+    List<Object[]> findAllPictures();
 
 
 }

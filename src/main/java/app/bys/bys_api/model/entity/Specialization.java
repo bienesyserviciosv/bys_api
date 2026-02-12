@@ -26,4 +26,8 @@ public class Specialization {
 
     @OneToMany(mappedBy = "specialization", fetch = FetchType.LAZY)
     private Set<ServiceRequest> serviceRequestSet;
+
+    @OneToMany(mappedBy = "specialization", fetch = FetchType.LAZY)
+    private Set<ServiceCatalog> serviceCatalogSet;
+
 }

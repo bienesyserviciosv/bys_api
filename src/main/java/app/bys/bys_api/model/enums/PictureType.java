@@ -4,5 +4,6 @@ public enum PictureType {
     PROFILE,
     WORK,
     SERVICE_REQUEST,
-    PAYMENT_PROOF
+    PAYMENT_PROOF,
+    SERVICE_CATALOG
 }

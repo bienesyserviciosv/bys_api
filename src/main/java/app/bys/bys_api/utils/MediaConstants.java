@@ -6,5 +6,6 @@ public class MediaConstants {
     public static final String REQUEST_FOLDER = "bys/request/";
     public static final String USER_FOLDER = "bys/user/";
     public static final String PAYMENT_FOLDER = "bys/payment/";
+    public static final String SERVICE_CATALOG_FOLDER = "bys/service_catalog/";
 
 }
