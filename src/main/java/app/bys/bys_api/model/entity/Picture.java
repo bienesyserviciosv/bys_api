@@ -39,4 +39,8 @@ public class Picture {
     @OneToOne
     @JoinColumn(name = "payment_id")
     private Payment payment;
+
+    @ManyToOne
+    @JoinColumn(name = "service_catalog_id")
+    private ServiceCatalog serviceCatalog;
 }

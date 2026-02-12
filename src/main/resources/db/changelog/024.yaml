@@ -1,0 +1,83 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1770575001778-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_service_catalog
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: specialization_id
+                  type: BIGINT
+            tableName: service_catalog
+  - changeSet:
+      id: 1770575001778-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: service_catalog_id
+                  type: BIGINT
+            tableName: picture
+  - changeSet:
+      id: 1770575001778-3
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_catalog_id
+            baseTableName: picture
+            constraintName: FK_PICTURE_ON_SERVICE_CATALOG
+            referencedColumnNames: id
+            referencedTableName: service_catalog
+  - changeSet:
+      id: 1770575001778-4
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: specialization_id
+            baseTableName: service_catalog
+            constraintName: FK_SERVICE_CATALOG_ON_SPECIALIZATION
+            referencedColumnNames: id
+            referencedTableName: specialization
+  - changeSet:
+      id: 1770575001778-5
+      author: Carlos
+      changes:
+        - createIndex:
+            tableName: service_catalog
+            indexName: idx_service_catalog_specialization
+            columns:
+              - column:
+                  name: specialization_id
+  - changeSet:
+      id: 1770575001778-6
+      author: Carlos
+      changes:
+        - createIndex:
+            tableName: picture
+            indexName: idx_picture_service_catalog
+            columns:
+              - column:
+                  name: service_catalog_id
+
+
