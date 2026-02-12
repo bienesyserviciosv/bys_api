@@ -32,6 +32,7 @@ public class ServiceCatalogService {
     private final ServiceCatalogMapper mapper;
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
+    private final PictureService pictureService;
 
     @Value("${media.url}")
     public String mediaUrl;
@@ -100,6 +101,7 @@ public class ServiceCatalogService {
                 .orElseThrow(() -> new EntityNotFoundException("Service catalog with id " + id + " not found"));
 
         if (files != null && files.length > 0) {
+            pictureService.deleteAllServiceCatalogPictures(serviceCatalogStored);
             uploadPictureSet(files, serviceCatalogStored);
         }
         mapper.updateServiceCatalogFromDto(dto, serviceCatalogStored);
@@ -115,7 +117,7 @@ public class ServiceCatalogService {
                     picture.setServiceCatalog(serviceCatalog);
                     picture.setPictureType(PictureType.SERVICE_CATALOG);
                     picture.setUrl(uploadImage(file));
-
+                    pictureRepository.save(picture);
                     serviceCatalog.getServicePictures().add(picture);
                 });
     }
@@ -134,9 +136,9 @@ public class ServiceCatalogService {
         }
 
     public void delete(Long id) {
-        if (!serviceCatalogRepository.existsById(id)) {
-            throw new EntityNotFoundException("Service catalog with id " + id + " not found");
-        }
+        ServiceCatalog serviceCatalog = serviceCatalogRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service catalog with id " + id + " not found"));
+        pictureService.deleteAllServiceCatalogPictures(serviceCatalog);
         serviceCatalogRepository.deleteById(id);
     }
 }

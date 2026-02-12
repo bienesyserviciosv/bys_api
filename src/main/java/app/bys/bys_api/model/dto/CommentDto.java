@@ -18,7 +18,7 @@ public class CommentDto {
     private Long id;
 
     @JsonProperty("text")
-    @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
+    //@NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
     @Size(min = 10, max = 1000, message = "The comment must be between 10 and 1000 characters long.")
     private String text;
 

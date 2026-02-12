@@ -4,6 +4,7 @@ import app.bys.bys_api.mapper.PictureMapper;
 import app.bys.bys_api.model.dto.PictureDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
+import app.bys.bys_api.model.entity.ServiceCatalog;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.repository.MediaRepository;
@@ -11,6 +12,7 @@ import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.utils.MediaConstants;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PictureService {
 
     private final PictureRepository pictureRepository;
@@ -137,6 +140,27 @@ public class PictureService {
         });
 
         provider.getWorkPictureSet().clear();
+    }
+
+    @Transactional
+    public void deleteAllServiceCatalogPictures(ServiceCatalog serviceCatalog) {
+        Set<Picture> serviceCatalogPictures = serviceCatalog.getServicePictures();
+
+        if (serviceCatalogPictures.isEmpty()) {
+            return;
+        }
+
+        serviceCatalogPictures.forEach(picture -> {
+            try {
+                mediaRepository.deleteImage(picture.getUrl());
+            }
+            catch (Exception e) {
+                log.error("Failed to delete image: {}", picture.getUrl(), e);
+            }
+            pictureRepository.delete(picture);
+        });
+
+        serviceCatalog.getServicePictures().clear();
     }
 
     @Transactional
