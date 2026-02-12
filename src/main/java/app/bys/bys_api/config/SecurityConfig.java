@@ -103,8 +103,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:63342",
                 "http://localhost:8080",
-                "https://api-dev.bienesyservicios.app",
-                "https://admin.bienesyservicios.app"
+                "https://api-dev.soytubys.com",
+                "https://admin.soytubys.com"
         ));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
