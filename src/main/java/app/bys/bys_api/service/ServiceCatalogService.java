@@ -63,7 +63,7 @@ public class ServiceCatalogService {
                 pageable
         );
 
-        Map<Long, Set<String>> picturesByCatalog = pictureRepository.findAllPictures()
+        Map<Long, Set<String>> picturesByCatalog = pictureRepository.findCatalogIdAndPictureUrlList()
                 .stream()
                 .filter(row -> row[0] != null)
                 .collect(Collectors.groupingBy(

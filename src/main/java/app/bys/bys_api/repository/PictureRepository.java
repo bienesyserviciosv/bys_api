@@ -60,7 +60,7 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
                 FROM Picture p
                 WHERE p.serviceCatalog IS NOT NULL
             """)
-    List<Object[]> findAllPictures();
+    List<Object[]> findCatalogIdAndPictureUrlList();
 
 
 }
