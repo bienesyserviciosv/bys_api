@@ -144,7 +144,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
               AND (:specializationList IS NULL OR s.id IN :specializationList)
               AND (:userList IS NULL OR fu.id IN :userList)
               AND (:providerList IS NULL OR sp.id IN :providerList)
-              AND (:requestStatusList IS NULL OR sr.requestStatus IN :requestStatusList)
+              AND (:status IS NULL OR sr.requestStatus = :status)
+              AND (:allowedStatusForProviders IS NULL OR sr.requestStatus IN :allowedStatusForProviders)
               AND (:applyDateFilter = false OR sr.date >= :today)
             ORDER BY
                   CASE WHEN sr.date <= :sevenDaysLater THEN 0 ELSE 1 END ASC,
@@ -159,7 +160,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             @Param("address") Province address,
             @Param("userList") List<Long> userList,
             @Param("providerList") List<Long> providerList,
-            @Param("requestStatusList") List<RequestStatus> requestStatusList,
+            @Param("status") RequestStatus status,
+            @Param("allowedStatusForProviders") List<RequestStatus> allowedStatusForProviders,
             @Param("applyDateFilter") boolean applyDateFilter,
             @Param("today") LocalDate today,
             @Param("sevenDaysLater") LocalDate sevenDaysLater,

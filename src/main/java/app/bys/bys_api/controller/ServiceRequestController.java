@@ -6,7 +6,7 @@ import app.bys.bys_api.model.dto.ServiceRequestDto;
 import app.bys.bys_api.model.dto.ServiceRequestSummary;
 import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
 import app.bys.bys_api.model.entity.ServiceRequest;
-import app.bys.bys_api.service.NotificationService;
+import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.service.ServiceRequestService;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
@@ -43,9 +43,10 @@ public class ServiceRequestController {
                                                                  @RequestParam(name = "address", required = false) String address,
                                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
                                                                  @RequestParam(name = "provider", required = false) List<Long> providerIdList,
+                                                                 @RequestParam(name = "status", required = false) RequestStatus status,
                                                                  Authentication authentication
     ) throws BadRequestException {
-        return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList, authentication), HttpStatus.OK);
+        return new ResponseEntity<>(serviceRequestService.getAll(pageable, search, specializationList, address, userIdList, providerIdList, status, authentication), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_USER')")

@@ -71,15 +71,16 @@ public class ServiceRequestService {
 
     }
 
-    public PageDto<ServiceRequestSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList, Authentication auth) throws BadRequestException {
-        List<RequestStatus> requestStatusList = null;
+    public PageDto<ServiceRequestSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userList, List<Long> providerIdList, RequestStatus status, Authentication auth) throws BadRequestException {
+        List<RequestStatus> allowedStatusForProviders = null;
         LocalDate today = LocalDate.now();
         boolean applyDateFilter = false;
         LocalDate sevenDaysLater = today.plusDays(7);
 
         if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PROVIDER"))) {
-            requestStatusList = List.of(RequestStatus.CREATED);
+            allowedStatusForProviders = List.of(RequestStatus.CREATED);
             applyDateFilter = true;
+            status = null;
         }
         Province province = null;
         if (address != null) {
@@ -93,8 +94,8 @@ public class ServiceRequestService {
         if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
 
         Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(
-                search, specializationList, province, userList, providerIdList,
-                requestStatusList, applyDateFilter, today, sevenDaysLater, pageable
+                search, specializationList, province, userList, providerIdList, status,
+                allowedStatusForProviders, applyDateFilter, today, sevenDaysLater, pageable
         );
 
         List<ServiceRequestSummary> enrichedList = page.getContent().stream()
