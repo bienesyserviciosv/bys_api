@@ -1,6 +1,7 @@
 package app.bys.bys_api.repository;
 
 import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
+import app.bys.bys_api.model.dto.ServiceRequestMinimal;
 import app.bys.bys_api.model.dto.ServiceRequestSummary;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.Province;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -167,5 +169,27 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             @Param("sevenDaysLater") LocalDate sevenDaysLater,
             Pageable pageable
     );
+
+
+    @Query("""
+    SELECT new app.bys.bys_api.model.dto.ServiceRequestMinimal(
+        sr.id,
+        sr.requestStatus,
+        sr.offerQuantity
+    )
+    FROM ServiceRequest sr
+    WHERE sr.id = :id
+""")
+    Optional<ServiceRequestMinimal> findRequestMinimalById(Long id);
+
+    @Modifying
+    @Query("""
+    UPDATE ServiceRequest sr
+    SET sr.offerQuantity = sr.offerQuantity + 1,
+        sr.newOffer = true
+    WHERE sr.id = :id
+""")
+    void incrementOfferQuantity(Long id);
+
 
 }

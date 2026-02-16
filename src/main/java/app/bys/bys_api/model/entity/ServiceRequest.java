@@ -88,4 +88,9 @@ public class ServiceRequest {
 
     @OneToOne(mappedBy = "request")
     private Comment comment;
+
+    public ServiceRequest(Long id) {
+        this.id = id;
+    }
+
 }

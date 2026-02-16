@@ -5,9 +5,7 @@ import app.bys.bys_api.error.ErrorMessage;
 import app.bys.bys_api.error.ForbiddenActionException;
 import app.bys.bys_api.mapper.OfferMapper;
 import app.bys.bys_api.mapper.PageMapper;
-import app.bys.bys_api.model.dto.OfferDto;
-import app.bys.bys_api.model.dto.OfferMetricsDto;
-import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
@@ -148,10 +146,10 @@ public class OfferService {
         );
     }
 
+    @Transactional
     public OfferDto create(ServiceProvider provider, OfferDto offerDto) {
         Long requestId = offerDto.getServiceRequestId();
-        ServiceRequest serviceRequest = serviceRequestRepo.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
+
         if (provider.getStatus().equals(UserStatus.INACTIVE)){
             throw new EmailNotVerifiedException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
         }
@@ -159,21 +157,18 @@ public class OfferService {
             throw new ForbiddenActionException("Service provider is not verified");
         }
 
-        if (!serviceRequest.getRequestStatus().equals(RequestStatus.CREATED) && !serviceRequest.getRequestStatus().equals(RequestStatus.IN_PROGRESS)) {
+        ServiceRequestMinimal requestMinimalDto = serviceRequestRepo.findRequestMinimalById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
+
+        if (!requestMinimalDto.getStatus().equals(RequestStatus.CREATED) && !requestMinimalDto.getStatus().equals(RequestStatus.IN_PROGRESS)) {
             throw new ForbiddenActionException("Cannot create offers for requests with payments created");
         }
 
-        Integer offerQuantity = serviceRequest.getOfferQuantity();
-        offerQuantity++;
-
-        serviceRequest.setOfferQuantity(offerQuantity);
-        serviceRequest.setNewOffer(true);
-
-        serviceRequestRepo.save(serviceRequest);
+       serviceRequestRepo.incrementOfferQuantity(requestId);
 
         Offer offer = offerMapper.dtoToEntity(offerDto);
         offer.setProvider(provider);
-        offer.setServiceRequest(serviceRequest);
+        offer.setServiceRequest(new ServiceRequest(requestId));
         offer.setAccepted(false);
         offer.setCreatedAt(LocalDateTime.now());
 
