@@ -196,9 +196,13 @@ public class OfferService {
         serviceProviderRepository.save(provider);
 
         ServiceRequest serviceRequest = offer.getServiceRequest();
-        serviceRequest.setOfferQuantity(Math.max(0, serviceRequest.getOfferQuantity() - 1));
 
-        if (serviceRequest.getAcceptedOffer().equals(offer)) {
+        Integer q = serviceRequest.getOfferQuantity();
+        serviceRequest.setOfferQuantity(Math.max(0, (q != null ? q : 0) - 1));
+
+        Offer acceptedOffer = serviceRequest.getAcceptedOffer();
+
+        if (acceptedOffer != null && acceptedOffer.getId().equals(offer.getId())) {
             FinalUser finalUser = offer.getFinalUser();
             finalUser.getOfferSet().remove(offer);
             finalUserRepo.save(finalUser);
