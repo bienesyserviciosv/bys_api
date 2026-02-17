@@ -17,6 +17,8 @@ import java.util.Optional;
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecificationExecutor<Offer> {
 
+    boolean existsByProviderIdAndServiceRequestId(Long providerId, Long requestId);
+
     @Query("SELECT COUNT(o) FROM Offer o")
     long countAllOffers();
 

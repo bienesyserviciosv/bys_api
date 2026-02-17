@@ -160,6 +160,10 @@ public class OfferService {
         ServiceRequestMinimal requestMinimalDto = serviceRequestRepo.findRequestMinimalById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
+        if (offerRepo.existsByProviderIdAndServiceRequestId(provider.getId(), requestId)) {
+            throw new ConflictException("The provider already submitted an offer for this request");
+        }
+
         if (!requestMinimalDto.getStatus().equals(RequestStatus.CREATED) && !requestMinimalDto.getStatus().equals(RequestStatus.IN_PROGRESS)) {
             throw new ConflictException("Request not open for new offers");
         }
