@@ -99,17 +99,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(ForbiddenActionException.class)
-    public ResponseEntity<ErrorResponseDto> handleForbiddenAction(ForbiddenActionException ex, HttpServletRequest request) {
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponseDto> handleConflict(ConflictException ex, HttpServletRequest request) {
         ErrorResponseDto error = ErrorResponseDto.builder()
-                .status(HttpStatus.FORBIDDEN.value())
-                .error("Forbidden")
+                .status(HttpStatus.CONFLICT.value())
+                .error("Conflict")
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(InvalidStarRatingException.class)

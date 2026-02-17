@@ -2,7 +2,7 @@ package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.EmailNotVerifiedException;
 import app.bys.bys_api.error.ErrorMessage;
-import app.bys.bys_api.error.ForbiddenActionException;
+import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.mapper.OfferMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.*;
@@ -154,14 +154,14 @@ public class OfferService {
             throw new EmailNotVerifiedException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
         }
         if (!provider.getVerified()){
-            throw new ForbiddenActionException("Service provider is not verified");
+            throw new ConflictException("Service provider is not verified");
         }
 
         ServiceRequestMinimal requestMinimalDto = serviceRequestRepo.findRequestMinimalById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
         if (!requestMinimalDto.getStatus().equals(RequestStatus.CREATED) && !requestMinimalDto.getStatus().equals(RequestStatus.IN_PROGRESS)) {
-            throw new ForbiddenActionException("Cannot create offers for requests with payments created");
+            throw new ConflictException("Request not open for new offers");
         }
 
        serviceRequestRepo.incrementOfferQuantity(requestId);
@@ -225,11 +225,11 @@ public class OfferService {
 
         //Validación de estado de la solicitud. Si tiene el estado valido es que puede aceptar una oferta
         if (!request.getRequestStatus().equals(RequestStatus.CREATED) && !request.getRequestStatus().equals(RequestStatus.IN_PROGRESS)) {
-            throw new ForbiddenActionException("Cannot accept offers of requests with payments created");
+            throw new ConflictException("Cannot accept offers of requests with payments created");
         }
 
         if (!offer.getServiceRequest().getFinalUser().equals(finalUser)) {
-            throw new ForbiddenActionException("The user can only accept offers from requests they made");
+            throw new ConflictException("The user can only accept offers from requests they made");
         }
 
         if (!request.getOfferSet().contains(offer)) {

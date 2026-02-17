@@ -1,6 +1,6 @@
 package app.bys.bys_api.service;
 
-import app.bys.bys_api.error.ForbiddenActionException;
+import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.mapper.NotificationMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.model.dto.NotificationDto;
@@ -192,7 +192,7 @@ public class NotificationService {
             }
         }
 
-        throw new ForbiddenActionException("The user can't read this notification");
+        throw new ConflictException("The user can't read this notification");
     }
 
     public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId, Long offerId) {

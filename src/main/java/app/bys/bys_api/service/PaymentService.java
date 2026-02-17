@@ -1,6 +1,6 @@
 package app.bys.bys_api.service;
 
-import app.bys.bys_api.error.ForbiddenActionException;
+import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.error.ServiceRequestAlreadyAcceptedException;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.PaymentMapper;
@@ -94,15 +94,15 @@ public class PaymentService {
         FinalUser finalUser = request.getFinalUser();
 
         if (!authenticatedEmail.equals(finalUser.getEmail())) {
-            throw new ForbiddenActionException("You cannot create a payment for another user's request");
+            throw new ConflictException("You cannot create a payment for another user's request");
         }
 
         if (offer.getPayment() != null) {
-            throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
+            throw new ConflictException("Offer with id: " + offer.getId() + " already has a payment set");
         }
 
         if (!offer.getId().equals(request.getAcceptedOffer().getId())) {
-            throw new ForbiddenActionException("The offer has not been accepted");
+            throw new ConflictException("The offer has not been accepted");
         }
 
         Payment mobilePayment = paymentMapper.mobileDtoToEntity(mobilePaymentDto);
@@ -136,15 +136,15 @@ public class PaymentService {
         FinalUser finalUser = request.getFinalUser();
 
         if (!authenticatedEmail.equals(finalUser.getEmail())) {
-            throw new ForbiddenActionException("You cannot create a payment for another user's request");
+            throw new ConflictException("You cannot create a payment for another user's request");
         }
 
         if (offer.getPayment() != null) {
-            throw new ForbiddenActionException("Offer with id: " + offer.getId() + " already has a payment set");
+            throw new ConflictException("Offer with id: " + offer.getId() + " already has a payment set");
         }
 
         if (!offer.getId().equals(request.getAcceptedOffer().getId())) {
-            throw new ForbiddenActionException("The offer has not been accepted");
+            throw new ConflictException("The offer has not been accepted");
         }
 
         Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
@@ -242,7 +242,7 @@ public class PaymentService {
         }
 
         if (serviceRequest.getAcceptedOffer() == null) {
-            throw new ForbiddenActionException("Service Request with id: " + requestId + " doesn't have an accepted offer");
+            throw new ConflictException("Service Request with id: " + requestId + " doesn't have an accepted offer");
         }
 
         payment.setPaymentStatus(PaymentStatus.ACCEPTED);
@@ -266,7 +266,7 @@ public class PaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("Service Request with id: " + requestId + " not found"));
 
         if (serviceRequest.getAcceptedOffer() == null) {
-            throw new ForbiddenActionException("Service Request with id: " + requestId + " doesn't have an accepted offer");
+            throw new ConflictException("Service Request with id: " + requestId + " doesn't have an accepted offer");
         }
 
         payment.setPaymentStatus(PaymentStatus.REJECTED);

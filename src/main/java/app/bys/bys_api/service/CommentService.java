@@ -1,6 +1,6 @@
 package app.bys.bys_api.service;
 
-import app.bys.bys_api.error.ForbiddenActionException;
+import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.error.InvalidStarRatingException;
 import app.bys.bys_api.mapper.CommentMapper;
 import app.bys.bys_api.mapper.PageMapper;
@@ -92,15 +92,15 @@ public class CommentService {
         }
 
         if (!request.getFinalUser().getId().equals(user.getId())) {
-            throw new ForbiddenActionException("The request does not belong to this user");
+            throw new ConflictException("The request does not belong to this user");
         }
 
         if (request.getComment() != null) {
-            throw new ForbiddenActionException("This request already has a comment");
+            throw new ConflictException("This request already has a comment");
         }
 
         if (!request.getRequestStatus().equals(RequestStatus.COMPLETED)) {
-            throw new ForbiddenActionException("The request has not been completed");
+            throw new ConflictException("The request has not been completed");
         }
 
         double rating = commentDto.getStarRating();
@@ -136,7 +136,7 @@ public class CommentService {
                 .orElseThrow(() -> new EntityNotFoundException("Comment with id: " + id + " not found"));
 
         if (!storedComment.getAuthor().getId().equals(storedUser.getId())) {
-            throw new ForbiddenActionException("The request does not belong to this user");
+            throw new ConflictException("The request does not belong to this user");
         }
 
         double rating = updateCommentDto.getStarRating();
@@ -166,7 +166,7 @@ public class CommentService {
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 
         if (!comment.getAuthor().getEmail().equals(email)) {
-            throw new ForbiddenActionException("You cannot delete a comment you did not create");
+            throw new ConflictException("You cannot delete a comment you did not create");
         }
 
         ServiceRequest request = comment.getRequest();

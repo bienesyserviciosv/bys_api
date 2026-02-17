@@ -2,7 +2,7 @@ package app.bys.bys_api.service;
 
 import app.bys.bys_api.error.EmailNotVerifiedException;
 import app.bys.bys_api.error.ErrorMessage;
-import app.bys.bys_api.error.ForbiddenActionException;
+import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
@@ -288,11 +288,11 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + requestId + " not found"));
 
         if (!serviceRequest.getFinalUser().getId().equals(finalUser.getId())) {
-            throw new ForbiddenActionException("The service request with id: " + requestId + " does not belong to this user");
+            throw new ConflictException("The service request with id: " + requestId + " does not belong to this user");
         }
 
         if (serviceRequest.getRequestStatus() != RequestStatus.ACCEPTED) {
-            throw new ForbiddenActionException("The service request with id: " + requestId + " hasn't been accepted");
+            throw new ConflictException("The service request with id: " + requestId + " hasn't been accepted");
         }
 
         finalUser.setCompletedRequests(finalUser.getCompletedRequests() + 1);
