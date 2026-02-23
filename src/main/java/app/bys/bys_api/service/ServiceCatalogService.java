@@ -4,6 +4,7 @@ import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceCatalogMapper;
 import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceCatalogDto;
+import app.bys.bys_api.model.dto.ServiceCatalogUpdateData;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceCatalog;
 import app.bys.bys_api.model.enums.PictureType;
@@ -88,7 +89,7 @@ public class ServiceCatalogService {
         ServiceCatalog serviceCatalog = mapper.dtoToEntity(dto);
 
         if (files != null && files.length > 0) {
-            uploadPictureSet(files, serviceCatalog);
+            uploadPictureSetForCreate(files, serviceCatalog);
         }
 
         ServiceCatalog saved = serviceCatalogRepository.save(serviceCatalog);
@@ -97,19 +98,23 @@ public class ServiceCatalogService {
 
     @Transactional
     public ServiceCatalogDto update(Long id, ServiceCatalogDto dto, MultipartFile[] files) {
-        ServiceCatalog serviceCatalogStored = serviceCatalogRepository.findById(id)
+
+        ServiceCatalogUpdateData current = serviceCatalogRepository.findUpdateDataById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Service catalog with id " + id + " not found"));
 
+        String name = dto.getName() != null ? dto.getName() : current.name();
+        String description = dto.getDescription() != null ? dto.getDescription() : current.description();
+
         if (files != null && files.length > 0) {
-            pictureService.deleteAllServiceCatalogPictures(serviceCatalogStored);
-            uploadPictureSet(files, serviceCatalogStored);
+            pictureService.deleteAllServiceCatalogPicturesByCatalogId(id);
+            uploadPictureSetForUpdate(files, id);
         }
-        mapper.updateServiceCatalogFromDto(dto, serviceCatalogStored);
-        ServiceCatalog saved = serviceCatalogRepository.save(serviceCatalogStored);
-        return mapper.entityToDto(saved);
+        serviceCatalogRepository.updateCatalog( id, name, description );
+
+        return get(id);
     }
 
-    private void uploadPictureSet(MultipartFile[] files, ServiceCatalog serviceCatalog) {
+    private void uploadPictureSetForCreate(MultipartFile[] files, ServiceCatalog serviceCatalog) {
         Arrays.stream(files)
                 .filter(file -> file != null && !file.isEmpty())
                 .forEach(file -> {
@@ -117,8 +122,19 @@ public class ServiceCatalogService {
                     picture.setServiceCatalog(serviceCatalog);
                     picture.setPictureType(PictureType.SERVICE_CATALOG);
                     picture.setUrl(uploadImage(file));
-                    pictureRepository.save(picture);
                     serviceCatalog.getServicePictures().add(picture);
+                });
+    }
+
+    private void uploadPictureSetForUpdate(MultipartFile[] files, Long catalogId) {
+        Arrays.stream(files)
+                .filter(file -> file != null && !file.isEmpty())
+                .forEach(file -> {
+                    Picture picture = new Picture();
+                    picture.setServiceCatalog(new ServiceCatalog(catalogId));
+                    picture.setPictureType(PictureType.SERVICE_CATALOG);
+                    picture.setUrl(uploadImage(file));
+                    pictureRepository.save(picture);
                 });
     }
 
@@ -136,9 +152,10 @@ public class ServiceCatalogService {
         }
 
     public void delete(Long id) {
-        ServiceCatalog serviceCatalog = serviceCatalogRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Service catalog with id " + id + " not found"));
-        pictureService.deleteAllServiceCatalogPictures(serviceCatalog);
+        if (!serviceCatalogRepository.existsById(id)) {
+            throw new EntityNotFoundException("Service catalog with id " + id + " not found");
+        }
+        pictureService.deleteAllServiceCatalogPicturesByCatalogId(id);
         serviceCatalogRepository.deleteById(id);
     }
 }

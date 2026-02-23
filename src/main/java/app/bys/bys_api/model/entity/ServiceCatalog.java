@@ -32,4 +32,6 @@ public class ServiceCatalog {
     @Builder.Default
     @OneToMany(mappedBy = "serviceCatalog", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Picture> servicePictures = new HashSet<>();
+
+    public ServiceCatalog(Long id) { this.id = id; }
 }

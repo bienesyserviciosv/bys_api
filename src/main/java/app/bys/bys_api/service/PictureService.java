@@ -4,7 +4,6 @@ import app.bys.bys_api.mapper.PictureMapper;
 import app.bys.bys_api.model.dto.PictureDto;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
-import app.bys.bys_api.model.entity.ServiceCatalog;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.repository.MediaRepository;
@@ -143,24 +142,19 @@ public class PictureService {
     }
 
     @Transactional
-    public void deleteAllServiceCatalogPictures(ServiceCatalog serviceCatalog) {
-        Set<Picture> serviceCatalogPictures = serviceCatalog.getServicePictures();
+    public void deleteAllServiceCatalogPicturesByCatalogId(Long catalogId) {
 
-        if (serviceCatalogPictures.isEmpty()) {
-            return;
-        }
+        List<String> urls = pictureRepository.findUrlsByCatalogId(catalogId);
 
-        serviceCatalogPictures.forEach(picture -> {
+        urls.forEach(url -> {
             try {
-                mediaRepository.deleteImage(picture.getUrl());
+                mediaRepository.deleteImage(url);
+            } catch (Exception e) {
+                log.error("Failed to delete image: {}", url, e);
             }
-            catch (Exception e) {
-                log.error("Failed to delete image: {}", picture.getUrl(), e);
-            }
-            pictureRepository.delete(picture);
         });
 
-        serviceCatalog.getServicePictures().clear();
+        pictureRepository.deleteAllByCatalogId(catalogId);
     }
 
     @Transactional

@@ -62,5 +62,15 @@ public interface PictureRepository extends JpaRepository<Picture, Long> {
             """)
     List<Object[]> findCatalogIdAndPictureUrlList();
 
+    @Modifying
+    @Query("DELETE FROM Picture p WHERE p.serviceCatalog.id = :catalogId")
+    void deleteAllByCatalogId(Long catalogId);
+
+    @Query("""
+                SELECT p.url
+                FROM Picture p
+                WHERE p.serviceCatalog.id = :catalogId
+            """)
+    List<String> findUrlsByCatalogId(Long catalogId);
 
 }

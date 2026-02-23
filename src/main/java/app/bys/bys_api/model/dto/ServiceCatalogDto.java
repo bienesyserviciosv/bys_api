@@ -54,5 +54,4 @@ public class ServiceCatalogDto {
         this.servicePictures = new HashSet<>();
     }
 
-
 }
