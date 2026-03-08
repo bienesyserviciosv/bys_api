@@ -71,6 +71,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
               AND (:providerIds IS NULL OR sp.id IN :providerIds)
               AND (:userIds IS NULL OR fu.id IN :userIds)
               AND (:accepted IS NULL OR o.accepted = :accepted)
+            ORDER BY o.createdAt DESC
             """)
     Page<OfferDto> findAllOffersFiltered(
             @Param("search") String search,

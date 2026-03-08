@@ -206,6 +206,10 @@ public class ServiceRequestService {
     }
 
     private ServiceRequest saveServiceRequest(ServiceRequestDto serviceRequestDto, MultipartFile[] files, FinalUser finalUser) {
+        if (serviceRequestRepository.existsActiveRequestOfType(finalUser.getId(), serviceRequestDto.getSpecialization().getId())) {
+            throw new ConflictException("You already have an active request for this specialization");
+        }
+
         serviceRequestDto.setRequestStatus(RequestStatus.CREATED);
         serviceRequestDto.setOfferQuantity(0);
         serviceRequestDto.setNewOffer(false);

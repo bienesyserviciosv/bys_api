@@ -147,6 +147,10 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
               AND (:userList IS NULL OR fu.id IN :userList)
               AND (:providerList IS NULL OR sp.id IN :providerList)
               AND (:status IS NULL OR sr.requestStatus = :status)
+              AND (
+                     :status IS NOT NULL
+                     OR sr.requestStatus <> app.bys.bys_api.model.enums.RequestStatus.COMPLETED
+                  )
               AND (:allowedStatusForProviders IS NULL OR sr.requestStatus IN :allowedStatusForProviders)
               AND (:applyDateFilter = false OR sr.date >= :today)
             ORDER BY
@@ -191,5 +195,23 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
 """)
     void incrementOfferQuantity(Long id);
 
+
+    @Query("""
+    SELECT COUNT(sr) > 0
+    FROM ServiceRequest sr
+    WHERE sr.finalUser.id = :userId
+      AND sr.specialization.id = :specializationId
+      AND sr.requestStatus IN (
+            app.bys.bys_api.model.enums.RequestStatus.CREATED,
+            app.bys.bys_api.model.enums.RequestStatus.IN_PROGRESS,
+            app.bys.bys_api.model.enums.RequestStatus.PENDING,
+            app.bys.bys_api.model.enums.RequestStatus.ACCEPTED,
+            app.bys.bys_api.model.enums.RequestStatus.IN_REVIEW
+      )
+""")
+    boolean existsActiveRequestOfType(
+            @Param("userId") Long userId,
+            @Param("specializationId") Long specializationId
+    );
 
 }
