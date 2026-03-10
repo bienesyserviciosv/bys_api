@@ -15,4 +15,5 @@ public class ServiceRequestMinimal {
     private Long id;
     private RequestStatus status;
     private int offerQuantity;
+    private Long userId;
 }

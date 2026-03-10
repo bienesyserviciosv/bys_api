@@ -179,7 +179,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
     SELECT new app.bys.bys_api.model.dto.ServiceRequestMinimal(
         sr.id,
         sr.requestStatus,
-        sr.offerQuantity
+        sr.offerQuantity,
+        sr.finalUser.id
     )
     FROM ServiceRequest sr
     WHERE sr.id = :id

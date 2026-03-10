@@ -195,6 +195,51 @@ public class NotificationService {
         throw new ConflictException("The user can't read this notification");
     }
 
+    public void notifyUserOfNewOffer(Offer offer, Long userId) {
+        FinalUser finalUser = finalUserRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
+
+        if (notificationRepository.existsByFinalUserAndOfferAndNotificationType(finalUser, offer, NotificationType.NEW_OFFER)) {
+            log.debug("User {} already has NEW_OFFER notification for offer {}", finalUser.getId(), offer.getId());
+            return;
+        }
+
+        try {
+            Notification notification = Notification.builder()
+                    .finalUser(finalUser)
+                    .read(false)
+                    .offer(offer)
+                    .timestamp(LocalDateTime.now())
+                    .notificationType(NotificationType.NEW_OFFER)
+                    .build();
+
+            Notification savedNotification = notificationRepository.save(notification);
+
+            String fcmToken = finalUser.getFcmToken();
+
+            if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+                String notificationTitle = "Nueva oferta";
+                String notificationBody = "Has recibido una oferta para la solicitud: " + offer.getServiceRequest().getId();
+
+                Map<String, String> dataPayload = Map.of(
+                        "notificationType", "NEW_OFFER",
+                        "targetEntityType", "user",
+                        "targetEntityId", String.valueOf(finalUser.getId()),
+                        "relatedEntityType", "offer",
+                        "relatedEntityId", String.valueOf(offer.getId()),
+                        "notificationId", String.valueOf(savedNotification.getId()),
+                        "action", "view_new_offer"
+                );
+                sendFcmNotification(fcmToken, notificationTitle, notificationBody, dataPayload, "user", finalUser.getId());
+            } else {
+                log.warn("User {} doesn't have an FCM Token registered, can't send notification", finalUser.getId());
+            }
+        } catch (Exception e) {
+            // Unique constraint violation or other database error
+            log.debug("NEW_OFFER notification already exists or error saving for user {}: {}", finalUser.getId(), e.getMessage());
+        }
+    }
+
     public void notifyPaymentAccepted(Long userId, Long providerId, Long requestId, Long offerId) {
         FinalUser finalUser = finalUserRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Final user with id: " + userId + " not found"));
@@ -248,7 +293,7 @@ public class NotificationService {
                 );
                 sendFcmNotification(fcmToken, notificationTitle, notificationBody, dataPayload, "user", finalUser.getId());
             } else {
-                log.warn("Usuario {} no tiene token FCM registrado, no se puede enviar notificación", finalUser.getId());
+                log.warn("User {} doesn't have an FCM Token registered, can't send notification", finalUser.getId());
             }
         } catch (Exception e) {
             // Unique constraint violation or other database error
@@ -262,7 +307,7 @@ public class NotificationService {
             if (notificationRepository.existsByServiceProviderAndServiceRequestAndNotificationType(
                     serviceProvider, serviceRequest, NotificationType.PAID_OFFER)) {
                 log.debug("Provider {} already has PAID_OFFER notification for request {}", serviceProvider.getId(), serviceRequest.getId());
-                return; // Salir si ya existe
+                return;
             }
 
             Notification providerNotification = Notification.builder()
@@ -295,7 +340,7 @@ public class NotificationService {
                 );
                 sendFcmNotification(fcmToken, notificationTitle, notificationBody, dataPayload, "provider", serviceProvider.getId());
             } else {
-                log.warn("Proveedor {} no tiene token FCM registrado, no se puede enviar notificación", serviceProvider.getId());
+                log.warn("Provider {} doesn't have an FCM Token registered, can't send notification", serviceProvider.getId());
             }
         } catch (Exception e) {
             // Unique constraint violation or other database error

@@ -18,4 +18,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             app.bys.bys_api.model.entity.ServiceRequest serviceRequest,
             app.bys.bys_api.model.enums.NotificationType notificationType);
 
+    boolean existsByFinalUserAndOfferAndNotificationType(
+            app.bys.bys_api.model.entity.FinalUser finalUser,
+            app.bys.bys_api.model.entity.Offer offer,
+            app.bys.bys_api.model.enums.NotificationType notificationType);
+
 }

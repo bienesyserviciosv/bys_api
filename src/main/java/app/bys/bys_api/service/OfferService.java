@@ -12,10 +12,7 @@ import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.model.enums.UserStatus;
-import app.bys.bys_api.repository.FinalUserRepository;
-import app.bys.bys_api.repository.OfferRepository;
-import app.bys.bys_api.repository.ServiceProviderRepository;
-import app.bys.bys_api.repository.ServiceRequestRepository;
+import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.OfferSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.EntityNotFoundException;
@@ -44,6 +41,7 @@ public class OfferService {
     private final FinalUserRepository finalUserRepo;
     private final OfferRepository offerRepository;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final NotificationService notificationService;
 
     public OfferDto get(Long id) {
         return offerRepo.findOfferById(id)
@@ -176,7 +174,10 @@ public class OfferService {
         offer.setAccepted(false);
         offer.setCreatedAt(LocalDateTime.now());
 
-        return offerMapper.entityToDto(offerRepo.save(offer));
+        Offer savedOffer = offerRepo.save(offer);
+        notificationService.notifyUserOfNewOffer(savedOffer, requestMinimalDto.getUserId());
+
+        return offerMapper.entityToDto(savedOffer);
     }
 
     public OfferDto update(Long id, OfferDto offerDto) {
