@@ -4,6 +4,7 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.utils.specification.SearchCriteria;
 import jakarta.persistence.criteria.*;
 import lombok.NonNull;
@@ -58,12 +59,12 @@ public class OfferSpecification extends ASpecification<Offer> {
         };
     }
 
-    public static Specification<Offer> isAccepted(Boolean accepted) {
+    public static Specification<Offer> hasStatus(OfferStatus status) {
         return (root, query, criteriaBuilder) -> {
-            if (accepted == null) {
+            if (status == null) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.equal(root.get("accepted"), accepted);
+            return criteriaBuilder.equal(root.get("status"), status);
         };
     }
 

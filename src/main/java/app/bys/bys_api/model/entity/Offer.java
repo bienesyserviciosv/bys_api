@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.entity;
 
+import app.bys.bys_api.model.enums.OfferStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,8 +40,9 @@ public class Offer {
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
 
-    @Column(name = "accepted")
-    private Boolean accepted;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private OfferStatus status;
 
     @OneToOne(mappedBy = "offer")
     private Payment payment;

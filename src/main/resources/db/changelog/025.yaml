@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 025-offer-status-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: offer
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: "PENDING"
+  - changeSet:
+      id: 025-offer-status-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - sql:
+            sql: |
+              UPDATE offer SET status = 'ACCEPTED' WHERE accepted = TRUE;
+              UPDATE offer SET status = 'PENDING' WHERE accepted = FALSE OR accepted IS NULL;
+  - changeSet:
+      id: 025-offer-status-3
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - sql:
+            sql: |
+              UPDATE offer
+              SET status = 'COMPLETED'
+              WHERE id IN (
+                SELECT accepted_offer_id FROM service_request
+                WHERE request_status = 'COMPLETED' AND accepted_offer_id IS NOT NULL
+              )
+  - changeSet:
+      id: 025-offer-status-4
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            tableName: offer
+            columnName: accepted

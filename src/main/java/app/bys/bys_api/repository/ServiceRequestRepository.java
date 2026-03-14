@@ -16,6 +16,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -154,6 +155,7 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
               AND (:allowedStatusForProviders IS NULL OR sr.requestStatus IN :allowedStatusForProviders)
               AND (:applyDateFilter = false OR sr.date >= :today)
             ORDER BY
+                  CASE WHEN sr.creationDate >= :oneDayAgo THEN 0 ELSE 1 END ASC,
                   CASE WHEN sr.date <= :sevenDaysLater THEN 0 ELSE 1 END ASC,
                   CASE
                       WHEN sr.date <= :sevenDaysLater THEN sr.date
@@ -171,6 +173,7 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             @Param("applyDateFilter") boolean applyDateFilter,
             @Param("today") LocalDate today,
             @Param("sevenDaysLater") LocalDate sevenDaysLater,
+            @Param("oneDayAgo") LocalDateTime oneDayAgo,
             Pageable pageable
     );
 

@@ -3,6 +3,7 @@ package app.bys.bys_api.controller.admin;
 import app.bys.bys_api.model.dto.OfferDto;
 import app.bys.bys_api.model.dto.OfferMetricsDto;
 import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.OfferService;
@@ -39,8 +40,9 @@ public class AdminOfferController {
                                                                       @RequestParam(name = "search", required = false) String search,
                                                                       @RequestParam(name = "provider", required = false) List<Long> providerIdList,
                                                                       @RequestParam(name = "service_request", required = false) List<Long> serviceRequestIdList,
-                                                                      @RequestParam(name = "accepted", required = false) Boolean accepted) {
-        return new ResponseEntity<>(offerService.getAllOfferMetrics(pageable, search, providerIdList, serviceRequestIdList, accepted), HttpStatus.OK);
+                                                                      @RequestParam(name = "status", required = false) OfferStatus status,
+                                                                      @RequestParam(name = "exclude_completed", required = false) Boolean excludeCompleted) {
+        return new ResponseEntity<>(offerService.getAllOfferMetrics(pageable, search, providerIdList, serviceRequestIdList, status, excludeCompleted), HttpStatus.OK);
     }
 
     @GetMapping("/metrics/{id}")

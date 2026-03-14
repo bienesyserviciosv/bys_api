@@ -13,7 +13,9 @@ import app.bys.bys_api.model.dto.ServiceRequestSummary;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
+import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.model.enums.PictureType;
 import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
@@ -57,6 +59,7 @@ public class ServiceRequestService {
     private final MediaRepository mediaRepository;
     private final PictureRepository pictureRepository;
     private final NotificationService notificationService;
+    private final OfferRepository offerRepository;
 
     public ServiceRequestSummary get(Long id) {
         ServiceRequestSummary serviceRequestSummary = serviceRequestRepository.findRequestById(id)
@@ -76,6 +79,7 @@ public class ServiceRequestService {
         LocalDate today = LocalDate.now();
         boolean applyDateFilter = false;
         LocalDate sevenDaysLater = today.plusDays(7);
+        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
 
         if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PROVIDER"))) {
             allowedStatusForProviders = List.of(RequestStatus.CREATED);
@@ -95,7 +99,7 @@ public class ServiceRequestService {
 
         Page<ServiceRequestSummary> page = serviceRequestRepository.findAllRequestSummariesFiltered(
                 search, specializationList, province, userList, providerIdList, status,
-                allowedStatusForProviders, applyDateFilter, today, sevenDaysLater, pageable
+                allowedStatusForProviders, applyDateFilter, today, sevenDaysLater, oneDayAgo, pageable
         );
 
         List<ServiceRequestSummary> enrichedList = page.getContent().stream()
@@ -303,6 +307,11 @@ public class ServiceRequestService {
         finalUserRepository.save(finalUser);
 
         serviceRequest.setRequestStatus(RequestStatus.COMPLETED);
+        Offer acceptedOffer = serviceRequest.getAcceptedOffer();
+        if (acceptedOffer != null) {
+            acceptedOffer.setStatus(OfferStatus.COMPLETED);
+            offerRepository.save(acceptedOffer);
+        }
         ServiceProvider serviceProvider = serviceRequest.getServiceProvider();
         if (serviceProvider == null) {
             throw new RuntimeException("Service Request without a Service Provider associated");

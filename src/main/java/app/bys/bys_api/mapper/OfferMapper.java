@@ -17,6 +17,7 @@ public interface OfferMapper {
     OfferDto entityToDto(Offer offer);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "status", ignore = true)
     void updateOfferFromDto(OfferDto offerDto, @MappingTarget Offer offer);
 
     @Mapping(target = "serviceRequestId", source = "serviceRequest.id")

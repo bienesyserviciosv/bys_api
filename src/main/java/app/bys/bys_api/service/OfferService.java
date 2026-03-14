@@ -10,6 +10,7 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.*;
@@ -53,13 +54,13 @@ public class OfferService {
                 .orElseThrow(() -> new EntityNotFoundException("Offer with id: " + id + " not found")));
     }
 
-    public PageDto<OfferDto> getAll(Authentication auth, Pageable pageable, String search, List<Long> providerIdList, Long serviceRequestId, Boolean accepted, List<Long> userIdList) {
+    public PageDto<OfferDto> getAll(Authentication auth, Pageable pageable, String search, List<Long> providerIdList, Long serviceRequestId, OfferStatus status, List<Long> userIdList, Boolean excludeCompleted) {
 
         if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
         if (userIdList != null && userIdList.isEmpty()) userIdList = null;
         if (search == null) search = "";
 
-        Page<OfferDto> page = offerRepository.findAllOffersFiltered(search, serviceRequestId, providerIdList, accepted, userIdList, pageable);
+        Page<OfferDto> page = offerRepository.findAllOffersFiltered(search, serviceRequestId, providerIdList, status, userIdList, excludeCompleted, pageable);
 
         boolean hasUserRole = auth.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"));
@@ -78,7 +79,7 @@ public class OfferService {
         return PageMapper.pageToDto(page);
     }
 
-    private List<Specification<Offer>> getSpecificationList(String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted, List<Long> userIdList){
+    private List<Specification<Offer>> getSpecificationList(String search, List<Long> providerIdList, List<Long> serviceRequestIdList, OfferStatus status, List<Long> userIdList){
         Specification<Offer> providerSpec =
                 providerIdList != null ? OfferSpecification.hasProvider(providerIdList)
                         : null;
@@ -91,8 +92,8 @@ public class OfferService {
                 serviceRequestIdList != null ? OfferSpecification.hasServiceRequest(serviceRequestIdList)
                         : null;
 
-        Specification<Offer> acceptedSpec =
-                accepted != null ? OfferSpecification.isAccepted(accepted)
+        Specification<Offer> statusSpec =
+                status != null ? OfferSpecification.hasStatus(status)
                         : null;
 
         OfferSpecification searchSpec =
@@ -110,12 +111,12 @@ public class OfferService {
                 userSpec,
                 serviceRequestSpec,
                 searchSpec,
-                acceptedSpec
+                statusSpec
         ));
 
     }
 
-    public PageDto<OfferMetricsDto> getAllOfferMetrics(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, Boolean accepted) {
+    public PageDto<OfferMetricsDto> getAllOfferMetrics(Pageable pageable, String search, List<Long> providerIdList, List<Long> serviceRequestIdList, OfferStatus status, Boolean excludeCompleted) {
 
         if (providerIdList != null && providerIdList.isEmpty()) providerIdList = null;
         if (serviceRequestIdList != null && serviceRequestIdList.isEmpty()) serviceRequestIdList = null;
@@ -124,7 +125,7 @@ public class OfferService {
         // Se tradujeron los nombres de campos del DTO a propiedades reales de la entidad para que el sort funcione
         Pageable translatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), translateSort(pageable.getSort()));
 
-        Page<OfferMetricsDto> page = offerRepository.findAllOfferMetricsFiltered(search, serviceRequestIdList, providerIdList, accepted, translatedPageable);
+        Page<OfferMetricsDto> page = offerRepository.findAllOfferMetricsFiltered(search, serviceRequestIdList, providerIdList, status, excludeCompleted, translatedPageable);
 
         return PageMapper.pageToDto(page);
     }
@@ -171,7 +172,7 @@ public class OfferService {
         Offer offer = offerMapper.dtoToEntity(offerDto);
         offer.setProvider(provider);
         offer.setServiceRequest(new ServiceRequest(requestId));
-        offer.setAccepted(false);
+        offer.setStatus(OfferStatus.PENDING);
         offer.setCreatedAt(LocalDateTime.now());
 
         Offer savedOffer = offerRepo.save(offer);
@@ -251,14 +252,14 @@ public class OfferService {
             if (offer.equals(previousAccepted)) {
                 return offerMapper.entityToDto(offer);
             }
-            previousAccepted.setAccepted(false);
+            previousAccepted.setStatus(OfferStatus.PENDING);
             previousAccepted.setAcceptedAt(null);
             previousAccepted.setFinalUser(null);
             offerRepo.save(previousAccepted);
         }
 
         offer.setFinalUser(finalUser);
-        offer.setAccepted(true);
+        offer.setStatus(OfferStatus.ACCEPTED);
         offer.setAcceptedAt(LocalDateTime.now());
 
         request.setAcceptedOffer(offer);

@@ -1,6 +1,6 @@
 package app.bys.bys_api.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import app.bys.bys_api.model.enums.OfferStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,27 +12,12 @@ import java.time.LocalDateTime;
 @Setter
 public class OfferMetricsDto {
 
-//    @JsonProperty("id")
     private Long id;
-
-//    @JsonProperty("worker_name")
     private String workerName;
-
-//    @JsonProperty("description")
     private String description;
-
-//    @JsonProperty("price")
     private Double price;
-
-//    @JsonProperty("service_request_id")
     private Long serviceRequestId;
-
-//    @JsonProperty("created_at")
     private LocalDateTime createdAt;
-
-//    @JsonProperty("accepted")
-    private Boolean accepted;
-
-//    @JsonProperty("accepted_at")
+    private OfferStatus status;
     private LocalDateTime acceptedAt;
 }

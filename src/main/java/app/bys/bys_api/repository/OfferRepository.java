@@ -3,6 +3,7 @@ package app.bys.bys_api.repository;
 import app.bys.bys_api.model.dto.OfferDto;
 import app.bys.bys_api.model.dto.OfferMetricsDto;
 import app.bys.bys_api.model.entity.Offer;
+import app.bys.bys_api.model.enums.OfferStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,7 +39,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
                 o.description,
                 sr.id,
                 sp.id,
-                o.accepted,
+                o.status,
                 o.createdAt,
                 o.acceptedAt
             )
@@ -58,7 +59,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
                 o.description,
                 sr.id,
                 sp.id,
-                o.accepted,
+                o.status,
                 o.createdAt,
                 o.acceptedAt
             )
@@ -70,20 +71,20 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
               AND (:serviceRequestId IS NULL OR sr.id = :serviceRequestId)
               AND (:providerIds IS NULL OR sp.id IN :providerIds)
               AND (:userIds IS NULL OR fu.id IN :userIds)
-              AND (:accepted IS NULL OR o.accepted = :accepted)
-            ORDER BY o.createdAt DESC
+              AND (:status IS NULL OR o.status = :status)
+              AND (:excludeCompleted IS NULL OR :excludeCompleted = false OR o.status <> app.bys.bys_api.model.enums.OfferStatus.COMPLETED)
             """)
     Page<OfferDto> findAllOffersFiltered(
             @Param("search") String search,
             @Param("serviceRequestId") Long serviceRequestId,
             @Param("providerIds") List<Long> providerIds,
-            @Param("accepted") Boolean accepted,
+            @Param("status") OfferStatus status,
             @Param("userIds") List<Long> userIds,
+            @Param("excludeCompleted") Boolean excludeCompleted,
             Pageable pageable
     );
 
     @Query("""
-            
             SELECT new app.bys.bys_api.model.dto.OfferMetricsDto(
                 o.id,
                 sp.name,
@@ -91,7 +92,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
                 o.price,
                 sr.id,
                 o.createdAt,
-                o.accepted,
+                o.status,
                 o.acceptedAt
             )
             FROM Offer o
@@ -100,13 +101,15 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
             WHERE (:search IS NULL OR LOWER(o.description) LIKE LOWER(CONCAT('%', :search, '%')))
               AND (:serviceRequestIds IS NULL OR sr.id IN :serviceRequestIds)
               AND (:providerIds IS NULL OR sp.id IN :providerIds)
-              AND (:accepted IS NULL OR o.accepted = :accepted)
+              AND (:status IS NULL OR o.status = :status)
+              AND (:excludeCompleted IS NULL OR :excludeCompleted = false OR o.status <> app.bys.bys_api.model.enums.OfferStatus.COMPLETED)
             """)
     Page<OfferMetricsDto> findAllOfferMetricsFiltered(
             @Param("search") String search,
             @Param("serviceRequestIds") List<Long> serviceRequestIds,
             @Param("providerIds") List<Long> providerIds,
-            @Param("accepted") Boolean accepted,
+            @Param("status") OfferStatus status,
+            @Param("excludeCompleted") Boolean excludeCompleted,
             Pageable pageable
     );
 }

@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
+import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,8 +45,8 @@ public class OfferDto {
     @JsonProperty(value = "provider_id", access = JsonProperty.Access.READ_ONLY)
     private Long providerId;
 
-    @JsonProperty("accepted")
-    private Boolean accepted;
+    @JsonProperty("status")
+    private OfferStatus status;
 
     @JsonProperty("created_at")
     private LocalDateTime createdAt;

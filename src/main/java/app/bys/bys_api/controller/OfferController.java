@@ -2,6 +2,7 @@ package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.OfferDto;
 import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.OfferService;
@@ -40,8 +41,9 @@ public class OfferController {
                                                     @RequestParam(name = "provider", required = false) List<Long> providerIdList,
                                                     @RequestParam(name = "user", required = false) List<Long> userIdList,
                                                     @RequestParam(name = "service_request", required = false) Long serviceRequestId,
-                                                    @RequestParam(name = "accepted", required = false) Boolean accepted) {
-        return new ResponseEntity<>(offerService.getAll(auth, pageable, search, providerIdList, serviceRequestId, accepted, userIdList), HttpStatus.OK);
+                                                    @RequestParam(name = "status", required = false) OfferStatus status,
+                                                    @RequestParam(name = "exclude_completed", required = false) Boolean excludeCompleted) {
+        return new ResponseEntity<>(offerService.getAll(auth, pageable, search, providerIdList, serviceRequestId, status, userIdList, excludeCompleted), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER')")
