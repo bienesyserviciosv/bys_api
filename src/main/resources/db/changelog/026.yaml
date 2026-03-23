@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 026-service-request-completed-at
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: service_request
+            columns:
+              - column:
+                  name: completed_at
+                  type: DATETIME
+        - sql:
+            sql: |
+              UPDATE service_request
+              SET completed_at = acceptance_date
+              WHERE request_status = 'COMPLETED' 
+              AND completed_at IS NULL
+              AND acceptance_date IS NOT NULL;

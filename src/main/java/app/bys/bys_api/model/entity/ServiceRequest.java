@@ -4,6 +4,7 @@ import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +55,9 @@ public class ServiceRequest {
     @Column(name = "acceptance_date")
     private LocalDateTime acceptanceDate;
 
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     @Column(name = "offer_quantity")
     private Integer offerQuantity;
 
@@ -65,6 +69,7 @@ public class ServiceRequest {
     private Specialization specialization;
 
     @Builder.Default
+    @BatchSize(size = 30)
     @OneToMany(mappedBy = "serviceRequest",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Picture> pictureSet =  new HashSet<>();
 
@@ -77,6 +82,7 @@ public class ServiceRequest {
     private ServiceProvider serviceProvider;
 
     @OneToMany(mappedBy = "serviceRequest", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @BatchSize(size = 30)
     private Set<Offer> offerSet = new HashSet<>();
 
     @OneToOne

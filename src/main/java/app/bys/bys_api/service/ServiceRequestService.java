@@ -307,6 +307,7 @@ public class ServiceRequestService {
         finalUserRepository.save(finalUser);
 
         serviceRequest.setRequestStatus(RequestStatus.COMPLETED);
+        serviceRequest.setCompletedAt(LocalDateTime.now());
         Offer acceptedOffer = serviceRequest.getAcceptedOffer();
         if (acceptedOffer != null) {
             acceptedOffer.setStatus(OfferStatus.COMPLETED);
