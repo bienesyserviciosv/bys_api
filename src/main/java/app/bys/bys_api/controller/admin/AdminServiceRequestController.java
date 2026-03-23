@@ -1,12 +1,8 @@
 package app.bys.bys_api.controller.admin;
 
 import app.bys.bys_api.mapper.ServiceRequestMapper;
-import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.dto.ServiceRequestDto;
-import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
-import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.ServiceRequest;
-import app.bys.bys_api.service.NotificationService;
 import app.bys.bys_api.service.ServiceRequestService;
 import app.bys.bys_api.validation.OnCreate;
 import lombok.RequiredArgsConstructor;
@@ -53,5 +49,20 @@ public class AdminServiceRequestController {
         ServiceRequest serviceRequest = serviceRequestService.createWithUserId(id, serviceRequestDto, files);
 
         return new ResponseEntity<>(serviceRequestMapper.entityToDtoWithPicture(serviceRequest), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/detail_info/{id}")
+    public ResponseEntity<ServiceRequestInfo> getRequestInfo(@PathVariable Long id) {
+        return new ResponseEntity<>(serviceRequestService.getRequestInfo(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/detail_info")
+    public ResponseEntity<PageDto<ServiceRequestInfo>> getAllRequestInfo(Pageable pageable,
+                                                                                  @RequestParam(name = "search", required = false) String search,
+                                                                                  @RequestParam(name = "specialization", required = false) List<Long> specializationList,
+                                                                                  @RequestParam(name = "address", required = false) String address,
+                                                                                  @RequestParam(name = "user", required = false) List<Long> userIdList
+    ) throws BadRequestException {
+        return new ResponseEntity<>(serviceRequestService.getAllRequestsInfo(pageable, search, specializationList, address, userIdList), HttpStatus.OK);
     }
 }

@@ -6,10 +6,7 @@ import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.mapper.FinalUserMapper;
 import app.bys.bys_api.mapper.PageMapper;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
-import app.bys.bys_api.model.dto.PageDto;
-import app.bys.bys_api.model.dto.ServiceRequestDto;
-import app.bys.bys_api.model.dto.ServiceRequestMetricsDto;
-import app.bys.bys_api.model.dto.ServiceRequestSummary;
+import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceProvider;
@@ -321,5 +318,32 @@ public class ServiceRequestService {
         serviceProviderRepository.save(serviceProvider);
 
         serviceRequestRepository.save(serviceRequest);
+    }
+
+    @Transactional(readOnly = true)
+    public ServiceRequestInfo getRequestInfo(Long id) {
+        ServiceRequest sr = serviceRequestRepository.findAdminInfoById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Service request with id: " + id + " not found"));
+        return requestMapper.entityToRequestInfo(sr);
+    }
+
+    @Transactional(readOnly = true)
+    public PageDto<ServiceRequestInfo> getAllRequestsInfo(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userIdList) throws BadRequestException {
+
+        Province province = null;
+        if (address != null) {
+            try {
+                province = Province.valueOf(address);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid province: " + address);
+            }
+        }
+        if (search == null || search.isBlank()) search = "";
+        if (specializationList != null && specializationList.isEmpty()) specializationList = null;
+        if (userIdList != null && userIdList.isEmpty()) userIdList = null;
+
+        Page<ServiceRequest> serviceRequestPage = serviceRequestRepository.findAllRequestInfo(search, specializationList, province, userIdList, pageable);
+
+        return PageMapper.pageToDto(serviceRequestPage.map(requestMapper::entityToRequestInfo));
     }
 }

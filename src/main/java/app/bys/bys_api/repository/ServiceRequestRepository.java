@@ -95,6 +95,35 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             """)
     Optional<ServiceRequestMetricsDto> findRequestMetricsById(@Param("requestId") Long requestId);
 
+    @Query("""
+            SELECT DISTINCT sr FROM ServiceRequest sr
+            JOIN FETCH sr.finalUser fu
+            LEFT JOIN FETCH sr.comment c
+            LEFT JOIN FETCH c.author
+            LEFT JOIN FETCH c.provider
+            LEFT JOIN FETCH sr.acceptedOffer
+            LEFT JOIN FETCH sr.pictureSet
+            WHERE sr.id = :id
+            """)
+    Optional<ServiceRequest> findAdminInfoById(@Param("id") Long id);
+
+    @Query("""
+            SELECT DISTINCT sr FROM ServiceRequest sr
+            JOIN FETCH sr.finalUser fu
+            LEFT JOIN FETCH sr.comment c
+            LEFT JOIN FETCH c.author
+            LEFT JOIN FETCH c.provider
+            LEFT JOIN FETCH sr.acceptedOffer
+            LEFT JOIN FETCH sr.pictureSet
+            LEFT JOIN FETCH sr.offerSet
+            """)
+    Page<ServiceRequest> findAllRequestInfo(
+                                            @Param("search") String search,
+                                            @Param("specializationList") List<Long> specializationList,
+                                            @Param("address") Province address,
+                                            @Param("userList") List<Long> userList,
+                                            Pageable pageable
+    );
 
     @Query("""
             SELECT new app.bys.bys_api.model.dto.ServiceRequestSummary(

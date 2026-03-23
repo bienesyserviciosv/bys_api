@@ -1,6 +1,7 @@
 package app.bys.bys_api.mapper;
 
 import app.bys.bys_api.model.dto.ServiceRequestDto;
+import app.bys.bys_api.model.dto.ServiceRequestInfo;
 import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
@@ -11,7 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {FinalUserMapper.class})
+@Mapper(componentModel = "spring", uses = {FinalUserMapper.class, OfferMapper.class, CommentMapper.class})
 public abstract class ServiceRequestMapper {
 
     @Value("${media.url}")
@@ -52,7 +53,18 @@ public abstract class ServiceRequestMapper {
         if (pictures == null) return Set.of();
         return pictures.stream()
                 .map(Picture::getUrl)
+                .filter(Objects::nonNull)
+                .map(url -> url.startsWith(mediaUrl) ? url : mediaUrl + url)
                 .collect(Collectors.toSet());
     }
+
+    @Mapping(source = "finalUser.id", target = "userId")
+    @Mapping(source = "requestStatus", target = "status")
+    @Mapping(source = "comment", target = "commentDto")
+    @Mapping(source = "offerSet", target = "offerDtoSet")
+    @Mapping(target = "pictureSet", qualifiedByName = "pictureToUrlSet")
+    @Mapping(target = "rating", expression = "java(serviceRequest.getComment() != null ? serviceRequest.getComment().getStarRating() : null)")
+    public abstract ServiceRequestInfo entityToRequestInfo(ServiceRequest serviceRequest);
+
 }
 
