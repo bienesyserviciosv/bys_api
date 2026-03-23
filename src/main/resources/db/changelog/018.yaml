@@ -23,6 +23,30 @@ databaseChangeLog:
             referencedTableName: offer
 
   - changeSet:
+      id: 1763247363186-2b
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: service_request
+                columnName: accepted_offer_id
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: accepted_offer_id
+                  type: BIGINT
+            tableName: service_request
+        - addForeignKeyConstraint:
+            baseColumnNames: accepted_offer_id
+            baseTableName: service_request
+            constraintName: FK_SERVICE_REQUEST_ON_ACCEPTED_OFFER
+            referencedColumnNames: id
+            referencedTableName: offer
+
+  - changeSet:
       id: 1763247363186-3
       author: Carlos
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS

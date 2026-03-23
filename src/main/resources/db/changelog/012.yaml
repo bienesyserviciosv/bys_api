@@ -2,20 +2,22 @@ databaseChangeLog:
   - changeSet:
       id: 20251013-01
       author: Carlos
+      # Liquibase checksum uses `changes` only (not preConditions). If any env still fails validation, add validCheckSum with MD5SUM from databasechangelog for this id+author.
       preConditions:
+        - onFail: MARK_RAN
         - or:
             - sqlCheck:
                 expectedResult: "1"
                 sql: |
-                    SELECT CASE WHEN EXISTS (
-                      SELECT 1 FROM service_provider WHERE address IN ('PROVINCE_NAME_1','PROVINCE_NAME_2','PROVINCE_NAME_3','PROVINCE_NAME_4')
-                    ) THEN 1 ELSE 0 END;
+                  SELECT CASE WHEN EXISTS (
+                    SELECT 1 FROM service_provider WHERE address IN ('PROVINCE_NAME_1','PROVINCE_NAME_2','PROVINCE_NAME_3','PROVINCE_NAME_4')
+                  ) THEN 1 ELSE 0 END;
             - sqlCheck:
                 expectedResult: "1"
                 sql: |
-                    SELECT CASE WHEN EXISTS (
-                      SELECT 1 FROM service_request WHERE address IN ('PROVINCE_NAME_1','PROVINCE_NAME_2','PROVINCE_NAME_3','PROVINCE_NAME_4')
-                    ) THEN 1 ELSE 0 END;
+                  SELECT CASE WHEN EXISTS (
+                    SELECT 1 FROM service_request WHERE address IN ('PROVINCE_NAME_1','PROVINCE_NAME_2','PROVINCE_NAME_3','PROVINCE_NAME_4')
+                  ) THEN 1 ELSE 0 END;
       changes:
         - sql:
             sql: |
@@ -42,4 +44,3 @@ databaseChangeLog:
         - sql:
             sql: |
               UPDATE service_request SET address = 'NUEVA_BARCELONA' WHERE address = 'PROVINCE_NAME_4';
-
