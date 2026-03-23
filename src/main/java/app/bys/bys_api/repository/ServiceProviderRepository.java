@@ -20,6 +20,12 @@ import java.util.Optional;
 
 @Repository
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long>, JpaSpecificationExecutor<ServiceProvider> {
+
+    @Query("SELECT COUNT(sp) FROM ServiceProvider sp")
+    long countAllServiceProvider();
+
+    long countByVerifiedFalse();
+
     Optional<ServiceProvider> findByEmail(String email);
 
     boolean existsByEmail(String email);

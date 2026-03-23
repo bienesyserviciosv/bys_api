@@ -20,6 +20,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
     @Query("SELECT COUNT(p) FROM Payment p  WHERE p.paymentStatus = 'ACCEPTED'")
     long countCompletedTransactions();
 
+    @Query("SELECT COUNT(p) FROM Payment p  WHERE p.paymentStatus = 'PENDING'")
+    long countPendingTransactions();
+
     @Query("""
                 SELECT new app.bys.bys_api.model.dto.TransferPaymentDto(
                     p.id, p.bank, p.screenshot, p.idNumber, p.referenceNumber,

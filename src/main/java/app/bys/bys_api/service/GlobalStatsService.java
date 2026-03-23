@@ -1,9 +1,7 @@
 package app.bys.bys_api.service;
 
 import app.bys.bys_api.model.dto.GlobalStatsDto;
-import app.bys.bys_api.repository.OfferRepository;
-import app.bys.bys_api.repository.PaymentRepository;
-import app.bys.bys_api.repository.ServiceRequestRepository;
+import app.bys.bys_api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +12,18 @@ public class GlobalStatsService {
     private final OfferRepository offerRepository;
     private final PaymentRepository paymentRepository;
     private final ServiceRequestRepository serviceRequestRepository;
+    private final FinalUserRepository finalUserRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
 
     public GlobalStatsDto getGlobalStats() {
         return GlobalStatsDto.builder()
                 .totalCompletedTransactions(paymentRepository.countCompletedTransactions())
                 .totalOffers(offerRepository.countAllOffers())
+                .totalClients(finalUserRepository.countAllFinalUser())
+                .totalServiceProviders(serviceProviderRepository.countAllServiceProvider())
+                .serviceProvidersNotVerified(serviceProviderRepository.countByVerifiedFalse())
                 .totalRequests(serviceRequestRepository.countAllRequests())
+                .pendingPayments(paymentRepository.countPendingTransactions())
                 .totalProfit(offerRepository.calculateTotalProfit())
                 .averageAcceptanceDurationInHours(getAverageDuration())
                 .build();

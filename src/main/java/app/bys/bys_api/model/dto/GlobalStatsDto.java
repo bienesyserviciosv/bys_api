@@ -16,8 +16,20 @@ public class GlobalStatsDto {
     @JsonProperty("total_offers")
     private long totalOffers;
 
+     @JsonProperty("total_clients")
+    private long totalClients;
+
+     @JsonProperty("total_service_providers")
+    private long totalServiceProviders;
+
+     @JsonProperty("service_providers_not_verified")
+    private long serviceProvidersNotVerified;
+
     @JsonProperty("total_completed_transactions")
     private long totalCompletedTransactions;
+
+    @JsonProperty("pending_payments")
+    private long pendingPayments;
 
     @JsonProperty("total_profit")
     private Double totalProfit;

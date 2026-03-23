@@ -18,6 +18,9 @@ import java.util.Optional;
 @Repository
 public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, JpaSpecificationExecutor<FinalUser> {
 
+    @Query("SELECT COUNT(fu) FROM FinalUser fu")
+    long countAllFinalUser();
+
     Optional<FinalUser> findByEmail(String email);
 
     boolean existsByEmail(String email);
