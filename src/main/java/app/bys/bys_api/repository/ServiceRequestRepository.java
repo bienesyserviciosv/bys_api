@@ -98,27 +98,39 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
     @Query("""
             SELECT DISTINCT sr FROM ServiceRequest sr
             JOIN FETCH sr.finalUser fu
+            JOIN FETCH sr.specialization s
             LEFT JOIN FETCH sr.comment c
             LEFT JOIN FETCH c.author
             LEFT JOIN FETCH c.provider
-            LEFT JOIN FETCH sr.acceptedOffer
-            LEFT JOIN FETCH sr.pictureSet
+            LEFT JOIN FETCH sr.acceptedOffer ao
+            LEFT JOIN FETCH ao.payment
             WHERE sr.id = :id
             """)
     Optional<ServiceRequest> findAdminInfoById(@Param("id") Long id);
 
-    @Query("""
+    @Query(value = """
             SELECT DISTINCT sr FROM ServiceRequest sr
             JOIN FETCH sr.finalUser fu
+            JOIN FETCH sr.specialization s
             LEFT JOIN FETCH sr.comment c
             LEFT JOIN FETCH c.author
             LEFT JOIN FETCH c.provider
-            LEFT JOIN FETCH sr.acceptedOffer
-            LEFT JOIN FETCH sr.pictureSet
+            LEFT JOIN FETCH sr.acceptedOffer ao
+            LEFT JOIN FETCH ao.payment
             LEFT JOIN FETCH sr.offerSet
+            WHERE (:address IS NULL OR sr.address = :address)
+              AND (:specializationList IS NULL OR s.id IN :specializationList)
+              AND (:userList IS NULL OR fu.id IN :userList)
+            """,
+            countQuery = """
+            SELECT COUNT(DISTINCT sr.id) FROM ServiceRequest sr
+            JOIN sr.finalUser fu
+            JOIN sr.specialization s
+            WHERE (:address IS NULL OR sr.address = :address)
+              AND (:specializationList IS NULL OR s.id IN :specializationList)
+              AND (:userList IS NULL OR fu.id IN :userList)
             """)
     Page<ServiceRequest> findAllRequestInfo(
-                                            @Param("search") String search,
                                             @Param("specializationList") List<Long> specializationList,
                                             @Param("address") Province address,
                                             @Param("userList") List<Long> userList,

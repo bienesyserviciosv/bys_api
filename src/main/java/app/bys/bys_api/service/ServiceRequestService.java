@@ -328,7 +328,7 @@ public class ServiceRequestService {
     }
 
     @Transactional(readOnly = true)
-    public PageDto<ServiceRequestInfo> getAllRequestsInfo(Pageable pageable, String search, List<Long> specializationList, String address, List<Long> userIdList) throws BadRequestException {
+    public PageDto<ServiceRequestInfo> getAllRequestsInfo(Pageable pageable, List<Long> specializationList, String address, List<Long> userIdList) throws BadRequestException {
 
         Province province = null;
         if (address != null) {
@@ -338,11 +338,10 @@ public class ServiceRequestService {
                 throw new BadRequestException("Invalid province: " + address);
             }
         }
-        if (search == null || search.isBlank()) search = "";
         if (specializationList != null && specializationList.isEmpty()) specializationList = null;
         if (userIdList != null && userIdList.isEmpty()) userIdList = null;
 
-        Page<ServiceRequest> serviceRequestPage = serviceRequestRepository.findAllRequestInfo(search, specializationList, province, userIdList, pageable);
+        Page<ServiceRequest> serviceRequestPage = serviceRequestRepository.findAllRequestInfo(specializationList, province, userIdList, pageable);
 
         return PageMapper.pageToDto(serviceRequestPage.map(requestMapper::entityToRequestInfo));
     }

@@ -3,6 +3,7 @@ package app.bys.bys_api.mapper;
 import app.bys.bys_api.model.dto.ServiceRequestDto;
 import app.bys.bys_api.model.dto.ServiceRequestInfo;
 import app.bys.bys_api.model.dto.ServiceRequestWithPictureDto;
+import app.bys.bys_api.model.entity.Payment;
 import app.bys.bys_api.model.entity.Picture;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import org.mapstruct.*;
@@ -62,9 +63,25 @@ public abstract class ServiceRequestMapper {
     @Mapping(source = "requestStatus", target = "status")
     @Mapping(source = "comment", target = "commentDto")
     @Mapping(source = "offerSet", target = "offerDtoSet")
-    @Mapping(target = "pictureSet", qualifiedByName = "pictureToUrlSet")
+    @Mapping(target = "pictureSet", ignore = true)
+    @Mapping(source = "specialization.specializationType", target = "specialization")
     @Mapping(target = "rating", expression = "java(serviceRequest.getComment() != null ? serviceRequest.getComment().getStarRating() : null)")
     public abstract ServiceRequestInfo entityToRequestInfo(ServiceRequest serviceRequest);
+
+    @AfterMapping
+    public void fillRequestInfoPaymentScreenshots(ServiceRequest source, @MappingTarget ServiceRequestInfo target) {
+        String screenshot = null;
+        if (source.getAcceptedOffer() != null && source.getAcceptedOffer().getPayment() != null) {
+            Payment p = source.getAcceptedOffer().getPayment();
+            screenshot = p.getScreenshot();
+        }
+        if (screenshot != null && !screenshot.isBlank()) {
+            String url = screenshot.startsWith(mediaUrl) ? screenshot : mediaUrl + screenshot;
+            target.setPictureSet(Set.of(url));
+        } else {
+            target.setPictureSet(Set.of());
+        }
+    }
 
 }
 

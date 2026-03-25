@@ -58,11 +58,10 @@ public class AdminServiceRequestController {
 
     @GetMapping("/detail_info")
     public ResponseEntity<PageDto<ServiceRequestInfo>> getAllRequestInfo(Pageable pageable,
-                                                                                  @RequestParam(name = "search", required = false) String search,
                                                                                   @RequestParam(name = "specialization", required = false) List<Long> specializationList,
                                                                                   @RequestParam(name = "address", required = false) String address,
                                                                                   @RequestParam(name = "user", required = false) List<Long> userIdList
     ) throws BadRequestException {
-        return new ResponseEntity<>(serviceRequestService.getAllRequestsInfo(pageable, search, specializationList, address, userIdList), HttpStatus.OK);
+        return new ResponseEntity<>(serviceRequestService.getAllRequestsInfo(pageable, specializationList, address, userIdList), HttpStatus.OK);
     }
 }

@@ -17,6 +17,7 @@ public class ServiceRequestInfo {
     private Long id;
     private Long userId;
     private Province address;
+    private String specialization;
     private Set<OfferDto> offerDtoSet;
     private RequestStatus status;
     private LocalDateTime creationDate;
