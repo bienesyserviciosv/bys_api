@@ -29,7 +29,7 @@ import java.util.Set;
         "address",
         "specializations",
         "experience",
-        "verified",
+        "adminVerified",
         "membershipType",
         "registrationDate",
         "lastLoginDate",
@@ -81,8 +81,8 @@ public class ServiceProviderWithPictureDto {
     @JsonProperty("experience")
     private String experience;
 
-    @JsonProperty("verified")
-    private Boolean verified;
+    @JsonProperty("adminVerified")
+    private Boolean adminVerified;
 
     @JsonProperty("membershipType")
     @Enumerated(EnumType.STRING)

@@ -24,7 +24,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     @Query("SELECT COUNT(sp) FROM ServiceProvider sp")
     long countAllServiceProvider();
 
-    long countByVerifiedFalse();
+    long countByAdminVerifiedFalse();
 
     Optional<ServiceProvider> findByEmail(String email);
 
@@ -46,7 +46,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
         sp.phoneNumber,
         sp.address,
         sp.experience,
-        sp.verified,
+        sp.adminVerified,
         sp.membershipType,
         sp.registrationDate,
         sp.lastLoginDate,
@@ -72,7 +72,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
                 sp.phoneNumber,
                 sp.address,
                 sp.experience,
-                sp.verified,
+                sp.adminVerified,
                 sp.membershipType,
                 sp.registrationDate,
                 sp.lastLoginDate,
@@ -87,7 +87,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
               AND (:search IS NULL OR LOWER(sp.name) LIKE LOWER(CONCAT('%', :search, '%')))
               AND (:address IS NULL OR sp.address = :address)
               AND (:membershipType IS NULL OR sp.membershipType = :membershipType)
-              AND (:verified IS NULL OR sp.verified = :verified)
+              AND (:adminVerified IS NULL OR sp.adminVerified = :adminVerified)
               AND (:specializationList IS NULL OR EXISTS (
                     SELECT s FROM sp.specializations s WHERE s.id IN :specializationList
               ))
@@ -97,7 +97,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
             @Param("specializationList") List<Long> specializationList,
             @Param("address") Province address,
             @Param("membershipType") MembershipType membershipType,
-            @Param("verified") Boolean verified,
+            @Param("adminVerified") Boolean adminVerified,
             Pageable pageable
     );
 

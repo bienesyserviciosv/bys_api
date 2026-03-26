@@ -12,7 +12,6 @@ import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
 import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.model.enums.RequestStatus;
-import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.service.specification.OfferSpecification;
 import app.bys.bys_api.utils.specification.SearchCriteria;
@@ -149,10 +148,10 @@ public class OfferService {
     public OfferDto create(ServiceProvider provider, OfferDto offerDto) {
         Long requestId = offerDto.getServiceRequestId();
 
-        if (provider.getStatus().equals(UserStatus.INACTIVE)){
+        if (!provider.isEmailVerified()){
             throw new EmailNotVerifiedException(ErrorMessage.EM_EMAIL_NOT_VERIFIED);
         }
-        if (!provider.getVerified()){
+        if (!provider.getAdminVerified()){
             throw new ConflictException("Service provider is not verified");
         }
 

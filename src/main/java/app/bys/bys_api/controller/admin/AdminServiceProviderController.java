@@ -33,8 +33,8 @@ public class AdminServiceProviderController {
                                                                   @RequestParam(name = "specializations", required = false) List<Long> specializationList,
                                                                   @RequestParam(name = "address", required = false) String address,
                                                                   @RequestParam(name = "membershipType", required = false) MembershipType membershipType,
-                                                                  @RequestParam(name = "verified", required = false) Boolean verified
+                                                                  @RequestParam(name = "adminVerified", required = false) Boolean adminVerified
                                                                   ) throws BadRequestException {
-        return ResponseEntity.ok(serviceProviderService.getAll(pageable, search, specializationList, address, membershipType, verified));
+        return ResponseEntity.ok(serviceProviderService.getAll(pageable, search, specializationList, address, membershipType, adminVerified));
     }
 }

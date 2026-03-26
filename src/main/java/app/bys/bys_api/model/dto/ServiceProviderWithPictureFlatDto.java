@@ -22,7 +22,7 @@ public class ServiceProviderWithPictureFlatDto {
     private String phoneNumber;
     private Province address;
     private String experience;
-    private Boolean verified;
+    private Boolean adminVerified;
     private MembershipType membershipType;
     private LocalDateTime registrationDate;
     private LocalDateTime lastLoginDate;

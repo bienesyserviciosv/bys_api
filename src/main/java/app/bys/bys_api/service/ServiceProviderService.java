@@ -74,7 +74,7 @@ public class ServiceProviderService {
         return getServiceProviderWithPictureDto(id);
     }
 
-    public PageDto<ServiceProviderSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, MembershipType membershipType, Boolean verified) throws BadRequestException {
+    public PageDto<ServiceProviderSummary> getAll(Pageable pageable, String search, List<Long> specializationList, String address, MembershipType membershipType, Boolean adminVerified) throws BadRequestException {
         Province province = null;
         if (address != null) {
             try {
@@ -87,7 +87,7 @@ public class ServiceProviderService {
             search = "";
         }
         if (specializationList != null && specializationList.isEmpty()) specializationList = null;
-        Page<ServiceProviderSummary> page = serviceProviderRepository.findAllProviderSummariesFiltered(search, specializationList, province, membershipType, verified, pageable);
+        Page<ServiceProviderSummary> page = serviceProviderRepository.findAllProviderSummariesFiltered(search, specializationList, province, membershipType, adminVerified, pageable);
 
         page.forEach(dto -> {
             Set<String> specializationSet = specializationRepository.findByServiceProviderId(dto.getId())
@@ -121,7 +121,7 @@ public class ServiceProviderService {
                 .phoneVerified(false)
                 .status(UserStatus.INACTIVE)
                 .membershipType(MembershipType.NOT_VERIFIED)
-                .verified(false)
+                .adminVerified(false)
                 .completedServices(0)
                 .address(serviceProviderDto.getAddress())
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
@@ -200,11 +200,19 @@ public class ServiceProviderService {
         ServiceProvider provider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Service provider with id " + id + " not found"));
 
-        provider.setVerified(true);
+        provider.setAdminVerified(true);
         provider.setMembershipType(MembershipType.BASIC);
+        activateIfEligible(provider);
         serviceProviderRepository.save(provider);
 
         return mapper.entityToDto(provider);
+    }
+
+    public void activateIfEligible(ServiceProvider provider) {
+        boolean adminVerified = Boolean.TRUE.equals(provider.getAdminVerified());
+        if (adminVerified && provider.isEmailVerified()) {
+            provider.setStatus(UserStatus.ACTIVE);
+        }
     }
 
     public MembershipType calculateMembershipType(ServiceProvider provider) {

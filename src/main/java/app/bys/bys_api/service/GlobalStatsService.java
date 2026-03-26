@@ -21,7 +21,7 @@ public class GlobalStatsService {
                 .totalOffers(offerRepository.countAllOffers())
                 .totalClients(finalUserRepository.countAllFinalUser())
                 .totalServiceProviders(serviceProviderRepository.countAllServiceProvider())
-                .serviceProvidersNotVerified(serviceProviderRepository.countByVerifiedFalse())
+                .serviceProvidersNotVerified(serviceProviderRepository.countByAdminVerifiedFalse())
                 .totalRequests(serviceRequestRepository.countAllRequests())
                 .pendingPayments(paymentRepository.countPendingTransactions())
                 .totalProfit(offerRepository.calculateTotalProfit())

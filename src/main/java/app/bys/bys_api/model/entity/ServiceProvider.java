@@ -35,8 +35,8 @@ public class ServiceProvider {
     @Column(name = "experience")
     private String experience;
 
-    @Column(name = "verified")
-    private Boolean verified;
+    @Column(name = "admin_verified")
+    private Boolean adminVerified;
 
     @Column(name = "membership_type")
     @Enumerated(EnumType.STRING)

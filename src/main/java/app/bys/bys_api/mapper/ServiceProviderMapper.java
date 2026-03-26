@@ -95,7 +95,7 @@ public abstract class ServiceProviderMapper {
                 .phoneNumber(flatDto.getPhoneNumber())
                 .address(flatDto.getAddress())
                 .experience(flatDto.getExperience())
-                .verified(flatDto.getVerified())
+                .adminVerified(flatDto.getAdminVerified())
                 .membershipType(flatDto.getMembershipType())
                 .registrationDate(flatDto.getRegistrationDate())
                 .lastLoginDate(flatDto.getLastLoginDate())

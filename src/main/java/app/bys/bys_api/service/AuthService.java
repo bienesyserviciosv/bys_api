@@ -138,7 +138,7 @@ public class AuthService {
                 .emailVerified(false)
                 .phoneVerified(false)
                 .membershipType(MembershipType.NOT_VERIFIED)
-                .verified(false)
+                .adminVerified(false)
                 .completedServices(0)
                 .address(dto.getAddress())
                 .roles(Set.of(roleService.getRoleOrThrow("ROLE_PROVIDER")))
@@ -190,7 +190,7 @@ public class AuthService {
         boolean providerFound = serviceProviderRepo.findByEmail(email)
                 .map(provider -> {
                     provider.setEmailVerified(true);
-                    provider.setStatus(UserStatus.ACTIVE);
+                    serviceProviderService.activateIfEligible(provider);
                     serviceProviderRepo.save(provider);
                     return true;
                 }).orElse(false);

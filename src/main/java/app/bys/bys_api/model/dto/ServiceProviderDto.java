@@ -76,8 +76,8 @@ public class ServiceProviderDto {
     @JsonProperty("experience")
     private String experience;
 
-    @JsonProperty("verified")
-    private Boolean verified;
+    @JsonProperty("adminVerified")
+    private Boolean adminVerified;
 
     @JsonProperty("membershipType")
     @Enumerated(EnumType.STRING)

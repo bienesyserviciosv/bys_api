@@ -23,7 +23,7 @@ public class ServiceProviderSummary {
     private Province address;
     private Set<String> specializations;
     private String experience;
-    private Boolean verified;
+    private Boolean adminVerified;
     private MembershipType membershipType;
     private LocalDateTime registrationDate;
     private LocalDateTime lastLoginDate;
@@ -33,7 +33,7 @@ public class ServiceProviderSummary {
     private String role;
 
     public ServiceProviderSummary(Long id, String name, String email, String phoneNumber,
-                                  Province address, String experience, Boolean verified, MembershipType membershipType,
+                                  Province address, String experience, Boolean adminVerified, MembershipType membershipType,
                                   LocalDateTime registrationDate, LocalDateTime lastLoginDate, Integer completedServices,
                                   Double qualification, UserStatus status, String role) {
 
@@ -43,7 +43,7 @@ public class ServiceProviderSummary {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.experience = experience;
-        this.verified = verified;
+        this.adminVerified = adminVerified;
         this.membershipType = membershipType;
         this.registrationDate = registrationDate;
         this.lastLoginDate = lastLoginDate;
