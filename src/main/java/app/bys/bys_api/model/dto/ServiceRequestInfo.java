@@ -1,5 +1,6 @@
 package app.bys.bys_api.model.dto;
 
+import app.bys.bys_api.model.enums.PaymentType;
 import app.bys.bys_api.model.enums.Province;
 import app.bys.bys_api.model.enums.RequestStatus;
 import lombok.*;
@@ -16,6 +17,7 @@ public class ServiceRequestInfo {
 
     private Long id;
     private Long userId;
+    private String description;
     private Province address;
     private String specialization;
     private Set<OfferDto> offerDtoSet;
@@ -27,5 +29,9 @@ public class ServiceRequestInfo {
     private CommentDto commentDto;
     //private Double clientRating;
     //private CommentDto clientComment;
+    private Long paymentId;
+    private LocalDateTime paymentDate;
+    private PaymentType paymentType;
+    private Double amountInBolivars;
     private Set<String> pictureSet;
 }
