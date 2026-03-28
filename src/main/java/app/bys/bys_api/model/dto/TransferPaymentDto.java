@@ -29,6 +29,15 @@ public class TransferPaymentDto {
     @JsonProperty("screenshot")
     private String screenshot;
 
+    @JsonProperty("user_id")
+    private Long userId;
+
+    @JsonProperty("user_name")
+    private String userName;
+
+    @JsonProperty("service_specialization")
+    private String serviceSpecialization;
+
     @JsonProperty("id_number")
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private String idNumber;

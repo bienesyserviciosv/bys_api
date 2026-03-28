@@ -4,6 +4,7 @@ import app.bys.bys_api.model.dto.MobilePaymentDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.Payment;
 import app.bys.bys_api.model.enums.BankName;
+import app.bys.bys_api.model.enums.PaymentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,15 +26,18 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
 
     @Query("""
                 SELECT new app.bys.bys_api.model.dto.TransferPaymentDto(
-                    p.id, p.bank, p.screenshot, p.idNumber, p.referenceNumber,
+                    p.id, p.bank, p.screenshot, fu.id, fu.name,
+                    o.serviceRequest.specialization.specializationType, p.idNumber, p.referenceNumber,
                     p.accountHolderName, p.paymentDate, p.offer.id,
                     p.amountInBolivars, p.paymentType, p.paymentStatus
                 )
                 FROM Payment p
                 JOIN p.finalUser fu
+                JOIN p.offer o
                 JOIN p.serviceProvider sp
                 WHERE p.paymentType = 'TRANSFER'
                 AND (:bank IS NULL OR p.bank = :bank)
+                AND (:paymentStatus IS NULL OR p.paymentStatus = :paymentStatus)
                 AND (:userIdList IS NULL OR fu.id IN (:userIdList))
                 AND (:providerIdList IS NULL OR sp.id IN (:providerIdList))
             """)
@@ -41,24 +45,29 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
             @Param("bank") BankName bank,
             @Param("userIdList") List<Long> userIdList,
             @Param("providerIdList") List<Long> providerIdList,
+            @Param("paymentStatus") PaymentStatus paymentStatus,
             Pageable pageable);
 
     @Query("""
                 SELECT new app.bys.bys_api.model.dto.MobilePaymentDto(
-                    p.id, p.bank, p.screenshot, p.idNumber, p.referenceNumber,
+                    p.id, p.bank, p.screenshot, fu.id, fu.name,
+                    o.serviceRequest.specialization.specializationType, p.idNumber, p.referenceNumber,
                     p.paymentDate, p.phoneCode, p.phoneNumber, p.offer.id,
                     p.amountInBolivars, p.paymentType, p.paymentStatus
                 )
                 FROM Payment p
                 JOIN p.finalUser fu
+                JOIN p.offer o
                 JOIN p.serviceProvider sp
                 WHERE p.paymentType = 'MOBILE'
                 AND (:bank IS NULL OR p.bank = :bank)
+                AND (:paymentStatus IS NULL OR p.paymentStatus = :paymentStatus)
                 AND (:userIdList IS NULL OR fu.id IN (:userIdList))
                 AND (:providerIdList IS NULL OR sp.id IN (:providerIdList))
             """)
     Page<MobilePaymentDto> findMobilePayments(@Param("bank") BankName bank,
                                               @Param("userIdList") List<Long> userIdList,
                                               @Param("providerIdList") List<Long> providerIdList,
+                                              @Param("paymentStatus") PaymentStatus paymentStatus,
                                               Pageable pageable);
 }

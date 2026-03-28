@@ -56,7 +56,7 @@ public class PaymentService {
         };
     }
 
-    public PageDto<Object> getAllPayments(Pageable pageable, String search, List<Long> userIdList, List<Long> providerIdList) throws BadRequestException {
+    public PageDto<Object> getAllPayments(Pageable pageable, String search, List<Long> userIdList, List<Long> providerIdList, PaymentStatus paymentStatus) throws BadRequestException {
 
         BankName bankFilter = null;
         if (search != null && !search.isBlank()) {
@@ -67,8 +67,8 @@ public class PaymentService {
             }
         }
 
-        Page<TransferPaymentDto> transfers = paymentRepository.findTransferPayments(bankFilter, userIdList, providerIdList, pageable);
-        Page<MobilePaymentDto> mobiles = paymentRepository.findMobilePayments(bankFilter, userIdList, providerIdList, pageable);
+        Page<TransferPaymentDto> transfers = paymentRepository.findTransferPayments(bankFilter, userIdList, providerIdList, paymentStatus, pageable);
+        Page<MobilePaymentDto> mobiles = paymentRepository.findMobilePayments(bankFilter, userIdList, providerIdList, paymentStatus, pageable);
 
         List<Object> combined = Stream.concat(
                         transfers.getContent().stream(),

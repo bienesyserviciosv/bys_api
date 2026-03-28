@@ -5,6 +5,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.ServiceRequestDto;
 import app.bys.bys_api.model.entity.Payment;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.PaymentStatus;
 import app.bys.bys_api.repository.ServiceRequestRepository;
 import app.bys.bys_api.service.NotificationService;
 import app.bys.bys_api.service.PaymentService;
@@ -34,8 +35,9 @@ public class AdminPaymentController {
     public ResponseEntity<PageDto<Object>> getAll(Pageable pageable,
                                                       @RequestParam(name = "search", required = false) String search,
                                                       @RequestParam(name = "user", required = false) List<Long> userIdList,
+                                                      @RequestParam(name = "paymentStatus", required = false) PaymentStatus paymentStatus,
                                                       @RequestParam(name = "provider", required = false) List<Long> providerIdList) throws BadRequestException {
-        return ResponseEntity.ok(paymentService.getAllPayments(pageable, search, userIdList, providerIdList));
+        return ResponseEntity.ok(paymentService.getAllPayments(pageable, search, userIdList, providerIdList, paymentStatus));
     }
 
     @Transactional
