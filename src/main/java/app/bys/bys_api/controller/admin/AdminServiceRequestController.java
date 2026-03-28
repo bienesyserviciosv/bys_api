@@ -3,6 +3,7 @@ package app.bys.bys_api.controller.admin;
 import app.bys.bys_api.mapper.ServiceRequestMapper;
 import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.service.ServiceRequestService;
 import app.bys.bys_api.validation.OnCreate;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -60,8 +62,11 @@ public class AdminServiceRequestController {
     public ResponseEntity<PageDto<ServiceRequestInfo>> getAllRequestInfo(Pageable pageable,
                                                                                   @RequestParam(name = "specialization", required = false) List<Long> specializationList,
                                                                                   @RequestParam(name = "address", required = false) String address,
-                                                                                  @RequestParam(name = "user", required = false) List<Long> userIdList
+                                                                                  @RequestParam(name = "user", required = false) List<Long> userIdList,
+                                                                                  @RequestParam(name = "status", required = false) List<RequestStatus> statusList,
+                                                                                  @RequestParam(name = "createdFrom", required = false) LocalDate createdFrom,
+                                                                                  @RequestParam(name = "createdTo", required = false) LocalDate createdTo
     ) throws BadRequestException {
-        return new ResponseEntity<>(serviceRequestService.getAllRequestsInfo(pageable, specializationList, address, userIdList), HttpStatus.OK);
+        return new ResponseEntity<>(serviceRequestService.getAllRequestsInfo(pageable, specializationList, address, userIdList, statusList, createdFrom, createdTo), HttpStatus.OK);
     }
 }

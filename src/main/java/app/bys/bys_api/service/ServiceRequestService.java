@@ -44,6 +44,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ServiceRequestService {
 
+    /** Bounds for open-ended creation date filters (PostgreSQL rejects untyped NULL in "? IS NULL OR …"). */
+    private static final LocalDateTime CREATION_RANGE_START = LocalDateTime.of(1900, 1, 1, 0, 0);
+    private static final LocalDateTime CREATION_RANGE_END_EXCLUSIVE = LocalDateTime.of(2100, 1, 1, 0, 0);
+
     private final ServiceProviderRepository serviceProviderRepository;
 
     @Value("${media.url}")
@@ -328,7 +332,8 @@ public class ServiceRequestService {
     }
 
     @Transactional(readOnly = true)
-    public PageDto<ServiceRequestInfo> getAllRequestsInfo(Pageable pageable, List<Long> specializationList, String address, List<Long> userIdList) throws BadRequestException {
+    public PageDto<ServiceRequestInfo> getAllRequestsInfo(Pageable pageable, List<Long> specializationList, String address, List<Long> userIdList,
+                                                           List<RequestStatus> statusList, LocalDate createdFrom, LocalDate createdTo) throws BadRequestException {
 
         Province province = null;
         if (address != null) {
@@ -340,8 +345,18 @@ public class ServiceRequestService {
         }
         if (specializationList != null && specializationList.isEmpty()) specializationList = null;
         if (userIdList != null && userIdList.isEmpty()) userIdList = null;
+        List<RequestStatus> effectiveStatusList =
+                (statusList == null || statusList.isEmpty()) ? Arrays.asList(RequestStatus.values()) : statusList;
 
-        Page<ServiceRequest> serviceRequestPage = serviceRequestRepository.findAllRequestInfo(specializationList, province, userIdList, pageable);
+        if (createdFrom != null && createdTo != null && createdFrom.isAfter(createdTo)) {
+            throw new BadRequestException("createdFrom must not be after createdTo");
+        }
+
+        LocalDateTime createdFromDt = createdFrom != null ? createdFrom.atStartOfDay() : CREATION_RANGE_START;
+        LocalDateTime createdToExclusive = createdTo != null ? createdTo.plusDays(1).atStartOfDay() : CREATION_RANGE_END_EXCLUSIVE;
+
+        Page<ServiceRequest> serviceRequestPage = serviceRequestRepository.findAllRequestInfo(
+                specializationList, province, userIdList, effectiveStatusList, createdFromDt, createdToExclusive, pageable);
 
         return PageMapper.pageToDto(serviceRequestPage.map(requestMapper::entityToRequestInfo));
     }

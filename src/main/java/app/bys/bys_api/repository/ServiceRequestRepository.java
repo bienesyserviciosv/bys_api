@@ -121,6 +121,9 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             WHERE (:address IS NULL OR sr.address = :address)
               AND (:specializationList IS NULL OR s.id IN :specializationList)
               AND (:userList IS NULL OR fu.id IN :userList)
+              AND sr.requestStatus IN :statusList
+              AND sr.creationDate >= :createdFrom
+              AND sr.creationDate < :createdToExclusive
             """,
             countQuery = """
             SELECT COUNT(DISTINCT sr.id) FROM ServiceRequest sr
@@ -129,11 +132,17 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             WHERE (:address IS NULL OR sr.address = :address)
               AND (:specializationList IS NULL OR s.id IN :specializationList)
               AND (:userList IS NULL OR fu.id IN :userList)
+              AND sr.requestStatus IN :statusList
+              AND sr.creationDate >= :createdFrom
+              AND sr.creationDate < :createdToExclusive
             """)
     Page<ServiceRequest> findAllRequestInfo(
                                             @Param("specializationList") List<Long> specializationList,
                                             @Param("address") Province address,
                                             @Param("userList") List<Long> userList,
+                                            @Param("statusList") List<RequestStatus> statusList,
+                                            @Param("createdFrom") LocalDateTime createdFrom,
+                                            @Param("createdToExclusive") LocalDateTime createdToExclusive,
                                             Pageable pageable
     );
 
