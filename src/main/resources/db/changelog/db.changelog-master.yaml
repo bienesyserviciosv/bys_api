@@ -55,3 +55,5 @@ databaseChangeLog:
       file: db/changelog/026.yaml
   - include:
       file: db/changelog/027.yaml
+  - include:
+      file: db/changelog/028.yaml

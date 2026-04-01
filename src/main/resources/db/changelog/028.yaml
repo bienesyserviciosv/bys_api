@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1773000000000-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: payment
+                columnName: amount_in_usd
+      changes:
+        - addColumn:
+            tableName: payment
+            columns:
+              - column:
+                  name: amount_in_usd
+                  type: DOUBLE
+
+  - changeSet:
+      id: 1773000000000-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: payment
+            columnName: amount_in_usd
+      changes:
+        - sql:
+            comment: Backfill amount_in_usd from amount_in_bolivars at 1 VES = 0.002120 USD
+            sql: |
+              UPDATE payment
+              SET amount_in_usd = COALESCE(amount_in_bolivars, 0) * 0.002120
+              WHERE amount_in_usd IS NULL;
+
+#  - changeSet:
+#      id: 1773000000000-3
+#      author: Carlos
+#      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+#      preConditions:
+#        - onFail: MARK_RAN
+#        - columnExists:
+#            tableName: payment
+#            columnName: amount_in_usd
+#      changes:
+#        - addNotNullConstraint:
+#            tableName: payment
+#            columnName: amount_in_usd
+#            columnDataType: DOUBLE

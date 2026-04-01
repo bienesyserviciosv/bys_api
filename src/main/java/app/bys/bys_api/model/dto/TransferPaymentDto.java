@@ -63,6 +63,10 @@ public class TransferPaymentDto {
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     private Double amountInBolivars;
 
+    @JsonProperty("amount_in_usd")
+    //@NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
+    private Double amountInUsd;
+
     @JsonProperty ("payment_type")
     private PaymentType paymentType;
 

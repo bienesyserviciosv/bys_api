@@ -33,5 +33,6 @@ public class ServiceRequestInfo {
     private LocalDateTime paymentDate;
     private PaymentType paymentType;
     private Double amountInBolivars;
+    private Double amountInUsd;
     private Set<String> pictureSet;
 }
