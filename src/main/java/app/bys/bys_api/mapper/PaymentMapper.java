@@ -14,6 +14,7 @@ public abstract class PaymentMapper {
     public abstract Payment transferDtoToEntity(TransferPaymentDto transferPaymentDto);
 
     @Mapping(target = "offerId", source = "offer.id")
+    @Mapping(target = "phoneNumber", source = "finalUser.phoneNumber")
     public abstract TransferPaymentDto entityToTransferDto(Payment payment);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

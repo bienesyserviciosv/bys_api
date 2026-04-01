@@ -35,6 +35,9 @@ public class TransferPaymentDto {
     @JsonProperty("user_name")
     private String userName;
 
+    @JsonProperty(value = "phone_number", access = JsonProperty.Access.READ_ONLY)
+    private String phoneNumber;
+
     @JsonProperty("service_specialization")
     private String serviceSpecialization;
 
