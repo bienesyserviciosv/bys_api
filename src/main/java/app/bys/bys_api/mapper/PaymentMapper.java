@@ -15,6 +15,7 @@ public abstract class PaymentMapper {
 
     @Mapping(target = "offerId", source = "offer.id")
     @Mapping(target = "phoneNumber", source = "finalUser.phoneNumber")
+    @Mapping(target = "amountInUsd", source = "offer.price")
     public abstract TransferPaymentDto entityToTransferDto(Payment payment);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -24,6 +25,7 @@ public abstract class PaymentMapper {
     public abstract Payment mobileDtoToEntity(MobilePaymentDto mobilePaymentDto);
 
     @Mapping(target = "offerId", source = "offer.id")
+    @Mapping(target = "amountInUsd", source = "offer.price")
     public abstract MobilePaymentDto entityToMobileDto(Payment payment);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

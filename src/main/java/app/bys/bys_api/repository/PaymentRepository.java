@@ -29,7 +29,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
                     p.id, p.bank, p.screenshot, fu.id, fu.name, fu.phoneNumber,
                     o.serviceRequest.specialization.specializationType, p.idNumber, p.referenceNumber,
                     p.accountHolderName, p.paymentDate, p.offer.id,
-                    p.amountInBolivars, p.amountInUsd, p.paymentType, p.paymentStatus
+                    p.amountInBolivars, o.price, p.paymentType, p.paymentStatus
                 )
                 FROM Payment p
                 JOIN p.finalUser fu
@@ -53,7 +53,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
                     p.id, p.bank, p.screenshot, fu.id, fu.name,
                     o.serviceRequest.specialization.specializationType, p.idNumber, p.referenceNumber,
                     p.paymentDate, p.phoneCode, p.phoneNumber, p.offer.id,
-                    p.amountInBolivars, p.amountInUsd, p.paymentType, p.paymentStatus
+                    p.amountInBolivars, o.price, p.paymentType, p.paymentStatus
                 )
                 FROM Payment p
                 JOIN p.finalUser fu

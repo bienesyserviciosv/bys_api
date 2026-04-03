@@ -67,7 +67,7 @@ public abstract class ServiceRequestMapper {
     @Mapping(source = "acceptedOffer.payment.paymentDate", target = "paymentDate")
     @Mapping(source = "acceptedOffer.payment.paymentType", target = "paymentType")
     @Mapping(source = "acceptedOffer.payment.amountInBolivars", target = "amountInBolivars")
-    @Mapping(source = "acceptedOffer.payment.amountInUsd", target = "amountInUsd")
+    @Mapping(source = "acceptedOffer.price", target = "amountInUsd")
     @Mapping(target = "pictureSet", ignore = true)
     @Mapping(source = "specialization.specializationType", target = "specialization")
     @Mapping(target = "rating", expression = "java(serviceRequest.getComment() != null ? serviceRequest.getComment().getStarRating() : null)")

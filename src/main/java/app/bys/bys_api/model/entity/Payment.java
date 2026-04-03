@@ -60,9 +60,6 @@ public class Payment {
     @Column(name = "amount_in_bolivars")
     private Double amountInBolivars;
 
-    @Column(name = "amount_in_usd") //, nullable = false
-    private Double amountInUsd;
-
     @ManyToOne
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
