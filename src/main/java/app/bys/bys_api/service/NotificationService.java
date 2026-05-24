@@ -97,7 +97,9 @@ public class NotificationService {
                         fcmToken,
                         "Nueva solicitud disponible",
                         "Hay una nueva solicitud disponible para tu especialización",
-                        dataPayload
+                        dataPayload,
+                        "provider",
+                        provider.getId()
                 ));
             }
         }
@@ -107,17 +109,15 @@ public class NotificationService {
                 BatchResponse response = fcmService.sendBatchNotifications(requests);
                 for (int i = 0; i < response.getResponses().size(); i++) {
                     SendResponse resp = response.getResponses().get(i);
+                    NotificationRequest request = requests.get(i);
                     if (!resp.isSuccessful()) {
                         MessagingErrorCode errorCode = resp.getException().getMessagingErrorCode();
-                        // Handle multiple error codes that indicate invalid tokens
-                        if (errorCode == MessagingErrorCode.UNREGISTERED ||
-                            errorCode == MessagingErrorCode.INVALID_ARGUMENT) {
-                            ServiceProvider provider = notificationsToSend.get(i).getServiceProvider();
-                            serviceProviderRepository.updateFcmToken(provider.getId(), null);
-                            log.warn("FCM Token cleared for provider ID {} due to {}.", provider.getId(), errorCode);
+                        if (errorCode == MessagingErrorCode.UNREGISTERED || errorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+                            clearFcmTokenIfInvalid(request.targetEntityType(), request.targetEntityId(), errorCode);
                         } else {
-                            log.error("FCM send failed for provider ID {} with error: {}",
-                                    notificationsToSend.get(i).getServiceProvider().getId(),
+                            log.error("FCM send failed for {} ID {} with error: {}",
+                                    request.targetEntityType(),
+                                    request.targetEntityId(),
                                     resp.getException().getMessage());
                         }
                     }
@@ -379,6 +379,16 @@ public class NotificationService {
         }
     }
 
+    private void clearFcmTokenIfInvalid(String entityType, Long entityId, MessagingErrorCode errorCode) {
+        if ("provider".equals(entityType)) {
+            serviceProviderRepository.updateFcmToken(entityId, null);
+            log.warn("FCM Token cleared for ServiceProvider ID {} due to {}.", entityId, errorCode);
+        } else if ("user".equals(entityType)) {
+            finalUserRepository.updateFcmToken(entityId, null);
+            log.warn("FCM Token cleared for FinalUser ID {} due to {}.", entityId, errorCode);
+        }
+    }
+
     private void sendFcmNotification(String token, String notificationTitle, String notificationBody, Map<String, String> dataPayload, String entityType, Long entityId) {
         if (token == null || token.trim().isEmpty()) {
             log.warn("Token FCM es null o vacío para la entidad {}, no se puede enviar notificación", entityType + " ID " + entityId);
@@ -393,15 +403,8 @@ public class NotificationService {
             log.error("Error al enviar FCM al token {} del {}: {} (Error Code: {})", token, entityType + " ID " + entityId, e.getMessage(), errorCode);
 
             // Clear token for various invalid token errors
-            if (errorCode == MessagingErrorCode.UNREGISTERED ||
-                errorCode == MessagingErrorCode.INVALID_ARGUMENT) {
-                if (entityType.equals("provider")) {
-                    serviceProviderRepository.updateFcmToken(entityId, null);
-                    log.warn("Token FCM limpiado para ServiceProvider ID {} debido a {}.", entityId, errorCode);
-                } else if (entityType.equals("user")) {
-                    finalUserRepository.updateFcmToken(entityId, null);
-                    log.warn("Token FCM limpiado para FinalUser ID {} debido a {}.", entityId, errorCode);
-                }
+            if (errorCode == MessagingErrorCode.UNREGISTERED || errorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+                clearFcmTokenIfInvalid(entityType, entityId, errorCode);
             }
         }
     }
