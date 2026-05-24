@@ -5,6 +5,7 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.repository.FinalUserRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
 import app.bys.bys_api.service.AuthService;
+import app.bys.bys_api.service.FcmTokenService;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.service.OtpService;
 import app.bys.bys_api.utils.JwtUtil;
@@ -48,6 +49,7 @@ public class AuthController {
     private final FinalUserRepository finalUserRepo;
     private final ServiceProviderRepository serviceProviderRepo;
     private final JwtUtil jwtUtil;
+    private final FcmTokenService fcmTokenService;
 
     @Value("${google.oauth2.android-client-id}")
     private String googleClientId;
@@ -174,6 +176,8 @@ public class AuthController {
                     .collect(Collectors.toList());
 
             String jwt = jwtUtil.generateToken(user.getEmail(), authorities);
+
+            fcmTokenService.registerFcmToken(user.getId(), request.getFcmToken(), user.getRoles());
 
             log.info("Token audience: {}", payload.getAudience());
 

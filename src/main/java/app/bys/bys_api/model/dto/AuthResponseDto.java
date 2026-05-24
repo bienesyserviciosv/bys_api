@@ -35,4 +35,7 @@ public class AuthResponseDto {
     @JsonProperty("token")
     private String token;
 
+    @JsonProperty("fcm_token")
+    private String fcmToken;
+
 }

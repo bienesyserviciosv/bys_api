@@ -1,6 +1,7 @@
 package app.bys.bys_api.model.dto;
 
 import app.bys.bys_api.error.ErrorMessage;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -16,6 +17,9 @@ public class AuthRequestDto {
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD)
     private String password;
+
+    @JsonProperty("fcm_token")
+    private String fcmToken;
 }
 
 

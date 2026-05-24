@@ -55,6 +55,7 @@ public class AuthService {
     private final PictureService pictureService;
     private final FinalUserService finalUserService;
     private final ServiceProviderService serviceProviderService;
+    private final FcmTokenService fcmTokenService;
 
     @Transactional
     public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
@@ -206,12 +207,14 @@ public class AuthService {
         if (finalUserRepo.existsByEmail(identifier) || finalUserRepo.existsByPhoneNumber(identifier)) {
             FinalUser user = getUser(identifier);
 
-            return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword(), user.getRoles());
+            return authenticateAndRespond(
+                    user.getEmail(), authRequestDto.getPassword(), user.getRoles(), authRequestDto.getFcmToken());
         }
 
         if (serviceProviderRepo.existsByEmail(identifier) || serviceProviderRepo.existsByPhoneNumber(identifier)) {
             ServiceProvider provider = getProvider(identifier);
-            return authenticateAndRespond(provider.getEmail(), authRequestDto.getPassword(), provider.getRoles());
+            return authenticateAndRespond(
+                    provider.getEmail(), authRequestDto.getPassword(), provider.getRoles(), authRequestDto.getFcmToken());
         }
 
         throw new UsernameNotFoundException("Credenciales erróneas");
@@ -231,7 +234,8 @@ public class AuthService {
                 throw new AccessDeniedException("Access denied: not an admin");
             }
 
-            return authenticateAndRespond(user.getEmail(), authRequestDto.getPassword(), user.getRoles());
+            return authenticateAndRespond(
+                    user.getEmail(), authRequestDto.getPassword(), user.getRoles(), authRequestDto.getFcmToken());
         }
 
         throw new UsernameNotFoundException("Credenciales erróneas");
@@ -317,7 +321,8 @@ public class AuthService {
                 : serviceProviderRepo.findByPhoneNumber(identifier).orElseThrow(() -> new UsernameNotFoundException("Phone number not found"));
     }
 
-    private ResponseEntity<AuthResponseDto> authenticateAndRespond(String username, String password, Set<Role> roles) {
+    private ResponseEntity<AuthResponseDto> authenticateAndRespond(
+            String username, String password, Set<Role> roles, String fcmToken) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
         String jwt = jwtUtil.generateToken(auth);
@@ -334,6 +339,7 @@ public class AuthService {
                     .name(user.getName())
                     .phoneNumber(user.getPhoneNumber())
                     .registrationDate(user.getRegistrationDate())
+                    .fcmToken(user.getFcmToken())
                     .build();
         }
 
@@ -348,7 +354,15 @@ public class AuthService {
                     .name(user.getName())
                     .phoneNumber(user.getPhoneNumber())
                     .registrationDate(user.getRegistrationDate())
+                    .fcmToken(user.getFcmToken())
                     .build();
+        }
+
+        if (authResponseDto.getId() != null) {
+            fcmTokenService.registerFcmToken(authResponseDto.getId(), fcmToken, roles);
+            if (fcmToken != null && !fcmToken.isBlank()) {
+                authResponseDto.setFcmToken(fcmToken.trim());
+            }
         }
 
         return ResponseEntity.ok(authResponseDto);

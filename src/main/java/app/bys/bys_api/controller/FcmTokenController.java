@@ -1,65 +1,40 @@
 package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.FcmTokenDto;
-import app.bys.bys_api.repository.FinalUserRepository;
-import app.bys.bys_api.repository.ServiceProviderRepository;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import jakarta.persistence.EntityNotFoundException;
+import app.bys.bys_api.model.entity.Role;
+import app.bys.bys_api.service.FcmTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 @RequestMapping("/fcm")
 public class FcmTokenController {
 
-    private final FinalUserRepository finalUserRepository;
-    private final ServiceProviderRepository serviceProviderRepository;
-    private final FirebaseMessaging firebaseMessaging;
+    private final FcmTokenService fcmTokenService;
 
-    @PatchMapping ("/token")
+    @PatchMapping("/token")
     public ResponseEntity<Void> registerFcmToken(@Valid @RequestBody FcmTokenDto tokenDto, Authentication auth) {
+        Set<Role> roles = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .map(name -> {
+                    Role role = new Role();
+                    role.setName(name);
+                    return role;
+                })
+                .collect(Collectors.toSet());
 
-        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PROVIDER"))){
-            if (!serviceProviderRepository.existsById(tokenDto.getUserId())){
-                throw new EntityNotFoundException("Provider with id " + tokenDto.getUserId() + " not found");
-            }
-//            ServiceProvider provider = serviceProviderRepository.findByEmail(auth.getName()).orElseThrow();
-//            if (!provider.getId().equals(tokenDto.getUserId())){
-//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//            }
-
-            serviceProviderRepository.updateFcmToken(tokenDto.getUserId(), tokenDto.getToken());
-            log.info("Token FCM actualizado para el prestador de servicios ID: {}", tokenDto.getUserId());
-            return ResponseEntity.ok().build();
-        }
-        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"))) {
-            if (!finalUserRepository.existsById(tokenDto.getUserId())) {
-                throw new EntityNotFoundException("Final User with id " + tokenDto.getUserId() + " not found");
-            }
-            finalUserRepository.updateFcmToken(tokenDto.getUserId(), tokenDto.getToken());
-            log.info("Token FCM actualizado para el usuario ID: {}", tokenDto.getUserId());
-        }
-        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
-            final String topic = "ADMIN_NEW_PAYMENTS";
-            try {
-                firebaseMessaging.subscribeToTopic(List.of(tokenDto.getToken()), topic);
-                log.info("Token {} suscrito con éxito al tópico {}.", tokenDto.getToken(), topic);
-            } catch (FirebaseMessagingException e) {
-                log.error("Error al suscribir el token {} al tópico {}: {}", tokenDto.getToken(), topic, e.getMessage());
-            }
-        }
+        fcmTokenService.registerFcmToken(tokenDto.getUserId(), tokenDto.getToken(), roles);
         return ResponseEntity.ok().build();
     }
 }

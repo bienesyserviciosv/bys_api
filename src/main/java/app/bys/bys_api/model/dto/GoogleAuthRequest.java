@@ -10,4 +10,5 @@ import lombok.*;
 public class GoogleAuthRequest {
 
     private String idToken;
+    private String fcmToken;
 }
