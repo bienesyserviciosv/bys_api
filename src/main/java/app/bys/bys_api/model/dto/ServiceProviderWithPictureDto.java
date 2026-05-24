@@ -25,6 +25,7 @@ import java.util.Set;
         "id",
         "name",
         "email",
+        "emailVerified",
         "phoneNumber",
         "address",
         "specializations",
@@ -63,6 +64,9 @@ public class ServiceProviderWithPictureDto {
     @NotNull(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @JsonProperty("email")
     private String email;
+
+    @JsonProperty("email_verified")
+    private Boolean emailVerified;
 
     @NotBlank(message = ErrorMessage.EM_EMPTY_FIELD, groups = OnCreate.class)
     @Size(min = 8, groups = {OnCreate.class, OnUpdate.class})

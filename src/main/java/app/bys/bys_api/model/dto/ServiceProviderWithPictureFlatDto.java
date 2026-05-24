@@ -19,6 +19,7 @@ public class ServiceProviderWithPictureFlatDto {
     private Long id;
     private String name;
     private String email;
+    private Boolean emailVerified;
     private String phoneNumber;
     private Province address;
     private String experience;

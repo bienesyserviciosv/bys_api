@@ -19,6 +19,7 @@ public class ServiceProviderSummary {
     private Long id;
     private String name;
     private String email;
+    private Boolean emailVerified;
     private String phoneNumber;
     private Province address;
     private Set<String> specializations;
@@ -32,7 +33,7 @@ public class ServiceProviderSummary {
     private UserStatus status;
     private String role;
 
-    public ServiceProviderSummary(Long id, String name, String email, String phoneNumber,
+    public ServiceProviderSummary(Long id, String name, String email, Boolean emailVerified, String phoneNumber,
                                   Province address, String experience, Boolean adminVerified, MembershipType membershipType,
                                   LocalDateTime registrationDate, LocalDateTime lastLoginDate, Integer completedServices,
                                   Double qualification, UserStatus status, String role) {
@@ -40,6 +41,7 @@ public class ServiceProviderSummary {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.emailVerified = emailVerified;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.experience = experience;

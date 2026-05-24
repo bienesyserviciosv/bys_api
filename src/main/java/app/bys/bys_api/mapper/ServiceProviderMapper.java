@@ -92,6 +92,7 @@ public abstract class ServiceProviderMapper {
                 .id(flatDto.getId())
                 .name(flatDto.getName())
                 .email(flatDto.getEmail())
+                .emailVerified(flatDto.getEmailVerified())
                 .phoneNumber(flatDto.getPhoneNumber())
                 .address(flatDto.getAddress())
                 .experience(flatDto.getExperience())
