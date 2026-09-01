@@ -9,6 +9,7 @@ import app.bys.bys_api.model.dto.PageDto;
 import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.*;
 import app.bys.bys_api.model.enums.*;
+import app.bys.bys_api.model.event.MobilePaymentCreatedEvent;
 import app.bys.bys_api.repository.*;
 import app.bys.bys_api.utils.MediaConstants;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +45,7 @@ public class PaymentService {
     private final MediaRepository mediaRepository;
     private final ServiceRequestRepository serviceRequestRepository;
     private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${media.url}")
     public String mediaUrl;
@@ -124,6 +127,7 @@ public class PaymentService {
                 request.getId(),
                 mobilePayment.getPaymentType()
         );
+        eventPublisher.publishEvent(new MobilePaymentCreatedEvent(savedPayment.getId()));
         return paymentMapper.entityToMobileDto(savedPayment);
     }
 

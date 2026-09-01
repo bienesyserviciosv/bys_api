@@ -5,6 +5,7 @@ import app.bys.bys_api.model.dto.TransferPaymentDto;
 import app.bys.bys_api.model.entity.Payment;
 import app.bys.bys_api.model.enums.BankName;
 import app.bys.bys_api.model.enums.PaymentStatus;
+import app.bys.bys_api.model.enums.PaymentType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,10 +14,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpecificationExecutor<Payment> {
+
+    List<Payment> findByPaymentTypeAndPaymentStatusAndPaymentDateAfter(
+            PaymentType paymentType, PaymentStatus paymentStatus, LocalDateTime cutoff);
 
     @Query("SELECT COUNT(p) FROM Payment p  WHERE p.paymentStatus = 'ACCEPTED'")
     long countCompletedTransactions();
