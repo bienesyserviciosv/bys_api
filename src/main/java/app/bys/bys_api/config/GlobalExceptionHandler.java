@@ -112,6 +112,45 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
+    @ExceptionHandler(BancamigaTokenExpiredException.class)
+    public ResponseEntity<ErrorResponseDto> handleBancamigaTokenExpired(BancamigaTokenExpiredException ex, HttpServletRequest request) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+                .status(HttpStatus.BAD_GATEWAY.value())
+                .error("Bancamiga Token Expired")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
+
+    @ExceptionHandler(BancamigaValidationException.class)
+    public ResponseEntity<ErrorResponseDto> handleBancamigaValidation(BancamigaValidationException ex, HttpServletRequest request) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+                .status(HttpStatus.BAD_GATEWAY.value())
+                .error("Bancamiga Validation Error")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
+
+    @ExceptionHandler(BancamigaUnavailableException.class)
+    public ResponseEntity<ErrorResponseDto> handleBancamigaUnavailable(BancamigaUnavailableException ex, HttpServletRequest request) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error("Bancamiga Unavailable")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     @ExceptionHandler(InvalidStarRatingException.class)
     public ResponseEntity<ErrorResponseDto> handleInvalidRating(InvalidStarRatingException ex, HttpServletRequest request) {
         ErrorResponseDto error = ErrorResponseDto.builder()
