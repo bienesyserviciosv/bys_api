@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1775500000000-1
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            tableName: bancamiga_credential
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_bancamiga_credential
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: access_token
+                  type: VARCHAR(2048)
+              - column:
+                  name: refresh_token
+                  type: VARCHAR(2048)
+              - column:
+                  name: token_issued_at
+                  type: TIMESTAMP
+              - column:
+                  name: token_expires_at
+                  type: TIMESTAMP
+              - column:
+                  name: last_refreshed_at
+                  type: TIMESTAMP
+              - column:
+                  name: last_refresh_attempt_at
+                  type: TIMESTAMP
+              - column:
+                  name: last_refresh_error
+                  type: VARCHAR(1024)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+
+  - changeSet:
+      id: 1775500000000-2
+      author: Carlos
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - columnExists:
+                tableName: payment
+                columnName: bancamiga_refpk
+      changes:
+        - addColumn:
+            tableName: payment
+            columns:
+              - column:
+                  name: bancamiga_refpk
+                  type: VARCHAR(255)
+              - column:
+                  name: bancamiga_verified_at
+                  type: TIMESTAMP
+              - column:
+                  name: bancamiga_match_source
+                  type: VARCHAR(32)

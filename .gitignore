@@ -35,3 +35,6 @@ build/
 
 ### Firebase ###
 firebase-service-account.json
+
+### Local dev config ###
+application-dev.properties

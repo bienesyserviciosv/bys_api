@@ -60,6 +60,15 @@ public class Payment {
     @Column(name = "amount_in_bolivars")
     private Double amountInBolivars;
 
+    @Column(name = "bancamiga_refpk")
+    private String bancamigaRefpk;
+
+    @Column(name = "bancamiga_verified_at")
+    private LocalDateTime bancamigaVerifiedAt;
+
+    @Column(name = "bancamiga_match_source")
+    private String bancamigaMatchSource;
+
     @ManyToOne
     @JoinColumn(name = "final_user_id")
     private FinalUser finalUser;
