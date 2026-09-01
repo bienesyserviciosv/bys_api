@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 .requestMatchers("/v3/api-docs*/**").permitAll()
                                 .requestMatchers("/specialization", "/province", "/fcm-test", "/fcm/**").permitAll()
                                 .requestMatchers("/api/v1/fcm/**").permitAll()
+                                .requestMatchers("/bancamiga/webhook").permitAll()
                                 .requestMatchers("/firebase-messaging-sw.js", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                                 .anyRequest().authenticated()
                 )
