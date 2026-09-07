@@ -3,6 +3,7 @@ package app.bys.bys_api.controller.super_admin;
 import app.bys.bys_api.model.dto.bancamiga.BancamigaCredentialSeedDto;
 import app.bys.bys_api.model.dto.bancamiga.BancamigaStatusDto;
 import app.bys.bys_api.model.entity.BancamigaCredential;
+import app.bys.bys_api.service.bancamiga.BancamigaClient;
 import app.bys.bys_api.service.bancamiga.BancamigaTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/super_admin/bancamiga")
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class SuperAdminBancamigaController {
 
     private final BancamigaTokenService bancamigaTokenService;
+    private final BancamigaClient bancamigaClient;
 
     @Value("${bancamiga.enabled}")
     private boolean bancamigaEnabled;
@@ -37,6 +41,11 @@ public class SuperAdminBancamigaController {
     public ResponseEntity<BancamigaStatusDto> forceRefresh() {
         bancamigaTokenService.refreshIfDue();
         return ResponseEntity.ok(toStatusDto(bancamigaTokenService.getStatus()));
+    }
+
+    @GetMapping("/healthcheck")
+    public ResponseEntity<Map<String, Boolean>> healthcheck() {
+        return ResponseEntity.ok(Map.of("reachable", bancamigaClient.healthcheck()));
     }
 
     private BancamigaStatusDto toStatusDto(BancamigaCredential credential) {
