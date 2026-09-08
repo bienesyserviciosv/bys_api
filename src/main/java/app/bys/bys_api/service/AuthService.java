@@ -60,6 +60,8 @@ public class AuthService {
     @Transactional
     public FinalUserDto registerFinalUser(FinalUserDto dto, MultipartFile profilePicture) {
 
+        boolean hasEmail = dto.getEmail() != null && !dto.getEmail().isBlank();
+
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (finalUserRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
                 throw new DuplicatePhoneException("The phone number is already registered");
@@ -67,11 +69,10 @@ public class AuthService {
             //handlePhoneOtp(dto.getPhoneNumber());
         }
 
-        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+        if (hasEmail) {
             if (finalUserRepo.existsByEmail(dto.getEmail()) || serviceProviderRepo.existsByEmail(dto.getEmail())) {
                 throw new DuplicateEmailException("The email is already registered");
             }
-            handleEmailOtp(dto.getEmail());
         }
 
         FinalUser user = FinalUser.builder()
@@ -97,6 +98,10 @@ public class AuthService {
             FinalUser savedUser = finalUserRepo.save(user);
             pictureService.uploadProfilePictureForFinalUser(profilePicture, savedUser);
 
+            if (hasEmail) {
+                handleEmailOtp(dto.getEmail());
+            }
+
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
 
@@ -114,6 +119,8 @@ public class AuthService {
     @Transactional
     public ServiceProviderWithPictureDto registerServiceProvider(ServiceProviderDto dto, MultipartFile profilePicture, MultipartFile[] workPictureSet) {
 
+        boolean hasEmail = dto.getEmail() != null && !dto.getEmail().isBlank();
+
         if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
             if (serviceProviderRepo.existsByPhoneNumber(dto.getPhoneNumber())) {
                 throw new DuplicatePhoneException("The phone number is already registered");
@@ -121,11 +128,10 @@ public class AuthService {
             //handlePhoneOtp(dto.getPhoneNumber());
         }
 
-        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+        if (hasEmail) {
             if (serviceProviderRepo.existsByEmail(dto.getEmail()) || finalUserRepo.existsByEmail(dto.getEmail())) {
                 throw new DuplicateEmailException("The email is already registered");
             }
-            handleEmailOtp(dto.getEmail());
         }
 
         ServiceProvider provider = ServiceProvider.builder()
@@ -151,6 +157,10 @@ public class AuthService {
             ServiceProvider savedProvider = serviceProviderRepo.save(provider);
             pictureService.uploadProfilePictureForProvider(profilePicture, savedProvider);
             pictureService.uploadWorkPictures(workPictureSet, savedProvider);
+
+            if (hasEmail) {
+                handleEmailOtp(dto.getEmail());
+            }
 
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
