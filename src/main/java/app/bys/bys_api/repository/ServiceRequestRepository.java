@@ -268,12 +268,4 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             @Param("specializationId") Long specializationId
     );
 
-    @Query("""
-    SELECT COUNT(sr) > 0
-    FROM ServiceRequest sr
-    WHERE sr.serviceProvider.email = :email
-      AND sr.requestStatus = app.bys.bys_api.model.enums.RequestStatus.ACCEPTED
-""")
-    boolean existsAcceptedRequestForProviderEmail(@Param("email") String email);
-
 }

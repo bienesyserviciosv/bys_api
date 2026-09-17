@@ -1,11 +1,9 @@
 package app.bys.bys_api.controller;
 
-import app.bys.bys_api.model.dto.ProviderLocationDto;
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
 import app.bys.bys_api.service.ServiceProviderService;
 import app.bys.bys_api.validation.OnUpdate;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,14 +40,6 @@ public class ServiceProviderController {
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteOwnProfile(Authentication authentication) {
         serviceProviderService.deleteByEmail(authentication.getName());
-        return ResponseEntity.ok().build();
-    }
-
-    @PatchMapping("/me/location")
-    public ResponseEntity<Void> updateOwnLocation(
-            Authentication authentication,
-            @Valid @RequestBody ProviderLocationDto locationDto) {
-        serviceProviderService.updateLocationByEmail(authentication.getName(), locationDto);
         return ResponseEntity.ok().build();
     }
 }
