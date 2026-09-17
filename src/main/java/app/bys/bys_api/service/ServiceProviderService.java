@@ -1,5 +1,6 @@
 package app.bys.bys_api.service;
 
+import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.error.DuplicateEmailException;
 import app.bys.bys_api.error.DuplicatePhoneException;
 import app.bys.bys_api.mapper.PageMapper;
@@ -15,6 +16,7 @@ import app.bys.bys_api.model.enums.UserStatus;
 import app.bys.bys_api.repository.MediaRepository;
 import app.bys.bys_api.repository.PictureRepository;
 import app.bys.bys_api.repository.ServiceProviderRepository;
+import app.bys.bys_api.repository.ServiceRequestRepository;
 import app.bys.bys_api.repository.SpecializationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,7 @@ public class ServiceProviderService {
     private final SpecializationRepository specializationRepository;
     private final PictureRepository pictureRepository;
     private final MediaRepository mediaRepository;
+    private final ServiceRequestRepository serviceRequestRepository;
 
     @Value("${media.url}")
     public String mediaUrl;
@@ -176,6 +179,16 @@ public class ServiceProviderService {
             throw new EntityNotFoundException("Service provider with email " + email + " not found");
         }
         serviceProviderRepository.deleteByEmail(email);
+    }
+
+    public void updateLocationByEmail(String email, ProviderLocationDto locationDto) {
+        if (!serviceProviderRepository.existsByEmail(email)) {
+            throw new EntityNotFoundException("Service provider with email " + email + " not found");
+        }
+        if (!serviceRequestRepository.existsAcceptedRequestForProviderEmail(email)) {
+            throw new ConflictException("Location updates are only accepted while a service is in progress");
+        }
+        serviceProviderRepository.updateLocationByEmail(email, locationDto.getLatitude(), locationDto.getLongitude());
     }
 
     public ServiceProvider findOrCreateProvider(String email, String name) {

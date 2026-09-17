@@ -108,4 +108,9 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     @Query("UPDATE ServiceProvider sp SET sp.fcmToken = :token WHERE sp.id = :serviceProviderId")
     void updateFcmToken(@Param("serviceProviderId") Long serviceProviderId, @Param("token") String token);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE ServiceProvider sp SET sp.latitude = :latitude, sp.longitude = :longitude WHERE sp.email = :email")
+    void updateLocationByEmail(@Param("email") String email, @Param("latitude") String latitude, @Param("longitude") String longitude);
+
 }
