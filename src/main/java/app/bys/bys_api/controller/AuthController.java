@@ -181,7 +181,23 @@ public class AuthController {
 
             log.info("Token audience: {}", payload.getAudience());
 
-            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+            // Antes esto devolvía solo el token (JwtAuthenticationResponse), pero el
+            // cliente Flutter espera el mismo formato que /auth/login (id, roles,
+            // etc.) para poder guardar el id del usuario y sincronizar el token de
+            // notificaciones push justo después de iniciar sesión con Google. Sin
+            // el id, esa sincronización siempre se mandaba con userId null.
+            AuthResponseDto authResponseDto = AuthResponseDto.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .token(jwt)
+                    .roles(user.getRoles())
+                    .name(user.getName())
+                    .phoneNumber(user.getPhoneNumber())
+                    .registrationDate(user.getRegistrationDate())
+                    .fcmToken(user.getFcmToken())
+                    .build();
+
+            return ResponseEntity.ok(authResponseDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
