@@ -1,5 +1,6 @@
 package app.bys.bys_api.controller;
 
+import app.bys.bys_api.error.ConflictException;
 import app.bys.bys_api.model.dto.*;
 import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.repository.FinalUserRepository;
@@ -169,6 +170,11 @@ public class AuthController {
         try {
             GoogleIdToken.Payload payload = verifyGoogleToken(request.getIdToken());
 
+            String email = payload.getEmail();
+            if (serviceProviderRepo.existsByEmail(email)) {
+                throw new ConflictException("Ya existe una cuenta de proveedor registrada con este correo. Inicia sesión con tu contraseña.");
+            }
+
             FinalUser user = finalUserService.findOrCreateUserFromGoogle(payload);
 
             List<GrantedAuthority> authorities = user.getRoles().stream()
@@ -198,6 +204,8 @@ public class AuthController {
                     .build();
 
             return ResponseEntity.ok(authResponseDto);
+        } catch (ConflictException ex) {
+            throw ex;
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
