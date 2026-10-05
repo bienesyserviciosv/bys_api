@@ -195,6 +195,56 @@ public class FinalUserService {
         return finalUserRepository.save(newUser);
     }
 
+    // Alternativa a findOrCreateUserFromGoogle() para Sign in with Apple
+    // (Guideline 4.8 de Apple). Recibe el email ya verificado por
+    // AppleIdTokenVerifier (no el payload crudo, para no acoplar este
+    // servicio a la librería jjwt) y el nombre, que Apple solo manda la
+    // PRIMERA vez que el usuario autoriza la app — por eso puede venir
+    // null, igual que ya maneja este mismo patrón para Google (2026-10-04).
+    public FinalUser findOrCreateUserFromApple(String email, String givenName, String familyName) {
+        Optional<FinalUser> existingUser = finalUserRepository.findByEmail(email);
+
+        if (existingUser.isPresent()) {
+            return existingUser.get();
+        }
+
+        FinalUser newUser = new FinalUser();
+        newUser.setEmail(email);
+
+        String name = buildAppleName(givenName, familyName);
+        if (name == null || name.isBlank()) {
+            name = email.split("@")[0];
+        }
+        newUser.setName(name);
+
+        Role userRole = roleService.getOrCreateRole("ROLE_USER");
+        newUser.setRoles(Set.of(userRole));
+        newUser.setPassword("oauth2_dummy");
+        newUser.setRegistrationDate(LocalDateTime.now());
+        newUser.setLastLoginDate(LocalDateTime.now());
+        newUser.setEmailVerified(true);
+        newUser.setStatus(UserStatus.ACTIVE);
+        newUser.setTotalRequests(0L);
+        newUser.setCompletedRequests(0L);
+
+        return finalUserRepository.save(newUser);
+    }
+
+    private String buildAppleName(String givenName, String familyName) {
+        if ((givenName == null || givenName.isBlank()) && (familyName == null || familyName.isBlank())) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        if (givenName != null && !givenName.isBlank()) {
+            sb.append(givenName.trim());
+        }
+        if (familyName != null && !familyName.isBlank()) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(familyName.trim());
+        }
+        return sb.toString();
+    }
+
     public void updateLastLoginDate(FinalUser user) {
         user.setLastLoginDate(LocalDateTime.now());
         finalUserRepository.save(user);

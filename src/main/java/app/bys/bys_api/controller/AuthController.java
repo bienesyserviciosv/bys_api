@@ -9,12 +9,14 @@ import app.bys.bys_api.service.AuthService;
 import app.bys.bys_api.service.FcmTokenService;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.service.OtpService;
+import app.bys.bys_api.utils.AppleIdTokenVerifier;
 import app.bys.bys_api.utils.JwtUtil;
 import app.bys.bys_api.validation.OnCreate;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +53,7 @@ public class AuthController {
     private final ServiceProviderRepository serviceProviderRepo;
     private final JwtUtil jwtUtil;
     private final FcmTokenService fcmTokenService;
+    private final AppleIdTokenVerifier appleIdTokenVerifier;
 
     @Value("${google.oauth2.android-client-id}")
     private String googleClientId;
@@ -207,6 +210,59 @@ public class AuthController {
         } catch (ConflictException ex) {
             throw ex;
         } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    // Guideline 4.8 de Apple: la app ofrece login con Google, así que
+    // necesita una alternativa equivalente que respete la privacidad —
+    // Apple nombra "Sign in with Apple" explícitamente como la que lo
+    // satisface. Calcado línea por línea de authenticateWithGoogle() de
+    // arriba, mismo shape de respuesta (AuthResponseDto) y mismo chequeo
+    // 409 de colisión con cuentas de proveedor (2026-10-04).
+    @PostMapping("/apple")
+    public ResponseEntity<?> authenticateWithApple(@RequestBody AppleAuthRequest request) {
+        try {
+            Claims claims = appleIdTokenVerifier.verify(request.getIdentityToken());
+
+            String email = claims.get("email", String.class);
+            if (email == null || email.isBlank()) {
+                // Pasa si el usuario nunca compartió su email con la app (no
+                // debería ocurrir con el scope "email" pedido del lado del
+                // cliente) — sin email no hay forma de identificar la cuenta.
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            if (serviceProviderRepo.existsByEmail(email)) {
+                throw new ConflictException("Ya existe una cuenta de proveedor registrada con este correo. Inicia sesión con tu contraseña.");
+            }
+
+            FinalUser user = finalUserService.findOrCreateUserFromApple(email, request.getGivenName(), request.getFamilyName());
+
+            List<GrantedAuthority> authorities = user.getRoles().stream()
+                    .map(role -> new SimpleGrantedAuthority(role.getName()))
+                    .collect(Collectors.toList());
+
+            String jwt = jwtUtil.generateToken(user.getEmail(), authorities);
+
+            fcmTokenService.registerFcmToken(user.getId(), request.getFcmToken(), user.getRoles());
+
+            AuthResponseDto authResponseDto = AuthResponseDto.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .token(jwt)
+                    .roles(user.getRoles())
+                    .name(user.getName())
+                    .phoneNumber(user.getPhoneNumber())
+                    .registrationDate(user.getRegistrationDate())
+                    .fcmToken(user.getFcmToken())
+                    .build();
+
+            return ResponseEntity.ok(authResponseDto);
+        } catch (ConflictException ex) {
+            throw ex;
+        } catch (Exception e) {
+            log.error("Error autenticando con Apple: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
