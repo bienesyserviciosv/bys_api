@@ -16,6 +16,14 @@ import java.util.Properties;
 @Configuration
 public class EmailConfig {
 
+    // Antes el host SMTP estaba fijo a "smtp.gmail.com" en el código.
+    // Se parametriza para poder cambiar de proveedor (SendPulse, Mailjet,
+    // SES, etc.) solo con una variable de entorno, sin tocar código de
+    // nuevo. El default mantiene el comportamiento actual (Gmail) si la
+    // variable no está definida en el .env (2026-10-03).
+    @Value("${spring.mail.host:smtp.gmail.com}")
+    String host;
+
     @Value("${spring.mail.username}")
     String username;
 
@@ -65,7 +73,7 @@ public class EmailConfig {
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
+        mailSender.setHost(host);
         mailSender.setPort(port);
 
         mailSender.setUsername(username);
