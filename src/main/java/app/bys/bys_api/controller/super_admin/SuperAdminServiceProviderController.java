@@ -2,6 +2,7 @@ package app.bys.bys_api.controller.super_admin;
 
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
+import app.bys.bys_api.service.AccountDeletionService;
 import app.bys.bys_api.service.ServiceProviderService;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class SuperAdminServiceProviderController {
 
     private final ServiceProviderService serviceProviderService;
+    private final AccountDeletionService accountDeletionService;
 
     @PostMapping
     public ResponseEntity<ServiceProviderWithPictureDto> create(@Validated(OnCreate.class)
@@ -36,7 +38,8 @@ public class SuperAdminServiceProviderController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        serviceProviderService.delete(id);
+        // 2026-10-05: borrado completo (ofertas, pagos, solicitudes asignadas, etc.), ver AccountDeletionService.
+        accountDeletionService.deleteProvider(id);
         return ResponseEntity.ok().build();
     }
 

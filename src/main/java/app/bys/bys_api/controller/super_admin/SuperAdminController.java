@@ -2,6 +2,7 @@ package app.bys.bys_api.controller.super_admin;
 
 import app.bys.bys_api.model.dto.FinalUserDto;
 import app.bys.bys_api.model.dto.PageDto;
+import app.bys.bys_api.service.AccountDeletionService;
 import app.bys.bys_api.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class SuperAdminController {
 
     private final SuperAdminService superAdminService;
+    private final AccountDeletionService accountDeletionService;
 
     @GetMapping("/me")
     public ResponseEntity<FinalUserDto> getSuperAdmin() {
@@ -44,7 +46,8 @@ public class SuperAdminController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) {
-        superAdminService.delete(id);
+        // 2026-10-05: solo borra ROLE_ADMIN (nunca al super-admin) y limpia sus datos, ver AccountDeletionService.
+        accountDeletionService.deleteAdmin(id);
         return ResponseEntity.ok().build();
     }
 

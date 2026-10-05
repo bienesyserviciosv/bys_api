@@ -1,6 +1,7 @@
 package app.bys.bys_api.controller.super_admin;
 
 import app.bys.bys_api.model.dto.FinalUserDto;
+import app.bys.bys_api.service.AccountDeletionService;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.validation.OnCreate;
 import app.bys.bys_api.validation.OnUpdate;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class SuperAdminFinalUserController {
 
     private final FinalUserService finalUserService;
+    private final AccountDeletionService accountDeletionService;
 
     @PostMapping
     public ResponseEntity<FinalUserDto> create(@Validated(OnCreate.class) @RequestBody FinalUserDto finalUserDto) {
@@ -31,7 +33,8 @@ public class SuperAdminFinalUserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        finalUserService.delete(id);
+        // 2026-10-05: borrado completo (solicitudes, ofertas, pagos, etc.), ver AccountDeletionService.
+        accountDeletionService.deleteClient(id);
         return ResponseEntity.ok().build();
     }
 }
