@@ -2,6 +2,7 @@ package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.ServiceProviderDto;
 import app.bys.bys_api.model.dto.ServiceProviderWithPictureDto;
+import app.bys.bys_api.service.AccountDeletionService;
 import app.bys.bys_api.service.ServiceProviderService;
 import app.bys.bys_api.validation.OnUpdate;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class ServiceProviderController {
 
     private final ServiceProviderService serviceProviderService;
+    private final AccountDeletionService accountDeletionService;
 
     @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @GetMapping("/{id}")
@@ -39,7 +41,8 @@ public class ServiceProviderController {
 
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteOwnProfile(Authentication authentication) {
-        serviceProviderService.deleteByEmail(authentication.getName());
+        // Borrado completo en cadena (solicitudes, ofertas, pagos, etc.): ver AccountDeletionService.
+        accountDeletionService.deleteOwnProvider(authentication.getName());
         return ResponseEntity.ok().build();
     }
 }

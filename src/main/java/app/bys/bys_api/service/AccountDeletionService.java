@@ -74,6 +74,32 @@ public class AccountDeletionService {
         purgeFinalUser(user);
     }
 
+    /**
+     * Auto-eliminacion de cuenta desde la app (boton "Eliminar cuenta" del perfil) para
+     * clientes. Usa el mismo borrado en cadena que el panel admin: antes se borraba solo
+     * la fila del usuario y fallaba con error 500 si ya tenia solicitudes, pagos, etc.
+     * Nunca permite borrar al super-admin.
+     */
+    @Transactional
+    public void deleteOwnFinalUser(String email) {
+        FinalUser user = finalUserRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Final user with email: " + email + " not found"));
+        if (hasRole(user, ROLE_SUPER_ADMIN)) {
+            throw new ConflictException("No se puede eliminar al super administrador.");
+        }
+        log.info("Usuario {} solicito eliminar su propia cuenta", email);
+        purgeFinalUser(user);
+    }
+
+    /** Auto-eliminacion de cuenta desde la app para proveedores. */
+    @Transactional
+    public void deleteOwnProvider(String email) {
+        ServiceProvider provider = serviceProviderRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Service provider with email " + email + " not found"));
+        log.info("Proveedor {} solicito eliminar su propia cuenta", email);
+        deleteProvider(provider.getId());
+    }
+
     /** Elimina un proveedor y todo lo relacionado con el. */
     @Transactional
     public void deleteProvider(Long id) {

@@ -1,6 +1,7 @@
 package app.bys.bys_api.controller;
 
 import app.bys.bys_api.model.dto.FinalUserDto;
+import app.bys.bys_api.service.AccountDeletionService;
 import app.bys.bys_api.service.FinalUserService;
 import app.bys.bys_api.validation.OnUpdate;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class FinalUserController {
 
     private final FinalUserService finalUserService;
+    private final AccountDeletionService accountDeletionService;
 
     @PreAuthorize("hasAnyAuthority('ROLE_PROVIDER', 'ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @GetMapping("/{id}")
@@ -38,7 +40,8 @@ public class FinalUserController {
 
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteOwnProfile(Authentication authentication) {
-        finalUserService.deleteByEmail(authentication.getName());
+        // Borrado completo en cadena (solicitudes, ofertas, pagos, etc.): ver AccountDeletionService.
+        accountDeletionService.deleteOwnFinalUser(authentication.getName());
         return ResponseEntity.ok().build();
     }
 }
