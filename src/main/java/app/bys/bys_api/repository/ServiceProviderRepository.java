@@ -21,7 +21,7 @@ import java.util.Optional;
 @Repository
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long>, JpaSpecificationExecutor<ServiceProvider> {
 
-    @Query("SELECT COUNT(sp) FROM ServiceProvider sp")
+    @Query("SELECT COUNT(sp) FROM ServiceProvider sp WHERE NOT EXISTS (SELECT r FROM sp.roles r WHERE r.name = 'ROLE_DELETED')")
     long countAllServiceProvider();
 
     long countByAdminVerifiedFalse();

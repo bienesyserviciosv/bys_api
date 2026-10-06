@@ -18,7 +18,7 @@ import java.util.Optional;
 @Repository
 public interface FinalUserRepository extends JpaRepository<FinalUser, Long>, JpaSpecificationExecutor<FinalUser> {
 
-    @Query("SELECT COUNT(fu) FROM FinalUser fu")
+    @Query("SELECT COUNT(fu) FROM FinalUser fu WHERE NOT EXISTS (SELECT r FROM fu.roles r WHERE r.name = 'ROLE_DELETED')")
     long countAllFinalUser();
 
     Optional<FinalUser> findByEmail(String email);
