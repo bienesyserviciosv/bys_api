@@ -198,10 +198,6 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
               AND (:userList IS NULL OR fu.id IN :userList)
               AND (:providerList IS NULL OR sp.id IN :providerList)
               AND (:status IS NULL OR sr.requestStatus = :status)
-              AND (
-                     :status IS NOT NULL
-                     OR sr.requestStatus <> app.bys.bys_api.model.enums.RequestStatus.COMPLETED
-                  )
               AND (:allowedStatusForProviders IS NULL OR sr.requestStatus IN :allowedStatusForProviders)
               AND (:applyDateFilter = false OR sr.date >= :today)
             ORDER BY
