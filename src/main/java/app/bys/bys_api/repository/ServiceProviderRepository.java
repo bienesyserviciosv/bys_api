@@ -24,6 +24,8 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     @Query("SELECT COUNT(sp) FROM ServiceProvider sp WHERE NOT EXISTS (SELECT r FROM sp.roles r WHERE r.name = 'ROLE_DELETED')")
     long countAllServiceProvider();
 
+    // Excluye las cuentas eliminadas (anonimizadas, ROLE_DELETED): no deben contar como "pendientes por validar"
+    @Query("SELECT COUNT(sp) FROM ServiceProvider sp WHERE sp.adminVerified = false AND NOT EXISTS (SELECT r FROM sp.roles r WHERE r.name = 'ROLE_DELETED')")
     long countByAdminVerifiedFalse();
 
     Optional<ServiceProvider> findByEmail(String email);
