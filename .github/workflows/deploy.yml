@@ -18,7 +18,7 @@ jobs:
 #          -d text=$'🚀 Deploy en dev iniciado'
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: SSH to VPS and run commands
         uses: appleboy/ssh-action@master
