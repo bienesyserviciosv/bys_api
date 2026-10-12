@@ -3,11 +3,11 @@ name: Deploy Bys API
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
-  deploy-develop:
-    name: Deploy develop
+  deploy-main:
+    name: Deploy main (produccion)
     runs-on: ubuntu-latest
     steps:
 #      - name: Notify start
@@ -28,8 +28,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu/bys_api
-            git checkout develop
-            git pull
+            git fetch origin
+            git checkout main
+            git pull origin main
             sudo docker compose down
             sudo docker compose up -d --build
 
