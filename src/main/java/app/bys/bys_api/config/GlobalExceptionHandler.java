@@ -151,6 +151,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 
+    @ExceptionHandler(ExchangeRateUnavailableException.class)
+    public ResponseEntity<ErrorResponseDto> handleExchangeRateUnavailable(ExchangeRateUnavailableException ex, HttpServletRequest request) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error("Exchange Rate Unavailable")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     @ExceptionHandler(InvalidStarRatingException.class)
     public ResponseEntity<ErrorResponseDto> handleInvalidRating(InvalidStarRatingException ex, HttpServletRequest request) {
         ErrorResponseDto error = ErrorResponseDto.builder()

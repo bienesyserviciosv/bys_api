@@ -1,0 +1,171 @@
+databaseChangeLog:
+  # Tasa de cambio USD -> Bs (historial; la ultima fila es la vigente)
+  - changeSet:
+      id: 1793000000000-1
+      author: Claude
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            tableName: exchange_rate
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_exchange_rate
+              - column:
+                  name: rate
+                  type: NUMERIC(19, 8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: source
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fetched_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: VARCHAR(255)
+
+  # Intentos de cobro C2P (Bancamiga). Nunca se guarda la clave OTP.
+  - changeSet:
+      id: 1793000000000-2
+      author: Claude
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            tableName: c2p_attempt
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_c2p_attempt
+              - column:
+                  name: offer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: final_user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payment_id
+                  type: BIGINT
+              - column:
+                  name: bank_code
+                  type: VARCHAR(8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone_code
+                  type: VARCHAR(32)
+              - column:
+                  name: phone_number
+                  type: VARCHAR(32)
+              - column:
+                  name: phone
+                  type: VARCHAR(32)
+              - column:
+                  name: id_document
+                  type: VARCHAR(32)
+              - column:
+                  name: amount_usd
+                  type: NUMERIC(19, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: exchange_rate
+                  type: NUMERIC(19, 8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount_bs
+                  type: NUMERIC(19, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: bancamiga_id
+                  type: VARCHAR(64)
+              - column:
+                  name: bancamiga_nroref
+                  type: VARCHAR(64)
+              - column:
+                  name: bancamiga_dataorig
+                  type: VARCHAR(64)
+              - column:
+                  name: error_code
+                  type: VARCHAR(32)
+              - column:
+                  name: error_message
+                  type: VARCHAR(1024)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+        # Si se borra la oferta o el usuario (eliminacion de cuenta / purga), se borran sus intentos.
+        # Si se borra el pago, el intento queda sin pago asociado.
+        - addForeignKeyConstraint:
+            constraintName: fk_c2p_attempt_offer
+            baseTableName: c2p_attempt
+            baseColumnNames: offer_id
+            referencedTableName: offer
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            constraintName: fk_c2p_attempt_final_user
+            baseTableName: c2p_attempt
+            baseColumnNames: final_user_id
+            referencedTableName: final_user
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            constraintName: fk_c2p_attempt_payment
+            baseTableName: c2p_attempt
+            baseColumnNames: payment_id
+            referencedTableName: payment
+            referencedColumnNames: id
+            onDelete: SET NULL
+        - createIndex:
+            indexName: ix_c2p_attempt_offer
+            tableName: c2p_attempt
+            columns:
+              - column:
+                  name: offer_id
+        - createIndex:
+            indexName: ix_c2p_attempt_status_created
+            tableName: c2p_attempt
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: created_at
+        # Un solo intento activo (en proceso, sin respuesta, aprobado o en revision) por oferta:
+        # evita cobrar dos veces si el cliente toca "Pagar" dos veces.
+        - sql:
+            dbms: postgresql
+            sql: >
+              CREATE UNIQUE INDEX ux_c2p_attempt_active_offer ON c2p_attempt (offer_id)
+              WHERE status IN ('PROCESSING', 'UNKNOWN', 'APPROVED', 'REVIEW')

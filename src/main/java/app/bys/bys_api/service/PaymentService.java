@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -46,6 +47,11 @@ public class PaymentService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final NotificationService notificationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final C2pAttemptRepository c2pAttemptRepository;
+
+    // Un pago C2P en curso o aprobado impide registrar un pago manual para la misma oferta
+    private static final Set<C2pAttemptStatus> ACTIVE_C2P_STATUSES = Set.of(
+            C2pAttemptStatus.PROCESSING, C2pAttemptStatus.UNKNOWN, C2pAttemptStatus.APPROVED, C2pAttemptStatus.REVIEW);
 
     @Value("${media.url}")
     public String mediaUrl;
@@ -54,7 +60,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment with id: " + id + " not found"));
         return switch (payment.getPaymentType()) {
-            case MOBILE -> paymentMapper.entityToMobileDto(payment);
+            case MOBILE, C2P -> paymentMapper.entityToMobileDto(payment);
             case TRANSFER -> paymentMapper.entityToTransferDto(payment);
         };
     }
@@ -72,19 +78,24 @@ public class PaymentService {
 
         Page<TransferPaymentDto> transfers = paymentRepository.findTransferPayments(bankFilter, userIdList, providerIdList, paymentStatus, pageable);
         Page<MobilePaymentDto> mobiles = paymentRepository.findMobilePayments(bankFilter, userIdList, providerIdList, paymentStatus, pageable);
+        Page<MobilePaymentDto> c2pPayments = paymentRepository.findC2pPayments(bankFilter, userIdList, providerIdList, paymentStatus, pageable);
 
         List<Object> combined = Stream.concat(
-                        transfers.getContent().stream(),
-                        mobiles.getContent().stream()
+                        Stream.concat(
+                                transfers.getContent().stream().map(dto -> (Object) dto),
+                                mobiles.getContent().stream().map(dto -> (Object) dto)),
+                        c2pPayments.getContent().stream().map(dto -> (Object) dto)
                 ).peek(dto -> {
-            if (dto instanceof TransferPaymentDto transfer) {
+            // Los pagos C2P no tienen comprobante (screenshot null)
+            if (dto instanceof TransferPaymentDto transfer && transfer.getScreenshot() != null) {
                 transfer.setScreenshot(mediaUrl + transfer.getScreenshot());
-            } else if (dto instanceof MobilePaymentDto mobile) {
+            } else if (dto instanceof MobilePaymentDto mobile && mobile.getScreenshot() != null) {
                 mobile.setScreenshot(mediaUrl + mobile.getScreenshot());
             }
         }).toList();
 
-        Page<Object> resultPage = new PageImpl<>(combined, pageable, transfers.getTotalElements() + mobiles.getTotalElements());
+        Page<Object> resultPage = new PageImpl<>(combined, pageable,
+                transfers.getTotalElements() + mobiles.getTotalElements() + c2pPayments.getTotalElements());
         return PageMapper.pageToDto(resultPage);
     }
 
@@ -107,6 +118,8 @@ public class PaymentService {
         if (!offer.getId().equals(request.getAcceptedOffer().getId())) {
             throw new ConflictException("The offer has not been accepted");
         }
+
+        checkNoActiveC2p(offer);
 
         Payment mobilePayment = paymentMapper.mobileDtoToEntity(mobilePaymentDto);
 
@@ -151,6 +164,8 @@ public class PaymentService {
             throw new ConflictException("The offer has not been accepted");
         }
 
+        checkNoActiveC2p(offer);
+
         Payment transferPayment = paymentMapper.transferDtoToEntity(transferPaymentDto);
 
         transferPayment.setFinalUser(finalUser);
@@ -190,6 +205,10 @@ public class PaymentService {
     public void delete(Long id) {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Payment with id: " + id + " not found"));
+
+        if (payment.getPaymentType() == PaymentType.C2P) {
+            throw new ConflictException("Los pagos en linea (C2P) ya fueron cobrados por el banco y no se pueden eliminar");
+        }
 
         try {
             pictureRepository.findByPaymentId(id).ifPresent(picture -> {
@@ -273,6 +292,10 @@ public class PaymentService {
             throw new ConflictException("Service Request with id: " + requestId + " doesn't have an accepted offer");
         }
 
+        if (payment.getPaymentType() == PaymentType.C2P) {
+            throw new ConflictException("Los pagos en linea (C2P) ya fueron cobrados por el banco y no se pueden rechazar");
+        }
+
         payment.setPaymentStatus(PaymentStatus.REJECTED);
         paymentRepository.save(payment);
 
@@ -281,6 +304,12 @@ public class PaymentService {
 
         return payment;
 
+    }
+
+    private void checkNoActiveC2p(Offer offer) {
+        if (c2pAttemptRepository.existsByOfferIdAndStatusIn(offer.getId(), ACTIVE_C2P_STATUSES)) {
+            throw new ConflictException("Esta oferta tiene un pago en linea en proceso o aprobado");
+        }
     }
 
     public void attachScreenshotToPayment(MultipartFile screenshot, Payment payment) {

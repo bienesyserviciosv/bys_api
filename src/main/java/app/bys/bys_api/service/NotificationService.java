@@ -354,6 +354,7 @@ public class NotificationService {
         switch (paymentType) {
             case MOBILE -> notificationTitle = "Nuevo Pago Móvil PENDIENTE";
             case TRANSFER -> notificationTitle = "Nuevo Pago por Transferencia PENDIENTE";
+            case C2P -> notificationTitle = "Nuevo Pago en línea (C2P) APROBADO";
         }
         String notificationBody = "Solicitud: " + requestId + " Usuario: " + userId + " Proveedor: " + providerId;
 
@@ -408,4 +409,4 @@ public class NotificationService {
             }
         }
     }
-}
+}

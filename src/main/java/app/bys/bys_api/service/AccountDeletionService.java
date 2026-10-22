@@ -299,6 +299,9 @@ public class AccountDeletionService {
             deletePictures("p.payment.id in :v", paymentIds, mediaUrls);
             exec("update Payment p set p.screenshot = null, p.phoneNumber = null, p.idNumber = null, "
                     + "p.accountHolderName = null where p.id in :v", paymentIds);
+            // Intentos de cobro C2P conservados: se borran telefono y cedula del pagador.
+            exec("update C2pAttempt a set a.phone = null, a.phoneNumber = null, a.idDocument = null "
+                    + "where a.finalUser.id = :v", id);
 
             // Solicitudes conservadas: se borra el texto libre, la ubicacion exacta y las fotos.
             if (!keepRequestIds.isEmpty()) {

@@ -75,4 +75,28 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
                                               @Param("providerIdList") List<Long> providerIdList,
                                               @Param("paymentStatus") PaymentStatus paymentStatus,
                                               Pageable pageable);
+
+    // Pagos en linea por C2P: misma forma que los pagos moviles (banco, telefono, cedula, referencia)
+    @Query("""
+                SELECT new app.bys.bys_api.model.dto.MobilePaymentDto(
+                    p.id, p.bank, p.screenshot, fu.id, fu.name,
+                    o.serviceRequest.specialization.specializationType, p.idNumber, p.referenceNumber,
+                    p.paymentDate, p.phoneCode, p.phoneNumber, p.offer.id,
+                    p.amountInBolivars, o.price, p.paymentType, p.paymentStatus
+                )
+                FROM Payment p
+                JOIN p.finalUser fu
+                JOIN p.offer o
+                JOIN p.serviceProvider sp
+                WHERE p.paymentType = 'C2P'
+                AND (:bank IS NULL OR p.bank = :bank)
+                AND (:paymentStatus IS NULL OR p.paymentStatus = :paymentStatus)
+                AND (:userIdList IS NULL OR fu.id IN (:userIdList))
+                AND (:providerIdList IS NULL OR sp.id IN (:providerIdList))
+            """)
+    Page<MobilePaymentDto> findC2pPayments(@Param("bank") BankName bank,
+                                           @Param("userIdList") List<Long> userIdList,
+                                           @Param("providerIdList") List<Long> providerIdList,
+                                           @Param("paymentStatus") PaymentStatus paymentStatus,
+                                           Pageable pageable);
 }
