@@ -1,5 +1,8 @@
 package app.bys.bys_api.model.enums;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * Estado de un intento de cobro C2P.
  * <ul>
@@ -17,5 +20,8 @@ public enum C2pAttemptStatus {
     REJECTED,
     ERROR,
     UNKNOWN,
-    REVIEW
+    REVIEW;
+
+    /** Estados que bloquean otro cobro o un cambio de oferta: el dinero pudo haberse cobrado. */
+    public static final Set<C2pAttemptStatus> ACTIVE = EnumSet.of(PROCESSING, UNKNOWN, APPROVED, REVIEW);
 }

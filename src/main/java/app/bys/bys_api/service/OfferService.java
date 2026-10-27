@@ -10,6 +10,7 @@ import app.bys.bys_api.model.entity.FinalUser;
 import app.bys.bys_api.model.entity.Offer;
 import app.bys.bys_api.model.entity.ServiceProvider;
 import app.bys.bys_api.model.entity.ServiceRequest;
+import app.bys.bys_api.model.enums.C2pAttemptStatus;
 import app.bys.bys_api.model.enums.OfferStatus;
 import app.bys.bys_api.model.enums.RequestStatus;
 import app.bys.bys_api.repository.*;
@@ -42,6 +43,7 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final ServiceProviderRepository serviceProviderRepository;
     private final NotificationService notificationService;
+    private final C2pAttemptRepository c2pAttemptRepository;
 
     public OfferDto get(Long id) {
         return offerRepo.findOfferById(id)
@@ -250,6 +252,10 @@ public class OfferService {
         if (previousAccepted != null){
             if (offer.equals(previousAccepted)) {
                 return offerMapper.entityToDto(offer);
+            }
+            // Si la oferta aceptada tiene un pago en linea en curso (o ya cobrado), no se puede cambiar de oferta
+            if (c2pAttemptRepository.existsByOfferIdAndStatusIn(previousAccepted.getId(), C2pAttemptStatus.ACTIVE)) {
+                throw new ConflictException("La oferta aceptada tiene un pago en linea en proceso; no se puede cambiar de oferta");
             }
             previousAccepted.setStatus(OfferStatus.PENDING);
             previousAccepted.setAcceptedAt(null);
