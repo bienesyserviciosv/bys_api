@@ -15,12 +15,20 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -37,12 +45,19 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class ExchangeRateService {
 
-    // En la portada del BCV la tasa del dolar esta en: <div id="dolar"> ... <strong> 36,12340000 </strong>
+    // En la portada del BCV la tasa del dolar esta en:
+    // <div id="dolar"> ... <strong class="strong-tb">889,25530000</strong>
     private static final Pattern BCV_USD_PATTERN =
-            Pattern.compile("id=\"dolar\".*?<strong>\\s*([0-9.,]+)\\s*</strong>", Pattern.DOTALL);
+            Pattern.compile("id=\"dolar\".*?<strong[^>]*>\\s*([0-9.,]+)\\s*</strong>", Pattern.DOTALL);
+
+    // El BCV no envia el certificado intermedio de Sectigo que firma el suyo, y Java no puede validar la conexion.
+    // Se agrega ese intermedio (publico, de Sectigo) solo para las consultas de este servicio.
+    private static final String EXTRA_CA_RESOURCE = "/certs/sectigo-dv-r36.crt";
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final ObjectMapper objectMapper;
+
+    private volatile SSLContext sslContext;
 
     @Value("${exchange-rate.bcv.url}")
     private String bcvUrl;
@@ -189,6 +204,7 @@ public class ExchangeRateService {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(timeoutMs))
                 .followRedirects(HttpClient.Redirect.NORMAL)
+                .sslContext(sslContext())
                 .build();
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .timeout(Duration.ofMillis(timeoutMs))
@@ -200,6 +216,42 @@ public class ExchangeRateService {
             throw new IllegalStateException("HTTP " + response.statusCode());
         }
         return response.body();
+    }
+
+    /** Confianza por defecto de Java + el intermedio de Sectigo incluido en el proyecto. */
+    private SSLContext sslContext() throws Exception {
+        if (sslContext != null) {
+            return sslContext;
+        }
+        try (InputStream in = ExchangeRateService.class.getResourceAsStream(EXTRA_CA_RESOURCE)) {
+            if (in == null) {
+                log.warn("No se encontro {}; se usa la confianza por defecto de Java", EXTRA_CA_RESOURCE);
+                sslContext = SSLContext.getDefault();
+                return sslContext;
+            }
+            X509Certificate extraCa = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(in);
+
+            TrustManagerFactory defaultTmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            defaultTmf.init((KeyStore) null);
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
+            int index = 0;
+            for (TrustManager tm : defaultTmf.getTrustManagers()) {
+                if (tm instanceof X509TrustManager x509) {
+                    for (X509Certificate ca : x509.getAcceptedIssuers()) {
+                        trustStore.setCertificateEntry("default-" + index++, ca);
+                    }
+                }
+            }
+            trustStore.setCertificateEntry("sectigo-dv-r36", extraCa);
+
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(trustStore);
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, tmf.getTrustManagers(), null);
+            sslContext = context;
+            return sslContext;
+        }
     }
 
     /** "36,12340000" o "1.234,56" -> BigDecimal. Si no hay coma, se interpreta con punto decimal. */
